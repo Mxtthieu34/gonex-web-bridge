@@ -1,0 +1,24 @@
+{
+  "name": "gonex-web-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mininavegador web híbrido: YouTube embed, búsquedas y redirecciones seguras.",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18.x"
+  },
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "^5.0.0"
+  },
+  "keywords": [
+    "express",
+    "vercel",
+    "serverless",
+    "youtube-embed",
+    "web-bridge"
+  ],
+  "license": "MIT"
+}

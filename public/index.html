@@ -1,0 +1,4039 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <meta
+    name="referrer"
+    content="strict-origin-when-cross-origin"
+  />
+
+  <title>GoNex Web Bridge</title>
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-2: #151d2e;
+      --surface-3: #1b2538;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --purple: #8b5cf6;
+      --blue: #6366f1;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      color: inherit;
+    }
+
+    /* =========================
+       APP
+    ========================= */
+
+    .app {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(99, 102, 241, 0.08),
+          transparent 30%
+        ),
+        var(--bg);
+    }
+
+    /* =========================
+       TOP BAR
+    ========================= */
+
+    .topbar {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(11, 15, 25, 0.94);
+      backdrop-filter: blur(18px);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 112px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      box-shadow: 0 5px 20px rgba(139, 92, 246, 0.25);
+    }
+
+    .brand-name {
+      font-size: 15px;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        transform 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.94);
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* =========================
+       ADDRESS BAR
+    ========================= */
+
+    .address-wrapper {
+      flex: 1;
+      min-width: 120px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .address-bar {
+      height: 36px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 13px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(17, 24, 39, 0.92);
+      transition:
+        border 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .address-bar:focus-within {
+      border-color: rgba(139, 92, 246, 0.55);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.08);
+    }
+
+    .address-icon {
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    #addressInput {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    #addressInput::placeholder {
+      color: #64748b;
+    }
+
+    .go-btn {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .go-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* =========================
+       TABS
+    ========================= */
+
+    .tabs-bar {
+      height: 43px;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      padding: 5px 9px 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      background: #0d1320;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .tabs-bar::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .tabs-bar::-webkit-scrollbar-thumb {
+      background: #273248;
+      border-radius: 10px;
+    }
+
+    .tab {
+      height: 38px;
+      min-width: 145px;
+      max-width: 220px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 9px 0 12px;
+      border: 1px solid transparent;
+      border-bottom: 0;
+      border-radius: 10px 10px 0 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      transition:
+        background 0.15s ease,
+        color 0.15s ease;
+    }
+
+    .tab:hover {
+      background: var(--surface-2);
+    }
+
+    .tab.active {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .tab-icon {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      color: var(--purple);
+    }
+
+    .tab-title {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 12px;
+    }
+
+    .tab-close {
+      width: 23px;
+      height: 23px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .tab-close:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .new-tab {
+      width: 34px;
+      height: 34px;
+      margin-bottom: 2px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .new-tab:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    /* =========================
+       BOOKMARKS
+    ========================= */
+
+    .bookmarks {
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 12px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      background: #0d1320;
+      flex-shrink: 0;
+    }
+
+    .bookmarks::-webkit-scrollbar {
+      height: 2px;
+    }
+
+    .bookmark {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 10px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 12px;
+      transition:
+        background 0.15s ease,
+        color 0.15s ease;
+    }
+
+    .bookmark:hover {
+      background: var(--surface-2);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .bookmark-icon {
+      font-size: 13px;
+    }
+
+    /* =========================
+       CONTENT
+    ========================= */
+
+    .content {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      background: #080c14;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      display: none;
+      background: #080c14;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page iframe {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border: 0;
+      background: #fff;
+    }
+
+    /* =========================
+       HOME
+    ========================= */
+
+    .home {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      overflow: auto;
+    }
+
+    .home-card {
+      width: min(850px, 100%);
+      text-align: center;
+    }
+
+    .home-logo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 21px;
+      font-size: 30px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      box-shadow:
+        0 15px 50px rgba(99, 102, 241, 0.2),
+        inset 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    .home-title {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 850;
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #a78bfa, #818cf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .home-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .quick-card {
+      min-height: 82px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 7px;
+      text-align: left;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: rgba(17, 24, 39, 0.65);
+      color: var(--text);
+      cursor: pointer;
+      transition:
+        transform 0.2s ease,
+        border 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .quick-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.35);
+      background: var(--surface-2);
+    }
+
+    .quick-icon {
+      font-size: 19px;
+    }
+
+    .quick-name {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* =========================
+       LOADING
+    ========================= */
+
+    .loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      overflow: hidden;
+      display: none;
+      z-index: 20;
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .loader.active {
+      display: block;
+    }
+
+    .loader::after {
+      content: "";
+      position: absolute;
+      width: 35%;
+      height: 100%;
+      left: -35%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--purple),
+        var(--blue),
+        transparent
+      );
+      animation: loading 1.1s infinite ease-in-out;
+    }
+
+    @keyframes loading {
+      from {
+        left: -35%;
+      }
+      to {
+        left: 100%;
+      }
+    }
+
+    /* =========================
+       FALLBACK
+    ========================= */
+
+    .fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(99, 102, 241, 0.08),
+          transparent 45%
+        ),
+        #080c14;
+    }
+
+    .fallback-card {
+      width: min(500px, 100%);
+      padding: 32px;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(17, 24, 39, 0.86);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+    }
+
+    .fallback-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(139, 92, 246, 0.12);
+      color: #a78bfa;
+      font-size: 25px;
+    }
+
+    .fallback-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 9px;
+    }
+
+    .fallback-text {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .fallback-url {
+      max-width: 100%;
+      margin-bottom: 20px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: #0b101b;
+      color: #818cf8;
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .primary-btn {
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.22);
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .status {
+      position: absolute;
+      bottom: 13px;
+      left: 13px;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(17, 24, 39, 0.9);
+      color: var(--muted);
+      font-size: 11px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status.visible {
+      display: flex;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+      .brand {
+        min-width: auto;
+      }
+
+      .brand-name {
+        display: none;
+      }
+
+      .quick-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tab {
+        min-width: 120px;
+      }
+
+      .bookmarks {
+        padding-left: 7px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar {
+        gap: 3px;
+      }
+
+      .nav-controls .icon-btn:nth-child(2) {
+        display: none;
+      }
+
+      .quick-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .home {
+        padding: 18px;
+      }
+
+      .home-title {
+        letter-spacing: -1px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- =========================
+         TOP NAVIGATION
+    ========================== -->
+
+    <header class="topbar">
+
+      <div class="brand">
+        <div class="brand-icon">G</div>
+        <span class="brand-name">GoNex</span>
+      </div>
+
+      <div class="nav-controls">
+        <button
+          class="icon-btn"
+          id="backBtn"
+          title="Atrás"
+          aria-label="Atrás"
+        >
+          ←
+        </button>
+
+        <button
+          class="icon-btn"
+          id="forwardBtn"
+          title="Adelante"
+          aria-label="Adelante"
+        >
+          →
+        </button>
+
+        <button
+          class="icon-btn"
+          id="reloadBtn"
+          title="Recargar"
+          aria-label="Recargar"
+        >
+          ↻
+        </button>
+      </div>
+
+      <form class="address-wrapper" id="navigationForm">
+
+        <div class="address-bar">
+
+          <span class="address-icon">⌕</span>
+
+          <input
+            id="addressInput"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Busca o introduce una dirección web..."
+            aria-label="Barra de dirección"
+          />
+
+          <button
+            type="submit"
+            class="go-btn"
+            title="Ir"
+            aria-label="Ir"
+          >
+            →
+          </button>
+
+        </div>
+
+      </form>
+
+      <button
+        class="icon-btn"
+        id="bookmarkCurrentBtn"
+        title="Añadir a marcadores"
+        aria-label="Añadir a marcadores"
+      >
+        ☆
+      </button>
+
+    </header>
+
+
+    <!-- =========================
+         TABS
+    ========================== -->
+
+    <div class="tabs-bar" id="tabsBar"></div>
+
+
+    <!-- =========================
+         BOOKMARKS
+    ========================== -->
+
+    <nav class="bookmarks" id="bookmarksBar">
+
+      <button
+        class="bookmark"
+        data-url="https://www.google.com"
+      >
+        <span class="bookmark-icon">G</span>
+        Google
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://www.youtube.com"
+      >
+        <span class="bookmark-icon">▶</span>
+        YouTube
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://wikipedia.org"
+      >
+        <span class="bookmark-icon">W</span>
+        Wikipedia
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://github.com"
+      >
+        <span class="bookmark-icon">◆</span>
+        GitHub
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://replit.com"
+      >
+        <span class="bookmark-icon">▣</span>
+        Replit
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://classroom.google.com"
+      >
+        <span class="bookmark-icon">▤</span>
+        Classroom
+      </button>
+
+    </nav>
+
+
+    <!-- =========================
+         CONTENT
+    ========================== -->
+
+    <main class="content" id="content">
+
+      <div class="loader" id="loader"></div>
+
+      <div class="status" id="status">
+        <span class="status-dot"></span>
+        <span id="statusText">Listo</span>
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <script>
+    /*
+     * ==========================================
+     * GoNex Web Bridge
+     * Frontend / Tab Manager
+     * ==========================================
+     *
+     * Esta capa NO intenta eliminar:
+     * - X-Frame-Options
+     * - CSP
+     * - CORS
+     * - políticas de seguridad de terceros
+     *
+     * Si un sitio no puede mostrarse mediante iframe,
+     * GoNex utiliza Fallback UI.
+     */
+
+
+    // ==========================================
+    // STATE
+    // ==========================================
+
+    const state = {
+      tabs: [],
+      activeTabId: null,
+      nextTabId: 1,
+      bookmarks: []
+    };
+
+
+    // ==========================================
+    // DOM
+    // ==========================================
+
+    const tabsBar = document.getElementById("tabsBar");
+    const content = document.getElementById("content");
+
+    const addressInput = document.getElementById("addressInput");
+    const navigationForm = document.getElementById("navigationForm");
+
+    const backBtn = document.getElementById("backBtn");
+    const forwardBtn = document.getElementById("forwardBtn");
+    const reloadBtn = document.getElementById("reloadBtn");
+
+    const bookmarkCurrentBtn =
+      document.getElementById("bookmarkCurrentBtn");
+
+    const bookmarksBar =
+      document.getElementById("bookmarksBar");
+
+    const loader =
+      document.getElementById("loader");
+
+    const status =
+      document.getElementById("status");
+
+    const statusText =
+      document.getElementById("statusText");
+
+
+    // ==========================================
+    // UTILS
+    // ==========================================
+
+    function escapeHTML(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+
+    function createId() {
+      return state.nextTabId++;
+    }
+
+
+    function showLoader() {
+      loader.classList.add("active");
+    }
+
+
+    function hideLoader() {
+      loader.classList.remove("active");
+    }
+
+
+    function setStatus(message, visible = true) {
+      statusText.textContent = message;
+
+      if (visible) {
+        status.classList.add("visible");
+      } else {
+        status.classList.remove("visible");
+      }
+    }
+
+
+    // ==========================================
+    // URL ROUTER
+    // ==========================================
+
+    function normalizeInput(input) {
+
+      let value = input.trim();
+
+      if (!value) {
+        return null;
+      }
+
+      /*
+       * URL completa
+       */
+      if (/^https?:\/\//i.test(value)) {
+        return value;
+      }
+
+      /*
+       * Dominio escrito directamente.
+       */
+      if (
+        /^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(value)
+      ) {
+        return `https://${value}`;
+      }
+
+      /*
+       * Si no parece URL, lo tratamos como búsqueda.
+       */
+      return `https://www.google.com/search?q=${encodeURIComponent(value)}`;
+    }
+
+
+    function extractYouTubeId(url) {
+
+      try {
+
+        const parsed = new URL(url);
+
+        /*
+         * youtube.com/watch?v=ID
+         */
+        if (
+          parsed.hostname.includes("youtube.com") &&
+          parsed.pathname === "/watch"
+        ) {
+          return parsed.searchParams.get("v");
+        }
+
+        /*
+         * youtu.be/ID
+         */
+        if (parsed.hostname === "youtu.be") {
+          return parsed.pathname.slice(1).split("/")[0];
+        }
+
+        /*
+         * youtube.com/shorts/ID
+         */
+        if (
+          parsed.hostname.includes("youtube.com") &&
+          parsed.pathname.startsWith("/shorts/")
+        ) {
+          return parsed.pathname
+            .split("/")[2]
+            ?.split("?")[0];
+        }
+
+        /*
+         * Ya es embed.
+         */
+        if (
+          parsed.hostname.includes("youtube.com") &&
+          parsed.pathname.startsWith("/embed/")
+        ) {
+          return parsed.pathname
+            .split("/")[2]
+            ?.split("?")[0];
+        }
+
+      } catch {
+        return null;
+      }
+
+      return null;
+    }
+
+
+    function getNavigationTarget(url) {
+
+      const youtubeId = extractYouTubeId(url);
+
+      if (youtubeId) {
+
+        return {
+          type: "youtube",
+          url:
+            `https://www.youtube.com/embed/` +
+            encodeURIComponent(youtubeId),
+          title: "YouTube"
+        };
+      }
+
+      return {
+        type: "web",
+        url,
+        title: getDomainName(url)
+      };
+    }
+
+
+    function getDomainName(url) {
+
+      try {
+
+        const parsed = new URL(url);
+
+        return parsed.hostname
+          .replace(/^www\./, "");
+
+      } catch {
+
+        return "Nueva pestaña";
+      }
+    }
+
+
+    // ==========================================
+    // TABS
+    // ==========================================
+
+    function createTab(url = null) {
+
+      const id = createId();
+
+      const tab = {
+        id,
+        title: "Nueva pestaña",
+        url: url || "",
+        currentUrl: url || "",
+        history: [],
+        historyIndex: -1,
+        pageElement: null
+      };
+
+      state.tabs.push(tab);
+
+      renderTab(tab);
+      createPage(tab);
+
+      activateTab(id);
+
+      return tab;
+    }
+
+
+    function renderTab(tab) {
+
+      const element =
+        document.createElement("div");
+
+      element.className = "tab";
+      element.dataset.tabId = tab.id;
+
+      element.innerHTML = `
+        <span class="tab-icon">◉</span>
+        <span class="tab-title">
+          ${escapeHTML(tab.title)}
+        </span>
+
+        <button
+          class="tab-close"
+          title="Cerrar pestaña"
+          aria-label="Cerrar pestaña"
+        >
+          ×
+        </button>
+      `;
+
+      element.addEventListener("click", event => {
+
+        if (
+          event.target.closest(".tab-close")
+        ) {
+          closeTab(tab.id);
+          return;
+        }
+
+        activateTab(tab.id);
+      });
+
+      tabsBar.appendChild(element);
+    }
+
+
+    function updateTabUI(tab) {
+
+      const element =
+        tabsBar.querySelector(
+          `[data-tab-id="${tab.id}"]`
+        );
+
+      if (!element) return;
+
+      const title =
+        element.querySelector(".tab-title");
+
+      title.textContent =
+        tab.title || "Nueva pestaña";
+    }
+
+
+    function activateTab(id) {
+
+      const tab =
+        state.tabs.find(item => item.id === id);
+
+      if (!tab) return;
+
+      state.activeTabId = id;
+
+      document
+        .querySelectorAll(".tab")
+        .forEach(element => {
+          element.classList.toggle(
+            "active",
+            Number(element.dataset.tabId) === id
+          );
+        });
+
+      document
+        .querySelectorAll(".page")
+        .forEach(element => {
+          element.classList.toggle(
+            "active",
+            Number(element.dataset.tabId) === id
+          );
+        });
+
+      updateAddressBar(tab);
+      updateNavigationButtons();
+
+      setTimeout(() => {
+        const element =
+          tabsBar.querySelector(
+            `[data-tab-id="${id}"]`
+          );
+
+        element?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "nearest"
+        });
+      }, 20);
+    }
+
+
+    function closeTab(id) {
+
+      const index =
+        state.tabs.findIndex(
+          tab => tab.id === id
+        );
+
+      if (index === -1) return;
+
+      const tab = state.tabs[index];
+
+      tab.pageElement?.remove();
+
+      tabsBar
+        .querySelector(
+          `[data-tab-id="${id}"]`
+        )
+        ?.remove();
+
+      state.tabs.splice(index, 1);
+
+      if (state.tabs.length === 0) {
+        createTab();
+        return;
+      }
+
+      if (state.activeTabId === id) {
+
+        const nextIndex =
+          Math.min(index, state.tabs.length - 1);
+
+        activateTab(
+          state.tabs[nextIndex].id
+        );
+      }
+    }
+
+
+    // ==========================================
+    // PAGE
+    // ==========================================
+
+    function createPage(tab) {
+
+      const page =
+        document.createElement("section");
+
+      page.className = "page";
+      page.dataset.tabId = tab.id;
+
+      content.appendChild(page);
+
+      tab.pageElement = page;
+
+      renderHome(tab);
+    }
+
+
+    function renderHome(tab) {
+
+      tab.pageElement.innerHTML = `
+        <div class="home">
+
+          <div class="home-card">
+
+            <div class="home-logo">
+              G
+            </div>
+
+            <h1 class="home-title">
+              Welcome to
+              <span class="gradient-text">
+                GoNex
+              </span>
+            </h1>
+
+            <p class="home-subtitle">
+              Tu puente web moderno, rápido y seguro.
+            </p>
+
+            <div class="quick-grid">
+
+              <button
+                class="quick-card"
+                data-url="https://www.google.com"
+              >
+                <span class="quick-icon">G</span>
+                <span class="quick-name">Google</span>
+              </button>
+
+              <button
+                class="quick-card"
+                data-url="https://www.youtube.com"
+              >
+                <span class="quick-icon">▶</span>
+                <span class="quick-name">YouTube</span>
+              </button>
+
+              <button
+                class="quick-card"
+                data-url="https://github.com"
+              >
+                <span class="quick-icon">◆</span>
+                <span class="quick-name">GitHub</span>
+              </button>
+
+              <button
+                class="quick-card"
+                data-url="https://wikipedia.org"
+              >
+                <span class="quick-icon">W</span>
+                <span class="quick-name">Wikipedia</span>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+      tab.pageElement
+        .querySelectorAll("[data-url]")
+        .forEach(button => {
+
+          button.addEventListener(
+            "click",
+            () => navigate(button.dataset.url)
+          );
+
+        });
+    }
+
+
+    // ==========================================
+    // NAVIGATION
+    // ==========================================
+
+    function navigate(input) {
+
+      const tab =
+        state.tabs.find(
+          item => item.id === state.activeTabId
+        );
+
+      if (!tab) return;
+
+      const normalized =
+        normalizeInput(input);
+
+      if (!normalized) return;
+
+      const target =
+        getNavigationTarget(normalized);
+
+      showLoader();
+      setStatus("Cargando...");
+
+      tab.url = normalized;
+      tab.currentUrl = target.url;
+      tab.title = target.title;
+
+      /*
+       * Añadimos la navegación al historial
+       * únicamente cuando avanzamos normalmente.
+       */
+      if (
+        tab.historyIndex <
+        tab.history.length - 1
+      ) {
+        tab.history =
+          tab.history.slice(
+            0,
+            tab.historyIndex + 1
+          );
+      }
+
+      tab.history.push(normalized);
+      tab.historyIndex =
+        tab.history.length - 1;
+
+      updateTabUI(tab);
+      updateAddressBar(tab);
+      updateNavigationButtons();
+
+      if (target.type === "youtube") {
+        renderIframe(tab, target.url, "YouTube");
+      } else {
+        renderIframe(
+          tab,
+          target.url,
+          target.title
+        );
+      }
+    }
+
+
+    // ==========================================
+    // IFRAME
+    // ==========================================
+
+    function renderIframe(tab, url, title) {
+
+      const page = tab.pageElement;
+
+      page.innerHTML = "";
+
+      const iframe =
+        document.createElement("iframe");
+
+      iframe.src = url;
+
+      /*
+       * Importante para YouTube y otros
+       * contenidos que dependen del Referer.
+       */
+      iframe.referrerPolicy =
+        "strict-origin-when-cross-origin";
+
+      iframe.allow =
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+
+      iframe.allowFullscreen = true;
+
+      iframe.title = title;
+
+      let loaded = false;
+
+      iframe.addEventListener(
+        "load",
+        () => {
+
+          loaded = true;
+
+          hideLoader();
+          setStatus("Página cargada");
+
+          setTimeout(() => {
+            setStatus("", false);
+          }, 1500);
+        }
+      );
+
+      /*
+       * No podemos inspeccionar directamente
+       * X-Frame-Options/CSP de un iframe
+       * cross-origin desde JavaScript debido
+       * a la Same-Origin Policy.
+       *
+       * Si el navegador bloquea el iframe,
+       * el navegador puede mostrar su propio
+       * error. La arquitectura del backend puede
+       * proporcionar una detección adicional
+       * cuando corresponda.
+       */
+      iframe.addEventListener(
+        "error",
+        () => {
+
+          if (!loaded) {
+            renderFallback(
+              tab,
+              url,
+              "Este sitio no permite mostrarse dentro de GoNex."
+            );
+          }
+
+          hideLoader();
+        }
+      );
+
+      page.appendChild(iframe);
+
+      /*
+       * Fallback de seguridad para determinados
+       * bloqueos que no generan un evento "error".
+       *
+       * No intenta saltarse la protección.
+       */
+      setTimeout(() => {
+
+        if (!loaded && tab.pageElement === page) {
+
+          /*
+           * Dejamos un margen para conexiones lentas.
+           * YouTube y sitios complejos pueden tardar.
+           */
+          if (
+            !url.includes("youtube.com/embed/")
+          ) {
+
+            renderFallback(
+              tab,
+              url,
+              "El sitio puede estar bloqueando la inserción mediante iframe."
+            );
+          }
+        }
+
+      }, 12000);
+    }
+
+
+    // ==========================================
+    // FALLBACK UI
+    // ==========================================
+
+    function renderFallback(tab, url, reason) {
+
+      hideLoader();
+
+      tab.pageElement.innerHTML = `
+        <div class="fallback">
+
+          <div class="fallback-card">
+
+            <div class="fallback-icon">
+              ↗
+            </div>
+
+            <h2 class="fallback-title">
+              No se puede mostrar aquí
+            </h2>
+
+            <p class="fallback-text">
+              ${escapeHTML(reason)}
+              Puedes abrir el sitio directamente
+              en una nueva pestaña del navegador.
+            </p>
+
+            <div class="fallback-url">
+              ${escapeHTML(url)}
+            </div>
+
+            <button
+              class="primary-btn"
+              id="fallbackOpenBtn"
+            >
+              Abrir sitio
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+      tab.pageElement
+        .querySelector("#fallbackOpenBtn")
+        .addEventListener(
+          "click",
+          () => {
+
+            /*
+             * Navegación externa normal.
+             * No se utiliza proxy ni se modifican
+             * las políticas del sitio.
+             */
+            window.open(
+              url,
+              "_blank",
+              "noopener,noreferrer"
+            );
+
+          }
+        );
+
+      setStatus(
+        "El sitio requiere navegación externa"
+      );
+    }
+
+
+    // ==========================================
+    // ADDRESS BAR
+    // ==========================================
+
+    function updateAddressBar(tab) {
+
+      if (!tab) return;
+
+      addressInput.value =
+        tab.currentUrl || tab.url || "";
+    }
+
+
+    navigationForm.addEventListener(
+      "submit",
+      event => {
+
+        event.preventDefault();
+
+        navigate(addressInput.value);
+
+      }
+    );
+
+
+    // ==========================================
+    // BROWSER CONTROLS
+    // ==========================================
+
+    backBtn.addEventListener(
+      "click",
+      () => goBack()
+    );
+
+    forwardBtn.addEventListener(
+      "click",
+      () => goForward()
+    );
+
+    reloadBtn.addEventListener(
+      "click",
+      () => reloadCurrentTab()
+    );
+
+
+    function goBack() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab) return;
+
+      if (tab.historyIndex <= 0) return;
+
+      tab.historyIndex--;
+
+      const url =
+        tab.history[tab.historyIndex];
+
+      loadHistoryEntry(tab, url);
+    }
+
+
+    function goForward() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab) return;
+
+      if (
+        tab.historyIndex >=
+        tab.history.length - 1
+      ) {
+        return;
+      }
+
+      tab.historyIndex++;
+
+      const url =
+        tab.history[tab.historyIndex];
+
+      loadHistoryEntry(tab, url);
+    }
+
+
+    function loadHistoryEntry(tab, url) {
+
+      const target =
+        getNavigationTarget(url);
+
+      tab.url = url;
+      tab.currentUrl = target.url;
+      tab.title = target.title;
+
+      updateTabUI(tab);
+      updateAddressBar(tab);
+      updateNavigationButtons();
+
+      showLoader();
+
+      renderIframe(
+        tab,
+        target.url,
+        target.title
+      );
+    }
+
+
+    function reloadCurrentTab() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab) return;
+
+      if (!tab.currentUrl) {
+        renderHome(tab);
+        return;
+      }
+
+      showLoader();
+
+      renderIframe(
+        tab,
+        tab.currentUrl,
+        tab.title
+      );
+    }
+
+
+    function getActiveTab() {
+
+      return state.tabs.find(
+        tab => tab.id === state.activeTabId
+      );
+    }
+
+
+    function updateNavigationButtons() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab) return;
+
+      backBtn.disabled =
+        tab.historyIndex <= 0;
+
+      forwardBtn.disabled =
+        tab.historyIndex >=
+        tab.history.length - 1;
+    }
+
+
+    // ==========================================
+    // NEW TAB
+    // ==========================================
+
+    function createNewTab() {
+      createTab();
+    }
+
+
+    tabsBar.addEventListener(
+      "dblclick",
+      event => {
+
+        if (
+          event.target === tabsBar
+        ) {
+          createNewTab();
+        }
+
+      }
+    );
+
+
+    const newTabButton =
+      document.createElement("button");
+
+    newTabButton.className = "new-tab";
+    newTabButton.textContent = "+";
+    newTabButton.title = "Nueva pestaña";
+    newTabButton.setAttribute(
+      "aria-label",
+      "Nueva pestaña"
+    );
+
+    newTabButton.addEventListener(
+      "click",
+      createNewTab
+    );
+
+    tabsBar.appendChild(newTabButton);
+
+
+    // ==========================================
+    // BOOKMARKS
+    // ==========================================
+
+    bookmarksBar
+      .querySelectorAll("[data-url]")
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            navigate(
+              button.dataset.url
+            );
+
+          }
+        );
+
+      });
+
+
+    bookmarkCurrentBtn.addEventListener(
+      "click",
+      addCurrentBookmark
+    );
+
+
+    function addCurrentBookmark() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab || !tab.currentUrl) {
+        return;
+      }
+
+      const bookmark = {
+        title:
+          tab.title ||
+          getDomainName(tab.currentUrl),
+
+        url: tab.currentUrl
+      };
+
+      state.bookmarks.push(bookmark);
+
+      renderBookmarks();
+
+      setStatus("Añadido a marcadores");
+
+      setTimeout(() => {
+        setStatus("", false);
+      }, 1300);
+    }
+
+
+    function renderBookmarks() {
+
+      /*
+       * Conservamos los marcadores predeterminados.
+       * Los personalizados se añaden después.
+       */
+
+      state.bookmarks.forEach(
+        bookmark => {
+
+          const exists =
+            [...bookmarksBar.children]
+              .some(
+                element =>
+                  element.dataset.url ===
+                  bookmark.url
+              );
+
+          if (exists) return;
+
+          const button =
+            document.createElement("button");
+
+          button.className = "bookmark";
+
+          button.dataset.url =
+            bookmark.url;
+
+          button.innerHTML = `
+            <span class="bookmark-icon">
+              ☆
+            </span>
+
+            ${escapeHTML(bookmark.title)}
+          `;
+
+          button.addEventListener(
+            "click",
+            () => navigate(bookmark.url)
+          );
+
+          bookmarksBar.appendChild(button);
+        }
+      );
+    }
+
+
+    // ==========================================
+    // KEYBOARD SHORTCUTS
+    // ==========================================
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        const modifier =
+          event.ctrlKey || event.metaKey;
+
+        /*
+         * Ctrl/Cmd + L
+         */
+        if (
+          modifier &&
+          event.key.toLowerCase() === "l"
+        ) {
+
+          event.preventDefault();
+
+          addressInput.focus();
+          addressInput.select();
+
+        }
+
+
+        /*
+         * Ctrl/Cmd + T
+         */
+        if (
+          modifier &&
+          event.key.toLowerCase() === "t"
+        ) {
+
+          event.preventDefault();
+
+          createNewTab();
+
+        }
+
+
+        /*
+         * Ctrl/Cmd + W
+         */
+        if (
+          modifier &&
+          event.key.toLowerCase() === "w"
+        ) {
+
+          event.preventDefault();
+
+          const tab =
+            getActiveTab();
+
+          if (tab) {
+            closeTab(tab.id);
+          }
+
+        }
+
+
+        /*
+         * Enter
+         */
+        if (
+          event.key === "Enter" &&
+          document.activeElement ===
+            addressInput
+        ) {
+
+          navigate(
+            addressInput.value
+          );
+
+        }
+
+      }
+    );
+
+
+    // ==========================================
+    // INITIALIZATION
+    // ==========================================
+
+    function init() {
+
+      /*
+       * Una pestaña inicial.
+       */
+      createTab();
+
+      setStatus(
+        "GoNex listo",
+        true
+      );
+
+      setTimeout(() => {
+        setStatus("", false);
+      }, 1800);
+    }
+
+
+    init();
+
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <meta
+    name="referrer"
+    content="strict-origin-when-cross-origin"
+  />
+
+  <title>GoNex Web Bridge</title>
+
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-2: #151d2e;
+      --surface-3: #1b2538;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --purple: #8b5cf6;
+      --blue: #6366f1;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      color: inherit;
+    }
+
+    /* =========================
+       APP
+    ========================= */
+
+    .app {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(99, 102, 241, 0.08),
+          transparent 30%
+        ),
+        var(--bg);
+    }
+
+    /* =========================
+       TOP BAR
+    ========================= */
+
+    .topbar {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(11, 15, 25, 0.94);
+      backdrop-filter: blur(18px);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 112px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-icon {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      box-shadow: 0 5px 20px rgba(139, 92, 246, 0.25);
+    }
+
+    .brand-name {
+      font-size: 15px;
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition:
+        background 0.15s ease,
+        color 0.15s ease,
+        transform 0.15s ease;
+    }
+
+    .icon-btn:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.94);
+    }
+
+    .icon-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* =========================
+       ADDRESS BAR
+    ========================= */
+
+    .address-wrapper {
+      flex: 1;
+      min-width: 120px;
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .address-bar {
+      height: 36px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 0 13px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(17, 24, 39, 0.92);
+      transition:
+        border 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .address-bar:focus-within {
+      border-color: rgba(139, 92, 246, 0.55);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.08);
+    }
+
+    .address-icon {
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    #addressInput {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    #addressInput::placeholder {
+      color: #64748b;
+    }
+
+    .go-btn {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .go-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* =========================
+       TABS
+    ========================= */
+
+    .tabs-bar {
+      height: 43px;
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      padding: 5px 9px 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      background: #0d1320;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .tabs-bar::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .tabs-bar::-webkit-scrollbar-thumb {
+      background: #273248;
+      border-radius: 10px;
+    }
+
+    .tab {
+      height: 38px;
+      min-width: 145px;
+      max-width: 220px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 9px 0 12px;
+      border: 1px solid transparent;
+      border-bottom: 0;
+      border-radius: 10px 10px 0 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      user-select: none;
+      transition:
+        background 0.15s ease,
+        color 0.15s ease;
+    }
+
+    .tab:hover {
+      background: var(--surface-2);
+    }
+
+    .tab.active {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .tab-icon {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      color: var(--purple);
+    }
+
+    .tab-title {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 12px;
+    }
+
+    .tab-close {
+      width: 23px;
+      height: 23px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .tab-close:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+
+    .new-tab {
+      width: 34px;
+      height: 34px;
+      margin-bottom: 2px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .new-tab:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    /* =========================
+       BOOKMARKS
+    ========================= */
+
+    .bookmarks {
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 12px;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border);
+      background: #0d1320;
+      flex-shrink: 0;
+    }
+
+    .bookmarks::-webkit-scrollbar {
+      height: 2px;
+    }
+
+    .bookmark {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 10px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 12px;
+      transition:
+        background 0.15s ease,
+        color 0.15s ease;
+    }
+
+    .bookmark:hover {
+      background: var(--surface-2);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .bookmark-icon {
+      font-size: 13px;
+    }
+
+    /* =========================
+       CONTENT
+    ========================= */
+
+    .content {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      background: #080c14;
+    }
+
+    .page {
+      position: absolute;
+      inset: 0;
+      display: none;
+      background: #080c14;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page iframe {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border: 0;
+      background: #fff;
+    }
+
+    /* =========================
+       HOME
+    ========================= */
+
+    .home {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      overflow: auto;
+    }
+
+    .home-card {
+      width: min(850px, 100%);
+      text-align: center;
+    }
+
+    .home-logo {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 21px;
+      font-size: 30px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      box-shadow:
+        0 15px 50px rgba(99, 102, 241, 0.2),
+        inset 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    .home-title {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 850;
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #a78bfa, #818cf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .home-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .quick-card {
+      min-height: 82px;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 7px;
+      text-align: left;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: rgba(17, 24, 39, 0.65);
+      color: var(--text);
+      cursor: pointer;
+      transition:
+        transform 0.2s ease,
+        border 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .quick-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.35);
+      background: var(--surface-2);
+    }
+
+    .quick-icon {
+      font-size: 19px;
+    }
+
+    .quick-name {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* =========================
+       LOADING
+    ========================= */
+
+    .loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      overflow: hidden;
+      display: none;
+      z-index: 20;
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .loader.active {
+      display: block;
+    }
+
+    .loader::after {
+      content: "";
+      position: absolute;
+      width: 35%;
+      height: 100%;
+      left: -35%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--purple),
+        var(--blue),
+        transparent
+      );
+      animation: loading 1.1s infinite ease-in-out;
+    }
+
+    @keyframes loading {
+      from {
+        left: -35%;
+      }
+      to {
+        left: 100%;
+      }
+    }
+
+    /* =========================
+       FALLBACK
+    ========================= */
+
+    .fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 25px;
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(99, 102, 241, 0.08),
+          transparent 45%
+        ),
+        #080c14;
+    }
+
+    .fallback-card {
+      width: min(500px, 100%);
+      padding: 32px;
+      text-align: center;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(17, 24, 39, 0.86);
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+    }
+
+    .fallback-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: rgba(139, 92, 246, 0.12);
+      color: #a78bfa;
+      font-size: 25px;
+    }
+
+    .fallback-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 9px;
+    }
+
+    .fallback-text {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .fallback-url {
+      max-width: 100%;
+      margin-bottom: 20px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      background: #0b101b;
+      color: #818cf8;
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .primary-btn {
+      height: 40px;
+      padding: 0 18px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, var(--purple), var(--blue));
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
+
+    .primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.22);
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .status {
+      position: absolute;
+      bottom: 13px;
+      left: 13px;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(17, 24, 39, 0.9);
+      color: var(--muted);
+      font-size: 11px;
+      backdrop-filter: blur(10px);
+    }
+
+    .status.visible {
+      display: flex;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 700px) {
+      .brand {
+        min-width: auto;
+      }
+
+      .brand-name {
+        display: none;
+      }
+
+      .quick-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tab {
+        min-width: 120px;
+      }
+
+      .bookmarks {
+        padding-left: 7px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar {
+        gap: 3px;
+      }
+
+      .nav-controls .icon-btn:nth-child(2) {
+        display: none;
+      }
+
+      .quick-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .home {
+        padding: 18px;
+      }
+
+      .home-title {
+        letter-spacing: -1px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- =========================
+         TOP NAVIGATION
+    ========================== -->
+
+    <header class="topbar">
+
+      <div class="brand">
+        <div class="brand-icon">G</div>
+        <span class="brand-name">GoNex</span>
+      </div>
+
+      <div class="nav-controls">
+        <button
+          class="icon-btn"
+          id="backBtn"
+          title="Atrás"
+          aria-label="Atrás"
+        >
+          ←
+        </button>
+
+        <button
+          class="icon-btn"
+          id="forwardBtn"
+          title="Adelante"
+          aria-label="Adelante"
+        >
+          →
+        </button>
+
+        <button
+          class="icon-btn"
+          id="reloadBtn"
+          title="Recargar"
+          aria-label="Recargar"
+        >
+          ↻
+        </button>
+      </div>
+
+      <form class="address-wrapper" id="navigationForm">
+
+        <div class="address-bar">
+
+          <span class="address-icon">⌕</span>
+
+          <input
+            id="addressInput"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Busca o introduce una dirección web..."
+            aria-label="Barra de dirección"
+          />
+
+          <button
+            type="submit"
+            class="go-btn"
+            title="Ir"
+            aria-label="Ir"
+          >
+            →
+          </button>
+
+        </div>
+
+      </form>
+
+      <button
+        class="icon-btn"
+        id="bookmarkCurrentBtn"
+        title="Añadir a marcadores"
+        aria-label="Añadir a marcadores"
+      >
+        ☆
+      </button>
+
+    </header>
+
+
+    <!-- =========================
+         TABS
+    ========================== -->
+
+    <div class="tabs-bar" id="tabsBar"></div>
+
+
+    <!-- =========================
+         BOOKMARKS
+    ========================== -->
+
+    <nav class="bookmarks" id="bookmarksBar">
+
+      <button
+        class="bookmark"
+        data-url="https://www.google.com"
+      >
+        <span class="bookmark-icon">G</span>
+        Google
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://www.youtube.com"
+      >
+        <span class="bookmark-icon">▶</span>
+        YouTube
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://wikipedia.org"
+      >
+        <span class="bookmark-icon">W</span>
+        Wikipedia
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://github.com"
+      >
+        <span class="bookmark-icon">◆</span>
+        GitHub
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://replit.com"
+      >
+        <span class="bookmark-icon">▣</span>
+        Replit
+      </button>
+
+      <button
+        class="bookmark"
+        data-url="https://classroom.google.com"
+      >
+        <span class="bookmark-icon">▤</span>
+        Classroom
+      </button>
+
+    </nav>
+
+
+    <!-- =========================
+         CONTENT
+    ========================== -->
+
+    <main class="content" id="content">
+
+      <div class="loader" id="loader"></div>
+
+      <div class="status" id="status">
+        <span class="status-dot"></span>
+        <span id="statusText">Listo</span>
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <script>
+    /*
+     * ==========================================
+     * GoNex Web Bridge
+     * Frontend / Tab Manager
+     * ==========================================
+     *
+     * Esta capa NO intenta eliminar:
+     * - X-Frame-Options
+     * - CSP
+     * - CORS
+     * - políticas de seguridad de terceros
+     *
+     * Si un sitio no puede mostrarse mediante iframe,
+     * GoNex utiliza Fallback UI.
+     */
+
+
+    // ==========================================
+    // STATE
+    // ==========================================
+
+    const state = {
+      tabs: [],
+      activeTabId: null,
+      nextTabId: 1,
+      bookmarks: []
+    };
+
+
+    // ==========================================
+    // DOM
+    // ==========================================
+
+    const tabsBar = document.getElementById("tabsBar");
+    const content = document.getElementById("content");
+
+    const addressInput = document.getElementById("addressInput");
+    const navigationForm = document.getElementById("navigationForm");
+
+    const backBtn = document.getElementById("backBtn");
+    const forwardBtn = document.getElementById("forwardBtn");
+    const reloadBtn = document.getElementById("reloadBtn");
+
+    const bookmarkCurrentBtn =
+      document.getElementById("bookmarkCurrentBtn");
+
+    const bookmarksBar =
+      document.getElementById("bookmarksBar");
+
+    const loader =
+      document.getElementById("loader");
+
+    const status =
+      document.getElementById("status");
+
+    const statusText =
+      document.getElementById("statusText");
+
+
+    // ==========================================
+    // UTILS
+    // ==========================================
+
+    function escapeHTML(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+
+    function createId() {
+      return state.nextTabId++;
+    }
+
+
+    function showLoader() {
+      loader.classList.add("active");
+    }
+
+
+    function hideLoader() {
+      loader.classList.remove("active");
+    }
+
+
+    function setStatus(message, visible = true) {
+      statusText.textContent = message;
+
+      if (visible) {
+        status.classList.add("visible");
+      } else {
+        status.classList.remove("visible");
+      }
+    }
+
+
+    // ==========================================
+    // URL ROUTER
+    // ==========================================
+
+    function normalizeInput(input) {
+
+      let value = input.trim();
+
+      if (!value) {
+        return null;
+      }
+
+      /*
+       * URL completa
+       */
+      if (/^https?:\/\//i.test(value)) {
+        return value;
+      }
+
+      /*
+       * Dominio escrito directamente.
+       */
+      if (
+        /^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(value)
+      ) {
+        return `https://${value}`;
+      }
+
+      /*
+       * Si no parece URL, lo tratamos como búsqueda.
+       */
+      return `https://www.google.com/search?q=${encodeURIComponent(value)}`;
+    }
+
+
+    function extractYouTubeId(url) {
+
+      try {
+
+        const parsed = new URL(url);
+
+        /*
+         * youtube.com/watch?v=ID
+         */
+        if (
+          parsed.hostname.includes("youtube.com") &&
+          parsed.pathname === "/watch"
+        ) {
+          return parsed.searchParams.get("v");
+        }
+
+        /*
+         * youtu.be/ID
+         */
+        if (parsed.hostname === "youtu.be") {
+          return parsed.pathname.slice(1).split("/")[0];
+        }
+
+        /*
+         * youtube.com/shorts/ID
+         */
+        if (
+          parsed.hostname.includes("youtube.com") &&
+          parsed.pathname.startsWith("/shorts/")
+        ) {
+          return parsed.pathname
+            .split("/")[2]
+            ?.split("?")[0];
+        }
+
+        /*
+         * Ya es embed.
+         */
+        if (
+          parsed.hostname.includes("youtube.com") &&
+          parsed.pathname.startsWith("/embed/")
+        ) {
+          return parsed.pathname
+            .split("/")[2]
+            ?.split("?")[0];
+        }
+
+      } catch {
+        return null;
+      }
+
+      return null;
+    }
+
+
+    function getNavigationTarget(url) {
+
+      const youtubeId = extractYouTubeId(url);
+
+      if (youtubeId) {
+
+        return {
+          type: "youtube",
+          url:
+            `https://www.youtube.com/embed/` +
+            encodeURIComponent(youtubeId),
+          title: "YouTube"
+        };
+      }
+
+      return {
+        type: "web",
+        url,
+        title: getDomainName(url)
+      };
+    }
+
+
+    function getDomainName(url) {
+
+      try {
+
+        const parsed = new URL(url);
+
+        return parsed.hostname
+          .replace(/^www\./, "");
+
+      } catch {
+
+        return "Nueva pestaña";
+      }
+    }
+
+
+    // ==========================================
+    // TABS
+    // ==========================================
+
+    function createTab(url = null) {
+
+      const id = createId();
+
+      const tab = {
+        id,
+        title: "Nueva pestaña",
+        url: url || "",
+        currentUrl: url || "",
+        history: [],
+        historyIndex: -1,
+        pageElement: null
+      };
+
+      state.tabs.push(tab);
+
+      renderTab(tab);
+      createPage(tab);
+
+      activateTab(id);
+
+      return tab;
+    }
+
+
+    function renderTab(tab) {
+
+      const element =
+        document.createElement("div");
+
+      element.className = "tab";
+      element.dataset.tabId = tab.id;
+
+      element.innerHTML = `
+        <span class="tab-icon">◉</span>
+        <span class="tab-title">
+          ${escapeHTML(tab.title)}
+        </span>
+
+        <button
+          class="tab-close"
+          title="Cerrar pestaña"
+          aria-label="Cerrar pestaña"
+        >
+          ×
+        </button>
+      `;
+
+      element.addEventListener("click", event => {
+
+        if (
+          event.target.closest(".tab-close")
+        ) {
+          closeTab(tab.id);
+          return;
+        }
+
+        activateTab(tab.id);
+      });
+
+      tabsBar.appendChild(element);
+    }
+
+
+    function updateTabUI(tab) {
+
+      const element =
+        tabsBar.querySelector(
+          `[data-tab-id="${tab.id}"]`
+        );
+
+      if (!element) return;
+
+      const title =
+        element.querySelector(".tab-title");
+
+      title.textContent =
+        tab.title || "Nueva pestaña";
+    }
+
+
+    function activateTab(id) {
+
+      const tab =
+        state.tabs.find(item => item.id === id);
+
+      if (!tab) return;
+
+      state.activeTabId = id;
+
+      document
+        .querySelectorAll(".tab")
+        .forEach(element => {
+          element.classList.toggle(
+            "active",
+            Number(element.dataset.tabId) === id
+          );
+        });
+
+      document
+        .querySelectorAll(".page")
+        .forEach(element => {
+          element.classList.toggle(
+            "active",
+            Number(element.dataset.tabId) === id
+          );
+        });
+
+      updateAddressBar(tab);
+      updateNavigationButtons();
+
+      setTimeout(() => {
+        const element =
+          tabsBar.querySelector(
+            `[data-tab-id="${id}"]`
+          );
+
+        element?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "nearest"
+        });
+      }, 20);
+    }
+
+
+    function closeTab(id) {
+
+      const index =
+        state.tabs.findIndex(
+          tab => tab.id === id
+        );
+
+      if (index === -1) return;
+
+      const tab = state.tabs[index];
+
+      tab.pageElement?.remove();
+
+      tabsBar
+        .querySelector(
+          `[data-tab-id="${id}"]`
+        )
+        ?.remove();
+
+      state.tabs.splice(index, 1);
+
+      if (state.tabs.length === 0) {
+        createTab();
+        return;
+      }
+
+      if (state.activeTabId === id) {
+
+        const nextIndex =
+          Math.min(index, state.tabs.length - 1);
+
+        activateTab(
+          state.tabs[nextIndex].id
+        );
+      }
+    }
+
+
+    // ==========================================
+    // PAGE
+    // ==========================================
+
+    function createPage(tab) {
+
+      const page =
+        document.createElement("section");
+
+      page.className = "page";
+      page.dataset.tabId = tab.id;
+
+      content.appendChild(page);
+
+      tab.pageElement = page;
+
+      renderHome(tab);
+    }
+
+
+    function renderHome(tab) {
+
+      tab.pageElement.innerHTML = `
+        <div class="home">
+
+          <div class="home-card">
+
+            <div class="home-logo">
+              G
+            </div>
+
+            <h1 class="home-title">
+              Welcome to
+              <span class="gradient-text">
+                GoNex
+              </span>
+            </h1>
+
+            <p class="home-subtitle">
+              Tu puente web moderno, rápido y seguro.
+            </p>
+
+            <div class="quick-grid">
+
+              <button
+                class="quick-card"
+                data-url="https://www.google.com"
+              >
+                <span class="quick-icon">G</span>
+                <span class="quick-name">Google</span>
+              </button>
+
+              <button
+                class="quick-card"
+                data-url="https://www.youtube.com"
+              >
+                <span class="quick-icon">▶</span>
+                <span class="quick-name">YouTube</span>
+              </button>
+
+              <button
+                class="quick-card"
+                data-url="https://github.com"
+              >
+                <span class="quick-icon">◆</span>
+                <span class="quick-name">GitHub</span>
+              </button>
+
+              <button
+                class="quick-card"
+                data-url="https://wikipedia.org"
+              >
+                <span class="quick-icon">W</span>
+                <span class="quick-name">Wikipedia</span>
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+      tab.pageElement
+        .querySelectorAll("[data-url]")
+        .forEach(button => {
+
+          button.addEventListener(
+            "click",
+            () => navigate(button.dataset.url)
+          );
+
+        });
+    }
+
+
+    // ==========================================
+    // NAVIGATION
+    // ==========================================
+
+    function navigate(input) {
+
+      const tab =
+        state.tabs.find(
+          item => item.id === state.activeTabId
+        );
+
+      if (!tab) return;
+
+      const normalized =
+        normalizeInput(input);
+
+      if (!normalized) return;
+
+      const target =
+        getNavigationTarget(normalized);
+
+      showLoader();
+      setStatus("Cargando...");
+
+      tab.url = normalized;
+      tab.currentUrl = target.url;
+      tab.title = target.title;
+
+      /*
+       * Añadimos la navegación al historial
+       * únicamente cuando avanzamos normalmente.
+       */
+      if (
+        tab.historyIndex <
+        tab.history.length - 1
+      ) {
+        tab.history =
+          tab.history.slice(
+            0,
+            tab.historyIndex + 1
+          );
+      }
+
+      tab.history.push(normalized);
+      tab.historyIndex =
+        tab.history.length - 1;
+
+      updateTabUI(tab);
+      updateAddressBar(tab);
+      updateNavigationButtons();
+
+      if (target.type === "youtube") {
+        renderIframe(tab, target.url, "YouTube");
+      } else {
+        renderIframe(
+          tab,
+          target.url,
+          target.title
+        );
+      }
+    }
+
+
+    // ==========================================
+    // IFRAME
+    // ==========================================
+
+    function renderIframe(tab, url, title) {
+
+      const page = tab.pageElement;
+
+      page.innerHTML = "";
+
+      const iframe =
+        document.createElement("iframe");
+
+      iframe.src = url;
+
+      /*
+       * Importante para YouTube y otros
+       * contenidos que dependen del Referer.
+       */
+      iframe.referrerPolicy =
+        "strict-origin-when-cross-origin";
+
+      iframe.allow =
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+
+      iframe.allowFullscreen = true;
+
+      iframe.title = title;
+
+      let loaded = false;
+
+      iframe.addEventListener(
+        "load",
+        () => {
+
+          loaded = true;
+
+          hideLoader();
+          setStatus("Página cargada");
+
+          setTimeout(() => {
+            setStatus("", false);
+          }, 1500);
+        }
+      );
+
+      /*
+       * No podemos inspeccionar directamente
+       * X-Frame-Options/CSP de un iframe
+       * cross-origin desde JavaScript debido
+       * a la Same-Origin Policy.
+       *
+       * Si el navegador bloquea el iframe,
+       * el navegador puede mostrar su propio
+       * error. La arquitectura del backend puede
+       * proporcionar una detección adicional
+       * cuando corresponda.
+       */
+      iframe.addEventListener(
+        "error",
+        () => {
+
+          if (!loaded) {
+            renderFallback(
+              tab,
+              url,
+              "Este sitio no permite mostrarse dentro de GoNex."
+            );
+          }
+
+          hideLoader();
+        }
+      );
+
+      page.appendChild(iframe);
+
+      /*
+       * Fallback de seguridad para determinados
+       * bloqueos que no generan un evento "error".
+       *
+       * No intenta saltarse la protección.
+       */
+      setTimeout(() => {
+
+        if (!loaded && tab.pageElement === page) {
+
+          /*
+           * Dejamos un margen para conexiones lentas.
+           * YouTube y sitios complejos pueden tardar.
+           */
+          if (
+            !url.includes("youtube.com/embed/")
+          ) {
+
+            renderFallback(
+              tab,
+              url,
+              "El sitio puede estar bloqueando la inserción mediante iframe."
+            );
+          }
+        }
+
+      }, 12000);
+    }
+
+
+    // ==========================================
+    // FALLBACK UI
+    // ==========================================
+
+    function renderFallback(tab, url, reason) {
+
+      hideLoader();
+
+      tab.pageElement.innerHTML = `
+        <div class="fallback">
+
+          <div class="fallback-card">
+
+            <div class="fallback-icon">
+              ↗
+            </div>
+
+            <h2 class="fallback-title">
+              No se puede mostrar aquí
+            </h2>
+
+            <p class="fallback-text">
+              ${escapeHTML(reason)}
+              Puedes abrir el sitio directamente
+              en una nueva pestaña del navegador.
+            </p>
+
+            <div class="fallback-url">
+              ${escapeHTML(url)}
+            </div>
+
+            <button
+              class="primary-btn"
+              id="fallbackOpenBtn"
+            >
+              Abrir sitio
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+      tab.pageElement
+        .querySelector("#fallbackOpenBtn")
+        .addEventListener(
+          "click",
+          () => {
+
+            /*
+             * Navegación externa normal.
+             * No se utiliza proxy ni se modifican
+             * las políticas del sitio.
+             */
+            window.open(
+              url,
+              "_blank",
+              "noopener,noreferrer"
+            );
+
+          }
+        );
+
+      setStatus(
+        "El sitio requiere navegación externa"
+      );
+    }
+
+
+    // ==========================================
+    // ADDRESS BAR
+    // ==========================================
+
+    function updateAddressBar(tab) {
+
+      if (!tab) return;
+
+      addressInput.value =
+        tab.currentUrl || tab.url || "";
+    }
+
+
+    navigationForm.addEventListener(
+      "submit",
+      event => {
+
+        event.preventDefault();
+
+        navigate(addressInput.value);
+
+      }
+    );
+
+
+    // ==========================================
+    // BROWSER CONTROLS
+    // ==========================================
+
+    backBtn.addEventListener(
+      "click",
+      () => goBack()
+    );
+
+    forwardBtn.addEventListener(
+      "click",
+      () => goForward()
+    );
+
+    reloadBtn.addEventListener(
+      "click",
+      () => reloadCurrentTab()
+    );
+
+
+    function goBack() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab) return;
+
+      if (tab.historyIndex <= 0) return;
+
+      tab.historyIndex--;
+
+      const url =
+        tab.history[tab.historyIndex];
+
+      loadHistoryEntry(tab, url);
+    }
+
+
+    function goForward() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab) return;
+
+      if (
+        tab.historyIndex >=
+        tab.history.length - 1
+      ) {
+        return;
+      }
+
+      tab.historyIndex++;
+
+      const url =
+        tab.history[tab.historyIndex];
+
+      loadHistoryEntry(tab, url);
+    }
+
+
+    function loadHistoryEntry(tab, url) {
+
+      const target =
+        getNavigationTarget(url);
+
+      tab.url = url;
+      tab.currentUrl = target.url;
+      tab.title = target.title;
+
+      updateTabUI(tab);
+      updateAddressBar(tab);
+      updateNavigationButtons();
+
+      showLoader();
+
+      renderIframe(
+        tab,
+        target.url,
+        target.title
+      );
+    }
+
+
+    function reloadCurrentTab() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab) return;
+
+      if (!tab.currentUrl) {
+        renderHome(tab);
+        return;
+      }
+
+      showLoader();
+
+      renderIframe(
+        tab,
+        tab.currentUrl,
+        tab.title
+      );
+    }
+
+
+    function getActiveTab() {
+
+      return state.tabs.find(
+        tab => tab.id === state.activeTabId
+      );
+    }
+
+
+    function updateNavigationButtons() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab) return;
+
+      backBtn.disabled =
+        tab.historyIndex <= 0;
+
+      forwardBtn.disabled =
+        tab.historyIndex >=
+        tab.history.length - 1;
+    }
+
+
+    // ==========================================
+    // NEW TAB
+    // ==========================================
+
+    function createNewTab() {
+      createTab();
+    }
+
+
+    tabsBar.addEventListener(
+      "dblclick",
+      event => {
+
+        if (
+          event.target === tabsBar
+        ) {
+          createNewTab();
+        }
+
+      }
+    );
+
+
+    const newTabButton =
+      document.createElement("button");
+
+    newTabButton.className = "new-tab";
+    newTabButton.textContent = "+";
+    newTabButton.title = "Nueva pestaña";
+    newTabButton.setAttribute(
+      "aria-label",
+      "Nueva pestaña"
+    );
+
+    newTabButton.addEventListener(
+      "click",
+      createNewTab
+    );
+
+    tabsBar.appendChild(newTabButton);
+
+
+    // ==========================================
+    // BOOKMARKS
+    // ==========================================
+
+    bookmarksBar
+      .querySelectorAll("[data-url]")
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            navigate(
+              button.dataset.url
+            );
+
+          }
+        );
+
+      });
+
+
+    bookmarkCurrentBtn.addEventListener(
+      "click",
+      addCurrentBookmark
+    );
+
+
+    function addCurrentBookmark() {
+
+      const tab =
+        getActiveTab();
+
+      if (!tab || !tab.currentUrl) {
+        return;
+      }
+
+      const bookmark = {
+        title:
+          tab.title ||
+          getDomainName(tab.currentUrl),
+
+        url: tab.currentUrl
+      };
+
+      state.bookmarks.push(bookmark);
+
+      renderBookmarks();
+
+      setStatus("Añadido a marcadores");
+
+      setTimeout(() => {
+        setStatus("", false);
+      }, 1300);
+    }
+
+
+    function renderBookmarks() {
+
+      /*
+       * Conservamos los marcadores predeterminados.
+       * Los personalizados se añaden después.
+       */
+
+      state.bookmarks.forEach(
+        bookmark => {
+
+          const exists =
+            [...bookmarksBar.children]
+              .some(
+                element =>
+                  element.dataset.url ===
+                  bookmark.url
+              );
+
+          if (exists) return;
+
+          const button =
+            document.createElement("button");
+
+          button.className = "bookmark";
+
+          button.dataset.url =
+            bookmark.url;
+
+          button.innerHTML = `
+            <span class="bookmark-icon">
+              ☆
+            </span>
+
+            ${escapeHTML(bookmark.title)}
+          `;
+
+          button.addEventListener(
+            "click",
+            () => navigate(bookmark.url)
+          );
+
+          bookmarksBar.appendChild(button);
+        }
+      );
+    }
+
+
+    // ==========================================
+    // KEYBOARD SHORTCUTS
+    // ==========================================
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        const modifier =
+          event.ctrlKey || event.metaKey;
+
+        /*
+         * Ctrl/Cmd + L
+         */
+        if (
+          modifier &&
+          event.key.toLowerCase() === "l"
+        ) {
+
+          event.preventDefault();
+
+          addressInput.focus();
+          addressInput.select();
+
+        }
+
+
+        /*
+         * Ctrl/Cmd + T
+         */
+        if (
+          modifier &&
+          event.key.toLowerCase() === "t"
+        ) {
+
+          event.preventDefault();
+
+          createNewTab();
+
+        }
+
+
+        /*
+         * Ctrl/Cmd + W
+         */
+        if (
+          modifier &&
+          event.key.toLowerCase() === "w"
+        ) {
+
+          event.preventDefault();
+
+          const tab =
+            getActiveTab();
+
+          if (tab) {
+            closeTab(tab.id);
+          }
+
+        }
+
+
+        /*
+         * Enter
+         */
+        if (
+          event.key === "Enter" &&
+          document.activeElement ===
+            addressInput
+        ) {
+
+          navigate(
+            addressInput.value
+          );
+
+        }
+
+      }
+    );
+
+
+    // ==========================================
+    // INITIALIZATION
+    // ==========================================
+
+    function init() {
+
+      /*
+       * Una pestaña inicial.
+       */
+      createTab();
+
+      setStatus(
+        "GoNex listo",
+        true
+      );
+
+      setTimeout(() => {
+        setStatus("", false);
+      }, 1800);
+    }
+
+
+    init();
+
+  </script>
+</body>
+</html>
