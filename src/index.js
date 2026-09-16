@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge - Backend Express 5 + YouTube + Tavily + Google
+// GoNex Web Bridge - Backend Express 5 + YouTube + Tavily + Visor Web Interactivo
 
 const express = require('express');
 const path = require('path');
@@ -9,8 +9,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
 const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
-const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
-const GOOGLE_CSE_ID = process.env.GOOGLE_CSE_ID;
 
 const publicPath = path.join(__dirname, '..', 'public');
 const youtube = new YTubeNoAPI();
@@ -35,7 +33,7 @@ app.use((req, res, next) => {
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
-      "connect-src 'self' https://www.youtube.com https://api.tavily.com https://www.googleapis.com",
+      "connect-src 'self' https://www.youtube.com https://api.tavily.com",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'"
@@ -147,47 +145,6 @@ app.get('/api/web-search', async (req, res) => {
   } catch (error) {
     console.error('[GoNex] Error /api/web-search:', error.message);
     res.status(500).json({ error: 'Error al buscar en la web.' });
-  }
-});
-
-// ==========================================================
-// ENDPOINT: Búsqueda en Google (Custom Search JSON API)
-// ==========================================================
-app.get('/api/google-search', async (req, res) => {
-  const query = req.query.q;
-
-  if (!query || typeof query !== 'string' || query.trim() === '') {
-    return res.status(400).json({ error: 'Falta el parámetro "q".' });
-  }
-
-  if (!GOOGLE_API_KEY || !GOOGLE_CSE_ID) {
-    console.error('[GoNex] GOOGLE_API_KEY o GOOGLE_CSE_ID no configuradas.');
-    return res.status(500).json({ error: 'El servicio de búsqueda de Google no está configurado.' });
-  }
-
-  try {
-    const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CSE_ID}&q=${encodeURIComponent(query.trim())}&num=10`;
-
-    const apiResponse = await fetch(url);
-
-    if (!apiResponse.ok) {
-      const errText = await apiResponse.text();
-      console.error('[GoNex] Google API error:', apiResponse.status, errText);
-      throw new Error(`Google respondió con estado ${apiResponse.status}`);
-    }
-
-    const data = await apiResponse.json();
-
-    const results = (data.items || []).map((item) => ({
-      title: item.title || 'Sin título',
-      url: item.link || '',
-      description: item.snippet || ''
-    }));
-
-    res.status(200).json({ results });
-  } catch (error) {
-    console.error('[GoNex] Error /api/google-search:', error.message);
-    res.status(500).json({ error: 'Error al buscar en Google.' });
   }
 });
 

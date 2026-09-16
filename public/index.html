@@ -38,6 +38,22 @@
     .filter-btn { background: #161b26; border: 1px solid #2d3748; color: #94a3b8; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
     .filter-btn.active { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; border-color: transparent; }
     .filter-btn:hover:not(.active) { border-color: #8b5cf6; color: #fff; }
+
+    /* Modal genérico */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .modal.active { display: flex; }
+    .modal-header { width: 100%; max-width: 850px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .btn-close { background: #2d3748; border: none; color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-close:hover { background: #ef4444; }
+
+    /* Visor de páginas web */
+    .web-viewer-wrapper { width: 100%; max-width: 850px; height: 70vh; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
+    .web-viewer-wrapper iframe { width: 100%; height: 100%; border: none; background: #fff; }
+    .web-viewer-fallback { margin-top: 12px; text-align: center; color: #64748b; font-size: 0.8rem; }
+    .web-viewer-fallback a { color: #a855f7; text-decoration: none; }
+    .web-viewer-message { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #161b26; color: #94a3b8; padding: 20px; text-align: center; }
+    .web-viewer-message h3 { color: #f1f5f9; margin-bottom: 10px; }
+    .web-viewer-message p { margin-bottom: 20px; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -49,23 +65,17 @@
 
   <div class="search-container">
     <form id="search-form" class="search-box">
-      <input id="search-input" type="text" placeholder="Busca en Google, Tavily, YouTube o pega una URL..." required />
+      <input id="search-input" type="text" placeholder="Busca en la web (Tavily), YouTube, o pega una URL..." required />
       <button type="submit">Buscar</button>
     </form>
   </div>
 
   <div class="filters">
-    <button class="filter-btn active" data-mode="google" onclick="setMode('google')">🔍 Google</button>
-    <button class="filter-btn" data-mode="web" onclick="setMode('web')">🌐 Web</button>
+    <button class="filter-btn active" data-mode="web" onclick="setMode('web')">🌐 Web</button>
     <button class="filter-btn" data-mode="youtube" onclick="setMode('youtube')">📺 YouTube</button>
   </div>
 
   <div class="grid">
-    <div class="card" onclick="setMode('google'); handleInput('noticias de tecnología')">
-      <div class="icon">🔍</div>
-      <div class="title">Google</div>
-      <div class="badge">BUSCADOR</div>
-    </div>
     <div class="card" onclick="setMode('web'); handleInput('noticias de tecnología')">
       <div class="icon">🌐</div>
       <div class="title">Web Search</div>
@@ -81,20 +91,99 @@
       <div class="title">Classroom</div>
       <div class="badge">DIRECTO</div>
     </div>
+    <div class="card" onclick="handleInput('https://www.google.com')">
+      <div class="icon">🔍</div>
+      <div class="title">Google</div>
+      <div class="badge">DIRECTO</div>
+    </div>
   </div>
 
   <div id="results-container" class="results-container"></div>
 
+  <!-- Modal Visor Web -->
+  <div id="web-viewer-modal" class="modal">
+    <div class="modal-header">
+      <span>Visor GoNex</span>
+      <div>
+        <button class="btn-close" onclick="closeModal('web-viewer-modal')">Cerrar ✕</button>
+      </div>
+    </div>
+    <div class="web-viewer-wrapper" id="web-viewer-wrapper">
+      <!-- Atributos sandbox para permitir interacción -->
+      <iframe id="web-viewer-iframe" src="" sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"></iframe>
+      <div id="web-viewer-message" class="web-viewer-message" style="display:none;">
+        <h3>No se puede mostrar esta página</h3>
+        <p>Este sitio ha bloqueado su visualización dentro de otra página web por motivos de seguridad.</p>
+        <a id="web-viewer-external-link" href="#" target="_blank" class="btn-close" style="text-decoration:none; padding:10px 20px; background: linear-gradient(135deg, #8b5cf6, #6366f1);">Abrir en pestaña nueva ↗</a>
+      </div>
+    </div>
+    <p class="web-viewer-fallback">
+      <a id="web-viewer-fallback-link" href="#" target="_blank">Abrir en pestaña nueva ↗</a>
+    </p>
+  </div>
+
   <script>
-    // ==========================================================
-    // MODO ACTIVO: 'google' (por defecto), 'web' o 'youtube'
-    // ==========================================================
-    var currentMode = 'google';
+    var currentMode = 'web';
 
     function setMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.mode === mode);
+      });
+    }
+
+    // ==========================================================
+    // YOUTUBE IFRAME PLAYER API
+    // ==========================================================
+    var ytPlayer = null;
+    var ytApiReady = false;
+    var pendingVideoId = null;
+
+    window.onYouTubeIframeAPIReady = function () {
+      ytApiReady = true;
+      if (pendingVideoId) {
+        var id = pendingVideoId;
+        pendingVideoId = null;
+        createPlayer(id);
+      }
+    };
+
+    (function loadYouTubeApi() {
+      var tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    })();
+
+    function resetPlayerContainer() {
+      if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+        try { ytPlayer.destroy(); } catch (e) {}
+      }
+      ytPlayer = null;
+      var wrapper = document.getElementById('player-wrapper');
+      if (wrapper) wrapper.innerHTML = '<div id="yt-player"></div>';
+    }
+
+    function createPlayer(videoId) {
+      if (!ytApiReady) {
+        pendingVideoId = videoId;
+        return;
+      }
+      resetPlayerContainer();
+      ytPlayer = new YT.Player('yt-player', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          origin: window.location.origin
+        },
+        events: {
+          onReady: function (event) { event.target.playVideo(); }
+        }
       });
     }
 
@@ -138,7 +227,6 @@
           <p>${video.channelTitle}</p>
         `;
         card.addEventListener('click', () => {
-          // ✅ YouTube abre en pestaña nueva
           window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank');
         });
         container.appendChild(card);
@@ -165,49 +253,59 @@
       }
     }
 
-    // ==========================================================
-    // BÚSQUEDA EN GOOGLE (Custom Search API)
-    // ==========================================================
-    async function searchGoogle(query) {
-      const container = document.getElementById('results-container');
-      container.innerHTML = '<p style="color:#94a3b8;">Buscando en Google...</p>';
-      try {
-        const response = await fetch(`/api/google-search?q=${encodeURIComponent(query)}`);
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-          throw new Error('El servidor no respondió con JSON.');
-        }
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
-        displayWebResults(data.results);
-      } catch (error) {
-        container.innerHTML = `<p style="color:#ef4444;">Error al buscar en Google: ${error.message}</p>`;
-      }
-    }
-
-    // ==========================================================
-    // DISPLAY DE RESULTADOS WEB (Google y Tavily)
-    // ==========================================================
     function displayWebResults(results) {
       const container = document.getElementById('results-container');
       container.innerHTML = '';
       if (!results || results.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8;">No se encontraron resultados.</p>';
+        container.innerHTML = '<p style="color:#94a3b8;">No se encontraron resultados web.</p>';
         return;
       }
       results.forEach((item) => {
-        const card = document.createElement('a');
+        const card = document.createElement('div');
         card.className = 'web-card';
-        card.href = item.url;
-        card.target = '_blank';
-        card.rel = 'noopener noreferrer';
         card.innerHTML = `
           <h3>${item.title}</h3>
           <div class="web-url">${item.url}</div>
           <p>${item.description}</p>
         `;
+        card.addEventListener('click', () => openWebViewer(item.url));
         container.appendChild(card);
       });
+    }
+
+    // ==========================================================
+    // VISOR WEB INTEGRADO (INTERACTIVO)
+    // ==========================================================
+    function openWebViewer(url) {
+      const iframe = document.getElementById('web-viewer-iframe');
+      const message = document.getElementById('web-viewer-message');
+      const externalLink = document.getElementById('web-viewer-external-link');
+      const fallbackLink = document.getElementById('web-viewer-fallback-link');
+
+      document.getElementById('web-viewer-modal').classList.add('active');
+      message.style.display = 'none';
+      iframe.style.display = 'block';
+      iframe.src = url;
+      externalLink.href = url;
+      fallbackLink.href = url;
+
+      // Timeout para detectar bloqueo
+      var loadTimeout = setTimeout(function () {
+        try {
+          var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+          if (!iframeDoc || iframeDoc.body.innerHTML === '' || iframeDoc.location.href === 'about:blank') {
+            showBlockedMessage();
+          }
+        } catch (e) {
+          // Cross-origin: asumimos bloqueado si no hay contenido
+          showBlockedMessage();
+        }
+      }, 3000);
+
+      function showBlockedMessage() {
+        iframe.style.display = 'none';
+        message.style.display = 'flex';
+      }
     }
 
     // ==========================================================
@@ -218,22 +316,25 @@
       const ytId = extractYouTubeId(clean);
 
       if (ytId) {
-        // URL de YouTube → abrir en pestaña nueva
         window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank');
       } else if (clean.includes('.') && !clean.includes(' ')) {
-        // URL genérica → abrir en pestaña nueva
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
-        window.open(url, '_blank');
+        openWebViewer(url);
       } else {
-        // Texto → según el modo activo
         if (currentMode === 'youtube') {
           searchYouTube(clean);
-        } else if (currentMode === 'web') {
-          searchWeb(clean);
         } else {
-          searchGoogle(clean);
+          searchWeb(clean);
         }
       }
+    }
+
+    function closeModal(modalId) {
+      if (modalId === 'web-viewer-modal') {
+        const iframe = document.getElementById('web-viewer-iframe');
+        iframe.src = 'about:blank';
+      }
+      document.getElementById(modalId).classList.remove('active');
     }
 
     document.getElementById('search-form').addEventListener('submit', function (e) {
