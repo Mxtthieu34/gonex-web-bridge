@@ -172,7 +172,7 @@
     }
 
     // ==========================================================
-    // VISOR WEB CON PROXY
+    // VISOR WEB (iframe directo, sin proxy)
     // ==========================================================
     function openWebViewer(url) {
       const iframe = document.getElementById('web-viewer-iframe');
@@ -185,7 +185,8 @@
       iframe.style.display = 'none';
       externalLink.href = url;
 
-      iframe.src = `/api/proxy?url=${encodeURIComponent(url)}`;
+      // ✅ Usamos la URL directamente (Canva embed funciona sin proxy)
+      iframe.src = url;
 
       iframe.onload = function () {
         loading.style.display = 'none';
