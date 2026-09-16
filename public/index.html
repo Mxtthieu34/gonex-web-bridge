@@ -81,6 +81,9 @@
     <div class="iframe-wrapper">
       <iframe
         id="embed-iframe"
+        src=""
+        title="Reproductor de YouTube"
+        frameborder="0"
         referrerpolicy="strict-origin-when-cross-origin"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowfullscreen>
@@ -126,8 +129,8 @@
           <p>${video.channelTitle}</p>
         `;
         card.addEventListener('click', () => {
-          // Usamos youtube-nocookie.com para evitar el Error 153
-          const embedUrl = `https://www.youtube-nocookie.com/embed/${video.videoId}?autoplay=1&rel=0`;
+          // Usamos youtube.com/embed para máxima compatibilidad
+          const embedUrl = `https://www.youtube.com/embed/${video.videoId}?autoplay=1&rel=0`;
           document.getElementById('embed-iframe').src = embedUrl;
           document.getElementById('fallback-link').href = `https://www.youtube.com/watch?v=${video.videoId}`;
           document.getElementById('embed-modal').classList.add('active');
@@ -141,8 +144,8 @@
       const ytId = extractYouTubeId(clean);
 
       if (ytId) {
-        // Usamos youtube-nocookie.com para evitar el Error 153
-        const embedUrl = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0`;
+        // Usamos youtube.com/embed para máxima compatibilidad
+        const embedUrl = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0`;
         document.getElementById('embed-iframe').src = embedUrl;
         document.getElementById('fallback-link').href = `https://www.youtube.com/watch?v=${ytId}`;
         document.getElementById('embed-modal').classList.add('active');
