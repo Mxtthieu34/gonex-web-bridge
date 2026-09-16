@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge - Backend Express 5 final
+// GoNex Web Bridge — Backend Express 5 con proxy para Canva
 
 const express = require('express');
 const path = require('path');
@@ -18,11 +18,15 @@ const youtube = new YTubeNoAPI();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
+// ==========================================================
+// MIDDLEWARE DE SEGURIDAD
+// ==========================================================
 app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+
   res.setHeader(
     'Content-Security-Policy',
     [
@@ -38,7 +42,12 @@ app.use((req, res, next) => {
       "object-src 'none'"
     ].join('; ')
   );
+
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+
   next();
 });
 
@@ -59,7 +68,7 @@ app.use(
 );
 
 // ==========================================================
-// YouTube
+// ENDPOINT: YouTube Search
 // ==========================================================
 app.get('/api/youtube-search', async (req, res) => {
   const query = req.query.q;
@@ -68,7 +77,9 @@ app.get('/api/youtube-search', async (req, res) => {
   }
   try {
     const videos = await youtube.searchVideos(query.trim(), 12);
-    if (!videos || videos.length === 0) return res.status(200).json({ results: [] });
+    if (!videos || videos.length === 0) {
+      return res.status(200).json({ results: [] });
+    }
     const results = videos.map((video) => ({
       videoId: video.videoId,
       title: video.title,
@@ -83,7 +94,7 @@ app.get('/api/youtube-search', async (req, res) => {
 });
 
 // ==========================================================
-// Tavily (Búsqueda Web)
+// ENDPOINT: Tavily Web Search
 // ==========================================================
 app.get('/api/web-search', async (req, res) => {
   const query = req.query.q;
@@ -91,7 +102,8 @@ app.get('/api/web-search', async (req, res) => {
     return res.status(400).json({ error: 'Falta el parámetro "q".' });
   }
   if (!TAVILY_API_KEY) {
-    return res.status(500).json({ error: 'TAVILY_API_KEY no configurada.' });
+    console.error('[GoNex] TAVILY_API_KEY no configurada.');
+    return res.status(500).json({ error: 'El servicio de búsqueda web no está configurado.' });
   }
   try {
     const apiResponse = await fetch('https://api.tavily.com/search', {
@@ -119,7 +131,7 @@ app.get('/api/web-search', async (req, res) => {
 });
 
 // ==========================================================
-// Proxy Inverso (para Canva y sitios que lo permitan)
+// ENDPOINT: Proxy Inverso (para Canva y sitios que lo permitan)
 // ==========================================================
 app.get('/api/proxy', async (req, res) => {
   const targetUrl = req.query.url;
@@ -128,8 +140,8 @@ app.get('/api/proxy', async (req, res) => {
   try {
     const response = await fetch(targetUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
       }
     });
@@ -148,9 +160,22 @@ app.get('/api/proxy', async (req, res) => {
       let html = await response.text();
       const $ = cheerio.load(html);
 
+      // Reescribir enlaces <a>
       $('a').each((i, el) => {
         const href = $(el).attr('href');
         if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+          try {
+            const absoluteUrl = new URL(href, targetUrl).href;
+            $(el).attr('href', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
+            $(el).attr('target', '_self');
+          } catch (e) {}
+        }
+      });
+
+      // Reescribir recursos (CSS, JS, imágenes)
+      $('link[rel="stylesheet"]').each((i, el) => {
+        const href = $(el).attr('href');
+        if (href) {
           try {
             const absoluteUrl = new URL(href, targetUrl).href;
             $(el).attr('href', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
@@ -158,13 +183,33 @@ app.get('/api/proxy', async (req, res) => {
         }
       });
 
-      $('link[rel="stylesheet"], script[src], img[src]').each((i, el) => {
-        const attr = el.tagName === 'link' ? 'href' : 'src';
-        const val = $(el).attr(attr);
-        if (val) {
+      $('script[src]').each((i, el) => {
+        const src = $(el).attr('src');
+        if (src) {
           try {
-            const absoluteUrl = new URL(val, targetUrl).href;
-            $(el).attr(attr, `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
+            const absoluteUrl = new URL(src, targetUrl).href;
+            $(el).attr('src', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
+          } catch (e) {}
+        }
+      });
+
+      $('img[src]').each((i, el) => {
+        const src = $(el).attr('src');
+        if (src) {
+          try {
+            const absoluteUrl = new URL(src, targetUrl).href;
+            $(el).attr('src', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
+          } catch (e) {}
+        }
+      });
+
+      // Reescribir formularios
+      $('form').each((i, el) => {
+        const action = $(el).attr('action');
+        if (action) {
+          try {
+            const absoluteUrl = new URL(action, targetUrl).href;
+            $(el).attr('action', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
           } catch (e) {}
         }
       });
@@ -184,36 +229,72 @@ app.get('/api/proxy', async (req, res) => {
 });
 
 // ==========================================================
-// Wildcard SPA
+// RUTA WILDCARD SPA — Express 5
 // ==========================================================
 app.get('/{*splat}', (req, res, next) => {
-  if (!req.accepts('html')) return next();
+  if (!req.accepts('html')) {
+    return next();
+  }
   res.sendFile('index.html', { root: publicPath }, (err) => {
     if (err) next(err);
   });
 });
 
+// ==========================================================
+// 404
+// ==========================================================
 app.use((req, res) => {
   if (req.accepts('html')) {
-    return res.status(404).send('<!doctype html><meta charset="utf-8"><title>404</title><h1>404</h1>');
+    return res.status(404).send(
+      '<!doctype html><meta charset="utf-8"><title>404</title>' +
+        '<body style="font-family:system-ui;background:#0b0f19;color:#f1f5f9;padding:40px;">' +
+        '<h1>404 - No encontrado</h1>' +
+        '<a href="/" style="color:#a855f7;">Volver al inicio</a></body>'
+    );
   }
-  res.status(404).json({ error: 'Not Found' });
+  res.status(404).json({ error: 'Not Found', path: req.originalUrl });
 });
 
+// ==========================================================
+// MANEJADOR GLOBAL DE ERRORES
+// ==========================================================
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  const status = err.status || 500;
-  console.error('[GoNex Error]', { status, message: err.message, path: req.originalUrl });
-  if (res.headersSent) return next(err);
-  const clientMessage = IS_PROD && status >= 500 ? 'Error interno del servidor' : err.message;
-  if (req.accepts('html')) {
-    return res.status(status).send(`<!doctype html><meta charset="utf-8"><h1>${status}</h1><p>${clientMessage}</p>`);
+  const status = err.status || err.statusCode || 500;
+  const isServerError = status >= 500;
+
+  if (isServerError) {
+    console.error('[GoNex Error]', {
+      status,
+      message: err.message,
+      path: req.originalUrl,
+      method: req.method
+    });
   }
-  res.status(status).json({ error: err.name || 'Error', message: clientMessage });
+
+  if (res.headersSent) return next(err);
+
+  const clientMessage = IS_PROD && isServerError ? 'Error interno del servidor' : err.message;
+
+  if (req.accepts('html')) {
+    return res.status(status).send(
+      `<!doctype html><meta charset="utf-8"><title>${status}</title>` +
+        '<body style="font-family:system-ui;background:#0b0f19;color:#f1f5f9;padding:40px;">' +
+        `<h1>${status}</h1><p>${clientMessage}</p>` +
+        '<a href="/" style="color:#a855f7;">Volver al inicio</a></body>'
+    );
+  }
+
+  res.status(status).json({
+    error: status === 500 ? 'Internal Server Error' : err.name || 'Error',
+    message: clientMessage
+  });
 });
 
 if (!IS_PROD) {
-  app.listen(PORT, () => console.log(`GoNex (dev) en http://localhost:${PORT}`));
+  app.listen(PORT, () => {
+    console.log(`GoNex Web Bridge (dev) en http://localhost:${PORT}`);
+  });
 }
 
 module.exports = app;
