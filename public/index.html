@@ -39,18 +39,28 @@
     .filter-btn.active { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; border-color: transparent; }
     .filter-btn:hover:not(.active) { border-color: #8b5cf6; color: #fff; }
 
+    /* Modal genérico */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     .modal.active { display: flex; }
     .modal-header { width: 100%; max-width: 850px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .btn-close { background: #2d3748; border: none; color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn-close:hover { background: #ef4444; }
 
+    /* Reproductor de YouTube */
     .player-wrapper { width: 100%; max-width: 850px; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
     .player-wrapper iframe { width: 100%; height: 100%; border: none; }
     #yt-player { width: 100%; height: 100%; }
-
     .player-fallback { margin-top: 12px; text-align: center; color: #64748b; font-size: 0.8rem; }
     .player-fallback a { color: #a855f7; text-decoration: none; }
+
+    /* Visor de páginas web */
+    .web-viewer-wrapper { width: 100%; max-width: 850px; height: 70vh; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
+    .web-viewer-wrapper iframe { width: 100%; height: 100%; border: none; background: #fff; }
+    .web-viewer-fallback { margin-top: 12px; text-align: center; color: #64748b; font-size: 0.8rem; }
+    .web-viewer-fallback a { color: #a855f7; text-decoration: none; }
+    .web-viewer-message { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #161b26; color: #94a3b8; padding: 20px; text-align: center; }
+    .web-viewer-message h3 { color: #f1f5f9; margin-bottom: 10px; }
+    .web-viewer-message p { margin-bottom: 20px; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -97,11 +107,12 @@
 
   <div id="results-container" class="results-container"></div>
 
+  <!-- Modal Reproductor YouTube -->
   <div id="embed-modal" class="modal">
     <div class="modal-header">
       <span>Reproductor GoNex</span>
       <div>
-        <button class="btn-close" onclick="closeModal()">Cerrar ✕</button>
+        <button class="btn-close" onclick="closeModal('embed-modal')">Cerrar ✕</button>
       </div>
     </div>
     <div class="player-wrapper" id="player-wrapper">
@@ -109,6 +120,27 @@
     </div>
     <p class="player-fallback">
       ¿No carga? <a id="fallback-link" href="#" target="_blank">Abrir en YouTube ↗</a>
+    </p>
+  </div>
+
+  <!-- Modal Visor Web -->
+  <div id="web-viewer-modal" class="modal">
+    <div class="modal-header">
+      <span>Visor GoNex</span>
+      <div>
+        <button class="btn-close" onclick="closeModal('web-viewer-modal')">Cerrar ✕</button>
+      </div>
+    </div>
+    <div class="web-viewer-wrapper" id="web-viewer-wrapper">
+      <iframe id="web-viewer-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+      <div id="web-viewer-message" class="web-viewer-message" style="display:none;">
+        <h3>No se puede mostrar esta página</h3>
+        <p>Este sitio ha bloqueado su visualización dentro de otra página web por motivos de seguridad.</p>
+        <a id="web-viewer-external-link" href="#" target="_blank" class="btn-close" style="text-decoration:none; padding:10px 20px; background: linear-gradient(135deg, #8b5cf6, #6366f1);">Abrir en pestaña nueva ↗</a>
+      </div>
+    </div>
+    <p class="web-viewer-fallback">
+      <a id="web-viewer-fallback-link" href="#" target="_blank">Abrir en pestaña nueva ↗</a>
     </p>
   </div>
 
@@ -122,6 +154,9 @@
       });
     }
 
+    // ==========================================================
+    // YOUTUBE IFRAME PLAYER API
+    // ==========================================================
     var ytPlayer = null;
     var ytApiReady = false;
     var pendingVideoId = null;
@@ -174,11 +209,17 @@
       });
     }
 
+    // ==========================================================
+    // UTILIDADES
+    // ==========================================================
     function extractYouTubeId(url) {
       const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
       return match ? match[1] : null;
     }
 
+    // ==========================================================
+    // BÚSQUEDA EN YOUTUBE
+    // ==========================================================
     async function searchYouTube(query) {
       const container = document.getElementById('results-container');
       container.innerHTML = '<p style="color:#94a3b8;">Buscando en YouTube...</p>';
@@ -212,6 +253,9 @@
       });
     }
 
+    // ==========================================================
+    // BÚSQUEDA WEB (TAVILY)
+    // ==========================================================
     async function searchWeb(query) {
       const container = document.getElementById('results-container');
       container.innerHTML = '<p style="color:#94a3b8;">Buscando en la web...</p>';
@@ -237,20 +281,63 @@
         return;
       }
       results.forEach((item) => {
-        const card = document.createElement('a');
+        const card = document.createElement('div');
         card.className = 'web-card';
-        card.href = item.url;
-        card.target = '_self'; /* ✅ Abre en la misma pestaña */
-        card.rel = 'noopener noreferrer';
         card.innerHTML = `
           <h3>${item.title}</h3>
           <div class="web-url">${item.url}</div>
           <p>${item.description}</p>
         `;
+        card.addEventListener('click', () => openWebViewer(item.url));
         container.appendChild(card);
       });
     }
 
+    // ==========================================================
+    // VISOR WEB INTEGRADO
+    // ==========================================================
+    function openWebViewer(url) {
+      const iframe = document.getElementById('web-viewer-iframe');
+      const message = document.getElementById('web-viewer-message');
+      const externalLink = document.getElementById('web-viewer-external-link');
+      const fallbackLink = document.getElementById('web-viewer-fallback-link');
+
+      // Mostramos el modal
+      document.getElementById('web-viewer-modal').classList.add('active');
+
+      // Ocultamos mensaje, cargamos iframe
+      message.style.display = 'none';
+      iframe.style.display = 'block';
+      iframe.src = url;
+
+      // Configuramos enlaces de escape
+      externalLink.href = url;
+      fallbackLink.href = url;
+
+      // Timeout para detectar bloqueo (si el iframe no carga en 3 segundos)
+      var loadTimeout = setTimeout(function () {
+        // Si el iframe sigue en blanco (about:blank o vacío), mostramos el aviso
+        try {
+          var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+          if (!iframeDoc || iframeDoc.location.href === 'about:blank' || iframeDoc.body.innerHTML === '') {
+            showBlockedMessage();
+          }
+        } catch (e) {
+          // Si no podemos acceder (cross-origin), asumimos que está bloqueado
+          // y mostramos el mensaje.
+          showBlockedMessage();
+        }
+      }, 3000);
+
+      function showBlockedMessage() {
+        iframe.style.display = 'none';
+        message.style.display = 'flex';
+      }
+    }
+
+    // ==========================================================
+    // FLUJO PRINCIPAL
+    // ==========================================================
     function openPlayer(videoId) {
       document.getElementById('fallback-link').href = `https://www.youtube.com/watch?v=${videoId}`;
       document.getElementById('embed-modal').classList.add('active');
@@ -265,7 +352,7 @@
         openPlayer(ytId);
       } else if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
-        window.location.href = url;
+        openWebViewer(url);
       } else {
         if (currentMode === 'youtube') {
           searchYouTube(clean);
@@ -275,9 +362,14 @@
       }
     }
 
-    function closeModal() {
-      document.getElementById('embed-modal').classList.remove('active');
-      resetPlayerContainer();
+    function closeModal(modalId) {
+      if (modalId === 'embed-modal') {
+        resetPlayerContainer();
+      } else if (modalId === 'web-viewer-modal') {
+        const iframe = document.getElementById('web-viewer-iframe');
+        iframe.src = 'about:blank';
+      }
+      document.getElementById(modalId).classList.remove('active');
     }
 
     document.getElementById('search-form').addEventListener('submit', function (e) {
