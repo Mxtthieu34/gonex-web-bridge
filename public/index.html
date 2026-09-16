@@ -50,7 +50,7 @@
     .secret-btn:hover { background: linear-gradient(135deg, #8b5cf6, #6366f1); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
     .secret-btn .secret-icon { display: block; font-size: 1.6rem; margin-bottom: 6px; }
 
-    /* Modal Visor Web (integración) */
+    /* Modal Visor Web */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     .modal.active { display: flex; }
     .modal-header { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -147,11 +147,14 @@
     const SECRET_CODE = 'gonex2026';
 
     const SECRET_BUTTONS = [
-      { icon: '🎸', label: 'Rock Music', url: 'https://canva.link/musicaderock-2026' },
-      { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/' },
-      { icon: '🐰', label: 'BaD BUNNY', url: 'https://alligator-2b3szs.my.canva.site/' },
+      // 👇 REEMPLAZA ESTAS URLs con las URLs de inserción de Canva (las que terminan en /view?embed)
+      { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/.../view?embed' },
+      { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/.../view?embed' },
+      // 👇 Para Classroom 6x, usamos la URL original. Se abrirá en pestaña nueva por seguridad.
+      { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', external: true },
     ];
 
+    // Función para construir los botones
     function buildSecretButtons() {
       const grid = document.getElementById('secret-grid');
       grid.innerHTML = '';
@@ -160,8 +163,13 @@
         el.className = 'secret-btn';
         el.innerHTML = `<span class="secret-icon">${btn.icon}</span>${btn.label}`;
         el.addEventListener('click', () => {
-          // ✅ Abre dentro de GoNex (visor con proxy)
-          openWebViewer(btn.url);
+          // Si el botón tiene la propiedad 'external: true', lo abrimos en pestaña nueva
+          if (btn.external) {
+            window.open(btn.url, '_blank');
+          } else {
+            // Si no, lo abrimos en el visor interno
+            openWebViewer(btn.url);
+          }
         });
         grid.appendChild(el);
       });
@@ -195,17 +203,14 @@
       iframe.style.display = 'none';
       externalLink.href = url;
 
-      // Cargamos la página a través del proxy de Vercel
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
       iframe.src = proxyUrl;
 
-      // Esperamos a que cargue para ocultar el mensaje de carga
       iframe.onload = function () {
         loading.style.display = 'none';
         iframe.style.display = 'block';
       };
 
-      // Timeout de seguridad: si pasan 8 segundos y no carga, mostramos aviso
       setTimeout(() => {
         if (iframe.style.display === 'none') {
           loading.innerHTML = `
@@ -300,7 +305,6 @@
           <div class="web-url">${item.url}</div>
           <p>${item.description}</p>
         `;
-        // ✅ Resultados web también abren en el visor interno
         card.addEventListener('click', () => openWebViewer(item.url));
         container.appendChild(card);
       });
@@ -320,7 +324,6 @@
         window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank');
       } else if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
-        // ✅ URLs pegadas también abren en el visor interno
         openWebViewer(url);
       } else {
         if (currentMode === 'youtube') {
