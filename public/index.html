@@ -46,9 +46,10 @@
     .secret-close { position: absolute; top: 10px; right: 12px; background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
     .secret-close:hover { color: #ef4444; }
     .secret-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
-    .secret-btn { background: #161b26; border: 1px solid #8b5cf6; color: #f1f5f9; padding: 14px 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; text-align: center; }
+    .secret-btn { background: #161b26; border: 1px solid #8b5cf6; color: #f1f5f9; padding: 14px 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; text-align: center; position: relative; }
     .secret-btn:hover { background: linear-gradient(135deg, #8b5cf6, #6366f1); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
     .secret-btn .secret-icon { display: block; font-size: 1.6rem; margin-bottom: 6px; }
+    .secret-btn .external-badge { position: absolute; top: 4px; right: 4px; font-size: 0.6rem; background: #64748b; color: #fff; padding: 2px 5px; border-radius: 4px; }
 
     /* Modal Visor Web */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
@@ -147,27 +148,29 @@
     const SECRET_CODE = 'gonex2026';
 
     const SECRET_BUTTONS = [
-      // 👇 REEMPLAZA ESTAS URLs con las URLs de inserción de Canva (las que terminan en /view?embed)
-      { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/.../view?embed' },
-      { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/.../view?embed' },
-      // 👇 Para Classroom 6x, usamos la URL original. Se abrirá en pestaña nueva por seguridad.
+      // 👇 REEMPLAZA estas URLs con las URLs de inserción de Canva (las que terminan en /view?embed)
+      // Ejemplo: { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/DAF.../view?embed' },
+      { icon: '🎸', label: 'Rock Music', url: 'PEGA_AQUI_TU_URL_DE_INSERCION_DE_CANVA_1' },
+      { icon: '🐰', label: 'BaD BUNNY', url: 'PEGA_AQUI_TU_URL_DE_INSERCION_DE_CANVA_2' },
+      // 👇 Classroom 6x se abre en pestaña nueva porque Google Sites bloquea iframes
       { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', external: true },
     ];
 
-    // Función para construir los botones
     function buildSecretButtons() {
       const grid = document.getElementById('secret-grid');
       grid.innerHTML = '';
       SECRET_BUTTONS.forEach((btn) => {
         const el = document.createElement('button');
         el.className = 'secret-btn';
-        el.innerHTML = `<span class="secret-icon">${btn.icon}</span>${btn.label}`;
+        let badge = '';
+        if (btn.external) {
+          badge = '<span class="external-badge">↗</span>';
+        }
+        el.innerHTML = `${badge}<span class="secret-icon">${btn.icon}</span>${btn.label}`;
         el.addEventListener('click', () => {
-          // Si el botón tiene la propiedad 'external: true', lo abrimos en pestaña nueva
           if (btn.external) {
             window.open(btn.url, '_blank');
           } else {
-            // Si no, lo abrimos en el visor interno
             openWebViewer(btn.url);
           }
         });
