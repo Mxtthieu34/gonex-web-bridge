@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge - Backend Express 5 + Búsqueda de YouTube sin API Key.
+// GoNex Web Bridge - Backend Express 5 + YouTube + Tavily
 
 const express = require('express');
 const path = require('path');
@@ -8,6 +8,7 @@ const { YTubeNoAPI } = require('ytube-noapi');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
+const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 
 const publicPath = path.join(__dirname, '..', 'public');
 const youtube = new YTubeNoAPI();
@@ -23,8 +24,6 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
-  // CSP: se permite cargar el script de la API IFrame de YouTube
-  // (https://www.youtube.com/iframe_api) y los iframes de YouTube.
   res.setHeader(
     'Content-Security-Policy',
     [
@@ -34,7 +33,7 @@ app.use((req, res, next) => {
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
-      "connect-src 'self' https://www.youtube.com https://www.google.com",
+      "connect-src 'self' https://www.youtube.com https://api.tavily.com",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'"
@@ -67,12 +66,14 @@ app.use(
   })
 );
 
-// --- Endpoint de búsqueda en YouTube ---
+// ==========================================================
+// ENDPOINT: Búsqueda en YouTube
+// ==========================================================
 app.get('/api/youtube-search', async (req, res) => {
   const query = req.query.q;
 
   if (!query || typeof query !== 'string' || query.trim() === '') {
-    return res.status(400).json({ error: 'Falta el parámetro de búsqueda "q".' });
+    return res.status(400).json({ error: 'Falta el parámetro "q".' });
   }
 
   try {
@@ -92,12 +93,64 @@ app.get('/api/youtube-search', async (req, res) => {
 
     res.status(200).json({ results });
   } catch (error) {
-    console.error('[GoNex] Error en /api/youtube-search:', error.message);
-    res.status(500).json({ error: 'Error interno del servidor al buscar en YouTube.' });
+    console.error('[GoNex] Error /api/youtube-search:', error.message);
+    res.status(500).json({ error: 'Error al buscar en YouTube.' });
   }
 });
 
-// --- Wildcard SPA (Express 5) ---
+// ==========================================================
+// ENDPOINT: Búsqueda Web con Tavily
+// ==========================================================
+app.get('/api/web-search', async (req, res) => {
+  const query = req.query.q;
+
+  if (!query || typeof query !== 'string' || query.trim() === '') {
+    return res.status(400).json({ error: 'Falta el parámetro "q".' });
+  }
+
+  if (!TAVILY_API_KEY) {
+    console.error('[GoNex] TAVILY_API_KEY no configurada en Vercel.');
+    return res.status(500).json({ error: 'El servicio de búsqueda web no está configurado.' });
+  }
+
+  try {
+    const apiResponse = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: TAVILY_API_KEY,
+        query: query.trim(),
+        search_depth: 'basic',
+        max_results: 10,
+        include_answer: false,
+        include_images: false
+      })
+    });
+
+    if (!apiResponse.ok) {
+      const errText = await apiResponse.text();
+      console.error('[GoNex] Tavily error:', apiResponse.status, errText);
+      throw new Error(`Tavily respondió con estado ${apiResponse.status}`);
+    }
+
+    const data = await apiResponse.json();
+
+    const results = (data.results || []).map((item) => ({
+      title: item.title || 'Sin título',
+      url: item.url || '',
+      description: item.content || ''
+    }));
+
+    res.status(200).json({ results });
+  } catch (error) {
+    console.error('[GoNex] Error /api/web-search:', error.message);
+    res.status(500).json({ error: 'Error al buscar en la web.' });
+  }
+});
+
+// ==========================================================
+// RUTA WILDCARD (SPA) — Express 5
+// ==========================================================
 app.get('/{*splat}', (req, res, next) => {
   if (!req.accepts('html')) {
     return next();
@@ -108,20 +161,24 @@ app.get('/{*splat}', (req, res, next) => {
   });
 });
 
-// --- 404 ---
+// ==========================================================
+// 404
+// ==========================================================
 app.use((req, res) => {
   if (req.accepts('html')) {
     return res.status(404).send(
       '<!doctype html><meta charset="utf-8"><title>404</title>' +
-      '<body style="font-family:system-ui;background:#0b0f19;color:#f1f5f9;padding:40px;">' +
-      '<h1>404 - No encontrado</h1>' +
-      '<a href="/" style="color:#a855f7;">Volver al inicio</a></body>'
+        '<body style="font-family:system-ui;background:#0b0f19;color:#f1f5f9;padding:40px;">' +
+        '<h1>404 - No encontrado</h1>' +
+        '<a href="/" style="color:#a855f7;">Volver al inicio</a></body>'
     );
   }
   res.status(404).json({ error: 'Not Found', path: req.originalUrl });
 });
 
-// --- Manejador global de errores ---
+// ==========================================================
+// MANEJADOR GLOBAL DE ERRORES
+// ==========================================================
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   const status = err.status || err.statusCode || 500;
@@ -145,9 +202,9 @@ app.use((err, req, res, next) => {
   if (req.accepts('html')) {
     return res.status(status).send(
       `<!doctype html><meta charset="utf-8"><title>${status}</title>` +
-      '<body style="font-family:system-ui;background:#0b0f19;color:#f1f5f9;padding:40px;">' +
-      `<h1>${status}</h1><p>${clientMessage}</p>` +
-      '<a href="/" style="color:#a855f7;">Volver al inicio</a></body>'
+        '<body style="font-family:system-ui;background:#0b0f19;color:#f1f5f9;padding:40px;">' +
+        `<h1>${status}</h1><p>${clientMessage}</p>` +
+        '<a href="/" style="color:#a855f7;">Volver al inicio</a></body>'
     );
   }
 
@@ -157,12 +214,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-// --- Inicialización condicional ---
+// ==========================================================
+// INICIALIZACIÓN CONDICIONAL
+// ==========================================================
 if (!IS_PROD) {
   app.listen(PORT, () => {
     console.log(`GoNex Web Bridge (dev) en http://localhost:${PORT}`);
   });
 }
 
-// --- Exportación serverless ---
+// ==========================================================
+// EXPORTACIÓN SERVERLESS
+// ==========================================================
 module.exports = app;
