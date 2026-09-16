@@ -23,16 +23,18 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
+  // CSP: se permite cargar el script de la API IFrame de YouTube
+  // (https://www.youtube.com/iframe_api) y los iframes de YouTube.
   res.setHeader(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      "script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
-      "connect-src 'self'",
+      "connect-src 'self' https://www.youtube.com https://www.google.com",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'"
