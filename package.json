@@ -2,7 +2,7 @@
   "name": "gonex-web-bridge",
   "version": "1.0.0",
   "private": true,
-  "description": "Mininavegador web híbrido con búsqueda de YouTube integrada.",
+  "description": "Mininavegador web híbrido con búsqueda de YouTube, Tavily y proxy inverso.",
   "main": "src/index.js",
   "engines": {
     "node": ">=18.x"
@@ -12,14 +12,16 @@
   },
   "dependencies": {
     "express": "^5.0.0",
-    "ytube-noapi": "^1.0.0"
+    "ytube-noapi": "^1.0.0",
+    "cheerio": "^1.0.0"
   },
   "keywords": [
     "express",
     "vercel",
     "serverless",
     "youtube-search",
-    "web-bridge"
+    "web-bridge",
+    "proxy"
   ],
   "license": "MIT"
 }

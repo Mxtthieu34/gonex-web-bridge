@@ -1,9 +1,11 @@
 // src/index.js
-// GoNex Web Bridge - Backend Express 5 + YouTube + Tavily
+// GoNex Web Bridge - Backend Express 5 con Proxy Inverso
 
 const express = require('express');
 const path = require('path');
 const { YTubeNoAPI } = require('ytube-noapi');
+const cheerio = require('cheerio');
+const { URL } = require('url');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,7 +19,7 @@ const youtube = new YTubeNoAPI();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
-// --- Middleware de seguridad ---
+// --- Middleware de seguridad (para nuestra propia web) ---
 app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -145,6 +147,123 @@ app.get('/api/web-search', async (req, res) => {
   } catch (error) {
     console.error('[GoNex] Error /api/web-search:', error.message);
     res.status(500).json({ error: 'Error al buscar en la web.' });
+  }
+});
+
+// ==========================================================
+// ENDPOINT: Proxy Inverso para el Visor Web
+// ==========================================================
+app.get('/api/proxy', async (req, res) => {
+  const targetUrl = req.query.url;
+
+  if (!targetUrl || typeof targetUrl !== 'string') {
+    return res.status(400).send('Falta el parámetro "url".');
+  }
+
+  try {
+    const response = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8'
+      }
+    });
+
+    // Eliminamos las cabeceras que bloquean la incrustación en iframes
+    const headers = new Headers(response.headers);
+    headers.delete('x-frame-options');
+    headers.delete('content-security-policy');
+    headers.delete('content-security-policy-report-only');
+    headers.delete('x-content-type-options');
+
+    // Forzamos que el navegador no cachee y permita la visualización
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Cache-Control', 'no-store');
+    headers.set('X-Frame-Options', 'ALLOWALL');
+
+    const contentType = headers.get('content-type') || '';
+
+    // Si es HTML, reescribimos las URLs para que pasen por nuestro proxy
+    if (contentType.includes('text/html')) {
+      let html = await response.text();
+      const $ = cheerio.load(html);
+
+      // Reescribimos todos los enlaces <a>
+      $('a').each((i, el) => {
+        const href = $(el).attr('href');
+        if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+          try {
+            const absoluteUrl = new URL(href, targetUrl).href;
+            $(el).attr('href', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
+            $(el).attr('target', '_self');
+          } catch (e) { /* Ignorar URLs inválidas */ }
+        }
+      });
+
+      // Reescribimos los recursos (CSS, JS, imágenes)
+      $('link[rel="stylesheet"]').each((i, el) => {
+        const href = $(el).attr('href');
+        if (href) {
+          try {
+            const absoluteUrl = new URL(href, targetUrl).href;
+            $(el).attr('href', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
+          } catch (e) {}
+        }
+      });
+
+      $('script[src]').each((i, el) => {
+        const src = $(el).attr('src');
+        if (src) {
+          try {
+            const absoluteUrl = new URL(src, targetUrl).href;
+            $(el).attr('src', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
+          } catch (e) {}
+        }
+      });
+
+      $('img[src]').each((i, el) => {
+        const src = $(el).attr('src');
+        if (src) {
+          try {
+            const absoluteUrl = new URL(src, targetUrl).href;
+            $(el).attr('src', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
+          } catch (e) {}
+        }
+      });
+
+      // Reescribimos los formularios
+      $('form').each((i, el) => {
+        const action = $(el).attr('action');
+        if (action) {
+          try {
+            const absoluteUrl = new URL(action, targetUrl).href;
+            $(el).attr('action', `/api/proxy?url=${encodeURIComponent(absoluteUrl)}`);
+          } catch (e) {}
+        }
+      });
+
+      // Inyectamos un pequeño script para que los enlaces se abran en el iframe
+      $('head').append(`
+        <base target="_self">
+        <style>
+          a, form, button { cursor: pointer !important; }
+        </style>
+      `);
+
+      html = $.html();
+
+      res.set('Content-Type', 'text/html; charset=utf-8');
+      res.send(html);
+    } else {
+      // Para otros recursos (CSS, JS, imágenes), los servimos tal cual
+      const buffer = await response.arrayBuffer();
+      res.set(headers);
+      res.send(Buffer.from(buffer));
+    }
+
+  } catch (error) {
+    console.error('[GoNex] Error en /api/proxy:', error.message);
+    res.status(500).send('Error al cargar la página a través del proxy.');
   }
 });
 

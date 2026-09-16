@@ -38,6 +38,16 @@
     .filter-btn { background: #161b26; border: 1px solid #2d3748; color: #94a3b8; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
     .filter-btn.active { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; border-color: transparent; }
     .filter-btn:hover:not(.active) { border-color: #8b5cf6; color: #fff; }
+
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .modal.active { display: flex; }
+    .modal-header { width: 100%; max-width: 850px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .btn-close { background: #2d3748; border: none; color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-close:hover { background: #ef4444; }
+
+    .web-viewer-wrapper { width: 100%; max-width: 850px; height: 75vh; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
+    .web-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
+    .web-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; }
   </style>
 </head>
 <body>
@@ -65,10 +75,10 @@
       <div class="title">Web Search</div>
       <div class="badge">TAVILY</div>
     </div>
-    <div class="card" onclick="rickroll()">
+    <div class="card" onclick="setMode('youtube'); handleInput('musica')">
       <div class="icon">📺</div>
       <div class="title">YouTube</div>
-      <div class="badge">🎭 TROLL</div>
+      <div class="badge">VIDEOS</div>
     </div>
     <div class="card" onclick="handleInput('https://classroom.google.com')">
       <div class="icon">🏫</div>
@@ -84,10 +94,26 @@
 
   <div id="results-container" class="results-container"></div>
 
+  <!-- Modal Visor Web con Proxy -->
+  <div id="web-viewer-modal" class="modal">
+    <div class="modal-header">
+      <span>Visor GoNex</span>
+      <div>
+        <button class="btn-close" onclick="closeModal('web-viewer-modal')">Cerrar ✕</button>
+      </div>
+    </div>
+    <div class="web-viewer-wrapper" id="web-viewer-wrapper">
+      <div id="web-viewer-loading" class="web-viewer-loading">
+        <p>Cargando página...</p>
+      </div>
+      <iframe id="web-viewer-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
+    </div>
+    <p class="web-viewer-fallback" style="margin-top: 12px; text-align: center; color: #64748b; font-size: 0.8rem;">
+      <a id="web-viewer-fallback-link" href="#" target="_blank" style="color: #a855f7; text-decoration: none;">Abrir en pestaña nueva ↗</a>
+    </p>
+  </div>
+
   <script>
-    // ==========================================================
-    // MODO ACTIVO: 'web' (por defecto) o 'youtube'
-    // ==========================================================
     var currentMode = 'web';
 
     function setMode(mode) {
@@ -97,24 +123,11 @@
       });
     }
 
-    // ==========================================================
-    // 🎭 TROLL: Rickroll
-    // ==========================================================
-    function rickroll() {
-      window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank');
-    }
-
-    // ==========================================================
-    // UTILIDADES
-    // ==========================================================
     function extractYouTubeId(url) {
       const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
       return match ? match[1] : null;
     }
 
-    // ==========================================================
-    // BÚSQUEDA EN YOUTUBE
-    // ==========================================================
     async function searchYouTube(query) {
       const container = document.getElementById('results-container');
       container.innerHTML = '<p style="color:#94a3b8;">Buscando en YouTube...</p>';
@@ -150,9 +163,6 @@
       });
     }
 
-    // ==========================================================
-    // BÚSQUEDA WEB (TAVILY)
-    // ==========================================================
     async function searchWeb(query) {
       const container = document.getElementById('results-container');
       container.innerHTML = '<p style="color:#94a3b8;">Buscando en la web...</p>';
@@ -185,36 +195,58 @@
           <div class="web-url">${item.url}</div>
           <p>${item.description}</p>
         `;
-        // ✅ Abre en pestaña nueva (sin iframe)
-        card.addEventListener('click', () => {
-          window.open(item.url, '_blank');
-        });
+        card.addEventListener('click', () => openWebViewer(item.url));
         container.appendChild(card);
       });
     }
 
     // ==========================================================
-    // FLUJO PRINCIPAL
+    // VISOR WEB CON PROXY INVERSO
     // ==========================================================
+    function openWebViewer(url) {
+      const iframe = document.getElementById('web-viewer-iframe');
+      const loading = document.getElementById('web-viewer-loading');
+      const fallbackLink = document.getElementById('web-viewer-fallback-link');
+
+      document.getElementById('web-viewer-modal').classList.add('active');
+      loading.style.display = 'flex';
+      iframe.style.display = 'none';
+      fallbackLink.href = url;
+
+      // Usamos nuestro proxy para cargar la página
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
+      iframe.src = proxyUrl;
+
+      iframe.onload = function() {
+        loading.style.display = 'none';
+        iframe.style.display = 'block';
+      };
+    }
+
     function handleInput(input) {
       const clean = input.trim();
       const ytId = extractYouTubeId(clean);
 
       if (ytId) {
-        // URL de YouTube → abre en pestaña nueva
         window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank');
       } else if (clean.includes('.') && !clean.includes(' ')) {
-        // URL genérica → abre en pestaña nueva
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
-        window.open(url, '_blank');
+        openWebViewer(url);
       } else {
-        // Texto → según modo activo
         if (currentMode === 'youtube') {
           searchYouTube(clean);
         } else {
           searchWeb(clean);
         }
       }
+    }
+
+    function closeModal(modalId) {
+      if (modalId === 'web-viewer-modal') {
+        const iframe = document.getElementById('web-viewer-iframe');
+        iframe.src = 'about:blank';
+      }
+      document.getElementById(modalId).classList.remove('active');
     }
 
     document.getElementById('search-form').addEventListener('submit', function (e) {
