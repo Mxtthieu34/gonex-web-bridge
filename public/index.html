@@ -34,8 +34,7 @@
     .btn-close { background: #2d3748; border: none; color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn-close:hover { background: #ef4444; }
 
-    /* Contenedor del reproductor de YouTube */
-    .player-wrapper { width: 100%; max-width: 850px; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; }
+    .player-wrapper { width: 100%; max-width: 850px; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
     .player-wrapper iframe { width: 100%; height: 100%; border: none; }
     #yt-player { width: 100%; height: 100%; }
 
@@ -92,8 +91,7 @@
         <button class="btn-close" onclick="closeModal()">Cerrar ✕</button>
       </div>
     </div>
-    <div class="player-wrapper">
-      <!-- Aquí se inyecta el player de YouTube IFrame API -->
+    <div class="player-wrapper" id="player-wrapper">
       <div id="yt-player"></div>
     </div>
     <p class="player-fallback">
@@ -103,21 +101,21 @@
 
   <script>
     // ==========================================================
-    // 1. YOUTUBE IFRAME PLAYER API - CARGA DEL SCRIPT OFICIAL
+    // 1. YOUTUBE IFRAME PLAYER API
     // ==========================================================
     var ytPlayer = null;
     var ytApiReady = false;
     var pendingVideoId = null;
 
-    // Callback global que YouTube llama cuando el script está listo.
     window.onYouTubeIframeAPIReady = function () {
       ytApiReady = true;
       if (pendingVideoId) {
-        createOrLoadPlayer(pendingVideoId);
+        var id = pendingVideoId;
+        pendingVideoId = null;
+        createPlayer(id);
       }
     };
 
-    // Carga el script oficial de YouTube de forma asíncrona.
     (function loadYouTubeApi() {
       var tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -126,22 +124,28 @@
     })();
 
     // ==========================================================
-    // 2. CREACIÓN / ACTUALIZACIÓN DEL PLAYER
+    // 2. GESTIÓN DEL REPRODUCTOR
     // ==========================================================
-    function createOrLoadPlayer(videoId) {
-      // Si el player ya existe, solo cambiamos el video (más rápido).
-      if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-        ytPlayer.loadVideoById(videoId);
-        return;
+    // Destruye el player anterior y recrea el contenedor.
+    // Esto fuerza a YouTube a cargar SIEMPRE el video correcto.
+    function resetPlayerContainer() {
+      if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+        try { ytPlayer.destroy(); } catch (e) { /* ignorar */ }
       }
+      ytPlayer = null;
 
-      // Si el API aún no está listo, guardamos el video y esperamos.
+      var wrapper = document.getElementById('player-wrapper');
+      wrapper.innerHTML = '<div id="yt-player"></div>';
+    }
+
+    function createPlayer(videoId) {
       if (!ytApiReady) {
         pendingVideoId = videoId;
         return;
       }
 
-      // Creamos el player desde cero.
+      resetPlayerContainer();
+
       ytPlayer = new YT.Player('yt-player', {
         height: '100%',
         width: '100%',
@@ -161,7 +165,7 @@
     }
 
     // ==========================================================
-    // 3. UTILIDADES
+    // 3. UTILIDADES Y FLUJO
     // ==========================================================
     function extractYouTubeId(url) {
       const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
@@ -207,7 +211,7 @@
     function openPlayer(videoId) {
       document.getElementById('fallback-link').href = `https://www.youtube.com/watch?v=${videoId}`;
       document.getElementById('embed-modal').classList.add('active');
-      createOrLoadPlayer(videoId);
+      createPlayer(videoId);
     }
 
     function handleInput(input) {
@@ -225,10 +229,9 @@
     }
 
     function closeModal() {
-      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-        ytPlayer.stopVideo();
-      }
       document.getElementById('embed-modal').classList.remove('active');
+      // Destruye el player al cerrar para liberar recursos
+      resetPlayerContainer();
     }
 
     document.getElementById('search-form').addEventListener('submit', function (e) {
