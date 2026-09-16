@@ -32,56 +32,22 @@
     .modal.active { display: flex; }
     .modal-header { width: 100%; max-width: 850px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .btn-close { background: #2d3748; border: none; color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+    .btn-close:hover { background: #ef4444; }
 
-    .iframe-wrapper { width: 100%; max-width: 850px; height: 480px; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; }
-    .iframe-wrapper iframe { width: 100%; height: 100%; border: none; }
+    /* Contenedor del reproductor de YouTube */
+    .player-wrapper { width: 100%; max-width: 850px; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; }
+    .player-wrapper iframe { width: 100%; height: 100%; border: none; }
+    #yt-player { width: 100%; height: 100%; }
 
-    /* Tarjeta de redirección (alternativa al iframe cuando la red lo bloquea) */
-    .redirect-card {
-      width: 100%;
-      max-width: 500px;
-      background: #161b26;
-      border: 1px solid #2d3748;
-      border-radius: 16px;
-      padding: 30px;
+    .player-fallback {
+      margin-top: 12px;
       text-align: center;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    }
-    .redirect-card img {
-      width: 100%;
-      max-width: 320px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-    .redirect-card h3 {
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-      line-height: 1.4;
-    }
-    .redirect-card p {
-      color: #94a3b8;
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-    }
-    .btn-open-youtube {
-      display: inline-block;
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: #fff;
-      text-decoration: none;
-      padding: 14px 32px;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 1rem;
-      transition: opacity 0.2s;
-    }
-    .btn-open-youtube:hover {
-      opacity: 0.9;
-    }
-    .redirect-note {
-      margin-top: 20px;
-      font-size: 0.75rem;
       color: #64748b;
-      line-height: 1.5;
+      font-size: 0.8rem;
+    }
+    .player-fallback a {
+      color: #a855f7;
+      text-decoration: none;
     }
   </style>
 </head>
@@ -126,35 +92,77 @@
         <button class="btn-close" onclick="closeModal()">Cerrar ✕</button>
       </div>
     </div>
-
-    <!-- Tarjeta de redirección (se muestra por defecto) -->
-    <div id="redirect-card" class="redirect-card">
-      <img id="redirect-thumbnail" src="" alt="Miniatura del video" />
-      <h3 id="redirect-title">Título del video</h3>
-      <p id="redirect-channel">Canal</p>
-      <a id="redirect-link" href="#" target="_blank" class="btn-open-youtube">
-        ▶ Abrir en YouTube
-      </a>
-      <p class="redirect-note">
-        Si el reproductor no carga en tu red, este botón abre el video directamente en YouTube.
-      </p>
+    <div class="player-wrapper">
+      <!-- Aquí se inyecta el player de YouTube IFrame API -->
+      <div id="yt-player"></div>
     </div>
-
-    <!-- IFrame (oculto por defecto, se activa si quieres el modo integrado) -->
-    <div id="iframe-container" class="iframe-wrapper" style="display:none;">
-      <iframe
-        id="embed-iframe"
-        src=""
-        title="Reproductor de YouTube"
-        frameborder="0"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowfullscreen>
-      </iframe>
-    </div>
+    <p class="player-fallback">
+      ¿No carga? <a id="fallback-link" href="#" target="_blank">Abrir en YouTube ↗</a>
+    </p>
   </div>
 
   <script>
+    // ==========================================================
+    // 1. YOUTUBE IFRAME PLAYER API - CARGA DEL SCRIPT OFICIAL
+    // ==========================================================
+    var ytPlayer = null;
+    var ytApiReady = false;
+    var pendingVideoId = null;
+
+    // Callback global que YouTube llama cuando el script está listo.
+    window.onYouTubeIframeAPIReady = function () {
+      ytApiReady = true;
+      if (pendingVideoId) {
+        createOrLoadPlayer(pendingVideoId);
+      }
+    };
+
+    // Carga el script oficial de YouTube de forma asíncrona.
+    (function loadYouTubeApi() {
+      var tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    })();
+
+    // ==========================================================
+    // 2. CREACIÓN / ACTUALIZACIÓN DEL PLAYER
+    // ==========================================================
+    function createOrLoadPlayer(videoId) {
+      // Si el player ya existe, solo cambiamos el video (más rápido).
+      if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+        ytPlayer.loadVideoById(videoId);
+        return;
+      }
+
+      // Si el API aún no está listo, guardamos el video y esperamos.
+      if (!ytApiReady) {
+        pendingVideoId = videoId;
+        return;
+      }
+
+      // Creamos el player desde cero.
+      ytPlayer = new YT.Player('yt-player', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+          autoplay: 1,
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1
+        },
+        events: {
+          onReady: function (event) {
+            event.target.playVideo();
+          }
+        }
+      });
+    }
+
+    // ==========================================================
+    // 3. UTILIDADES
+    // ==========================================================
     function extractYouTubeId(url) {
       const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
       return match ? match[1] : null;
@@ -174,21 +182,6 @@
       }
     }
 
-    function showRedirectCard(video) {
-      // Actualiza la tarjeta con los datos del video
-      document.getElementById('redirect-thumbnail').src = video.thumbnail;
-      document.getElementById('redirect-title').innerText = video.title;
-      document.getElementById('redirect-channel').innerText = video.channelTitle;
-      document.getElementById('redirect-link').href = `https://www.youtube.com/watch?v=${video.videoId}`;
-
-      // Muestra la tarjeta, oculta el iframe
-      document.getElementById('redirect-card').style.display = 'block';
-      document.getElementById('iframe-container').style.display = 'none';
-
-      // Abre el modal
-      document.getElementById('embed-modal').classList.add('active');
-    }
-
     function displayYouTubeResults(results) {
       const container = document.getElementById('results-container');
       container.innerHTML = '';
@@ -206,9 +199,15 @@
           <h3>${video.title}</h3>
           <p>${video.channelTitle}</p>
         `;
-        card.addEventListener('click', () => showRedirectCard(video));
+        card.addEventListener('click', () => openPlayer(video.videoId));
         container.appendChild(card);
       });
+    }
+
+    function openPlayer(videoId) {
+      document.getElementById('fallback-link').href = `https://www.youtube.com/watch?v=${videoId}`;
+      document.getElementById('embed-modal').classList.add('active');
+      createOrLoadPlayer(videoId);
     }
 
     function handleInput(input) {
@@ -216,12 +215,7 @@
       const ytId = extractYouTubeId(clean);
 
       if (ytId) {
-        showRedirectCard({
-          videoId: ytId,
-          title: 'Video de YouTube',
-          thumbnail: `https://i.ytimg.com/vi/${ytId}/mqdefault.jpg`,
-          channelTitle: 'YouTube'
-        });
+        openPlayer(ytId);
       } else if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
         window.location.href = url;
@@ -231,7 +225,9 @@
     }
 
     function closeModal() {
-      document.getElementById('embed-iframe').src = '';
+      if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+        ytPlayer.stopVideo();
+      }
       document.getElementById('embed-modal').classList.remove('active');
     }
 
