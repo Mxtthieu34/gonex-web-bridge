@@ -1,734 +1,304 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>GoNex Web Bridge</title>
-
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    /* Estilos Premium UI (Completos y Corregidos) */
+    :root {
+      --bg: #0b0f19;
+      --surface: #111827;
+      --surface-2: #151d2e;
+      --surface-3: #1b2538;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --purple: #8b5cf6;
+      --blue: #6366f1;
+      --radius: 12px;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    button, input { font: inherit; outline: none; border: none; }
+    button { background: transparent; cursor: pointer; color: inherit; }
+    input { width: 100%; color: var(--text); }
 
-    body {
-      background:
-        radial-gradient(circle at top, rgba(99,102,241,.12), transparent 35%),
-        #0b0f19;
-      color: #f1f5f9;
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
+    /* Estructura de la APP */
+    .app { width: 100%; height: 100vh; display: flex; flex-direction: column; }
 
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
-    }
+    /* Barra Superior */
+    .topbar { height: 52px; display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-bottom: 1px solid var(--border); background: rgba(11, 15, 25, 0.94); backdrop-filter: blur(18px); flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand-icon { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: linear-gradient(135deg, var(--purple), var(--blue)); box-shadow: 0 5px 20px rgba(139, 92, 246, 0.25); }
+    .nav-controls { display: flex; gap: 3px; }
+    .icon-btn { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; color: var(--muted); transition: all 0.15s ease; }
+    .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+    .icon-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    .logo {
-      font-size: 2.8rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #a855f7, #6366f1);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
+    /* Barra de Dirección */
+    .address-wrapper { flex: 1; max-width: 900px; margin: auto; }
+    .address-bar { height: 36px; display: flex; align-items: center; gap: 9px; padding: 0 13px; border: 1px solid var(--border); border-radius: 18px; background: rgba(17, 24, 39, 0.92); transition: all 0.2s ease; }
+    .address-bar:focus-within { border-color: rgba(139, 92, 246, 0.55); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.08); }
+    .go-btn { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--blue)); }
 
-    .subtitle {
-      color: #64748b;
-      margin-top: 6px;
-      font-size: .9rem;
-    }
+    /* Sistema de Pestañas */
+    .tabs-bar { height: 43px; display: flex; align-items: flex-end; gap: 3px; padding: 5px 9px 0; background: #0d1320; border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; }
+    .tabs-bar::-webkit-scrollbar { height: 3px; }
+    .tabs-bar::-webkit-scrollbar-thumb { background: #273248; border-radius: 10px; }
+    .tab { height: 38px; min-width: 145px; max-width: 220px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid transparent; border-bottom: 0; border-radius: 10px 10px 0 0; color: var(--muted); cursor: pointer; user-select: none; transition: background 0.15s ease; }
+    .tab:hover { background: var(--surface-2); }
+    .tab.active { background: var(--surface); border-color: var(--border); color: var(--text); }
+    .tab-title { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; }
+    .tab-close { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); }
+    .tab-close:hover { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    .new-tab { width: 34px; height: 34px; margin-bottom: 2px; display: grid; place-items: center; border-radius: 8px; color: var(--muted); }
+    .new-tab:hover { background: var(--surface-2); color: var(--text); }
 
-    .search-container {
-      width: 100%;
-      max-width: 720px;
-      margin: 0 auto 28px;
-    }
+    /* Barra de Marcadores */
+    .bookmarks { min-height: 40px; display: flex; items-center: center; gap: 7px; padding: 4px 12px; overflow-x: auto; background: #0d1320; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .bookmark { height: 30px; display: flex; items-center: center; gap: 7px; padding: 0 10px; border-radius: 7px; background: transparent; color: var(--muted); font-size: 12px; white-space: nowrap; transition: background 0.15s ease; }
+    .bookmark:hover { background: var(--surface-2); border-color: var(--border); color: var(--text); }
 
-    .search-box {
-      display: flex;
-      gap: 10px;
-      background: rgba(22,27,38,.95);
-      padding: 8px;
-      border: 1px solid #2d3748;
-      border-radius: 14px;
-      box-shadow: 0 15px 50px rgba(0,0,0,.25);
-    }
+    /* Contenido */
+    .content { position: relative; flex: 1; min-height: 0; background: #080c14; }
+    .page { position: absolute; inset: 0; display: none; background: #080c14; }
+    .page.active { display: block; }
+    iframe { width: 100%; height: 100%; display: block; border: 0; background: #fff; }
 
-    .search-box input {
-      flex: 1;
-      min-width: 0;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: white;
-      padding: 12px 14px;
-      font-size: 1rem;
-    }
-
-    .search-box input::placeholder {
-      color: #64748b;
-    }
-
-    .search-box button {
-      border: none;
-      color: white;
-      padding: 11px 22px;
-      border-radius: 9px;
-      font-weight: 700;
-      cursor: pointer;
-      background: linear-gradient(135deg, #8b5cf6, #6366f1);
-      transition: .2s;
-    }
-
-    .search-box button:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.1);
-    }
-
-    .grid {
-      width: 100%;
-      max-width: 720px;
-      margin: auto;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: rgba(22,27,38,.92);
-      border: 1px solid #2d3748;
-      border-radius: 14px;
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: .2s;
-    }
-
-    .card:hover {
-      border-color: #8b5cf6;
-      transform: translateY(-3px);
-      box-shadow: 0 12px 35px rgba(99,102,241,.12);
-    }
-
-    .icon {
-      font-size: 2rem;
-      margin-bottom: 9px;
-    }
-
-    .title {
-      font-size: .95rem;
-      font-weight: 700;
-    }
-
-    .badge {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: .65rem;
-      font-weight: 700;
-      color: #a855f7;
-      background: rgba(139,92,246,.14);
-    }
-
-    /* MODAL */
-
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      background: rgba(5,8,15,.94);
-      backdrop-filter: blur(10px);
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      width: 100%;
-      max-width: 900px;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 15px;
-    }
-
-    .modal-title {
-      font-weight: 700;
-      color: #f8fafc;
-    }
-
-    .modal-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .external-link {
-      color: #a855f7;
-      text-decoration: none;
-      font-size: .85rem;
-      font-weight: 600;
-    }
-
-    .btn-close {
-      border: none;
-      background: #252d3d;
-      color: white;
-      padding: 8px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .iframe-wrapper {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border: 1px solid #2d3748;
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .iframe-wrapper iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    /* FALLBACK */
-
-    .fallback-card {
-      width: 100%;
-      max-width: 480px;
-      background: #161b26;
-      border: 1px solid #2d3748;
-      border-radius: 18px;
-      padding: 35px;
-      text-align: center;
-      box-shadow: 0 25px 80px rgba(0,0,0,.45);
-    }
-
-    .fallback-icon {
-      font-size: 3rem;
-      margin-bottom: 15px;
-    }
-
-    .fallback-card h2 {
-      margin-bottom: 10px;
-    }
-
-    .fallback-card p {
-      color: #94a3b8;
-      line-height: 1.6;
-      font-size: .9rem;
-    }
-
-    .open-button {
-      display: inline-block;
-      margin-top: 22px;
-      padding: 12px 24px;
-      border-radius: 9px;
-      color: white;
-      text-decoration: none;
-      font-weight: 700;
-      background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    }
-
-    .back-button {
-      margin-top: 12px;
-      border: none;
-      background: #252d3d;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 9px;
-      cursor: pointer;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 25px 14px;
-      }
-
-      .logo {
-        font-size: 2.2rem;
-      }
-
-      .search-box {
-        flex-direction: column;
-      }
-
-      .search-box button {
-        width: 100%;
-      }
-
-      .modal-header {
-        align-items: flex-start;
-      }
-    }
+    /* Fallback UI (Interfaz Oscura Corregida) */
+    .fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 25px; background: #080c14; }
+    .fallback-card { width: min(500px, 100%); padding: 32px; text-align: center; border: 1px solid var(--border); border-radius: 18px; background: rgba(17, 24, 39, 0.86); }
+    .fallback-icon { width: 58px; height: 58px; margin: 0 auto 18px; display: grid; place-items: center; border-radius: 16px; background: rgba(139, 92, 246, 0.12); color: #a78bfa; font-size: 25px; }
+    .fallback-title { font-size: 20px; font-weight: 800; margin-bottom: 9px; }
+    .fallback-text { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+    .fallback-url { max-width: 100%; margin-bottom: 20px; padding: 9px 12px; border-radius: 8px; background: #0b101b; color: #818cf8; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .primary-btn { height: 40px; padding: 0 18px; border-radius: 9px; background: linear-gradient(135deg, var(--purple), var(--blue)); color: white; font-weight: 700; }
   </style>
-
 </head>
-
 <body>
-
-  <header class="header">
-    <div class="logo">🟣 GoNex Bridge</div>
-    <div class="subtitle">
-      Lanzador inteligente y navegación web
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">G</div>
+        <span class="brand-name">GoNex</span>
+      </div>
+      <div class="nav-controls">
+        <button class="icon-btn" id="backBtn" disabled title="Atrás">←</button>
+        <button class="icon-btn" id="forwardBtn" disabled title="Adelante">→</button>
+        <button class="icon-btn" id="reloadBtn" title="Recargar">↻</button>
+      </div>
+      <form class="address-wrapper" id="navigationForm">
+        <div class="address-bar">
+          <input id="addressInput" type="text" placeholder="URL o búsqueda..." />
+          <button type="submit" class="go-btn">🚀</button>
+        </div>
+      </form>
+    </header>
+    <div class="tabs-bar" id="tabsBar">
+      <button class="new-tab" id="newTabBtn" title="Nueva Pestaña">+</button>
     </div>
-  </header>
-
-  <main>
-
-```
-<div class="search-container">
-  <form id="search-form" class="search-box">
-    <input
-      id="search-input"
-      type="text"
-      placeholder="Busca en Google o pega una URL..."
-      autocomplete="off"
-      required
-    >
-    <button type="submit">Navegar</button>
-  </form>
-</div>
-
-<div class="grid">
-
-  <div class="card" onclick="handleInput('https://www.youtube.com')">
-    <div class="icon">📺</div>
-    <div class="title">YouTube</div>
-    <div class="badge">FALLBACK</div>
+    <nav class="bookmarks">
+      <button class="bookmark" onclick="navigate('google.com')">Google Sandbox</button>
+      <button class="bookmark" onclick="navigate('piped.video')">❤️ YouTube (Espejo)</button>
+      <button class="bookmark" onclick="navigate('wikipedia.org')">W Wikipedia</button>
+    </nav>
+    <main class="content" id="content">
+      <!-- Las páginas de pestañas se cargarán aquí dinámicamente -->
+    </main>
   </div>
-
-  <div class="card" onclick="handleInput('https://classroom.google.com')">
-    <div class="icon">🏫</div>
-    <div class="title">Classroom</div>
-    <div class="badge">FALLBACK</div>
-  </div>
-
-  <div class="card" onclick="handleInput('https://www.google.com')">
-    <div class="icon">🔍</div>
-    <div class="title">Google</div>
-    <div class="badge">FALLBACK</div>
-  </div>
-
-  <div class="card" onclick="handleInput('https://www.youtube.com/watch?v=dQw4w9WgXcQ')">
-    <div class="icon">▶️</div>
-    <div class="title">Video YouTube</div>
-    <div class="badge">EMBED</div>
-  </div>
-
-</div>
-```
-
-  </main>
-
-  <!-- YOUTUBE EMBED -->
-
-  <div id="embed-modal" class="modal">
-
-```
-<div class="modal-content">
-
-  <div class="modal-header">
-
-    <div class="modal-title">
-      Reproductor GoNex
-    </div>
-
-    <div class="modal-actions">
-
-      <a
-        id="youtube-direct"
-        class="external-link"
-        href="#"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Abrir YouTube ↗
-      </a>
-
-      <button
-        class="btn-close"
-        onclick="closeEmbed()"
-      >
-        Cerrar ✕
-      </button>
-
-    </div>
-
-  </div>
-
-  <div class="iframe-wrapper">
-
-    <iframe
-      id="youtube-frame"
-      title="Reproductor YouTube"
-      referrerpolicy="strict-origin-when-cross-origin"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowfullscreen>
-    </iframe>
-
-  </div>
-
-</div>
-```
-
-  </div>
-
-  <!-- FALLBACK -->
-
-  <div id="fallback-modal" class="modal">
-
-```
-<div class="fallback-card">
-
-  <div class="fallback-icon">🌐</div>
-
-  <h2>Sitio externo</h2>
-
-  <p>
-    Este sitio no permite ser mostrado dentro de un iframe.
-    GoNex puede detectar esta restricción y enviarte directamente
-    al sitio original.
-  </p>
-
-  <a
-    id="fallback-link"
-    class="open-button"
-    href="#"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    Abrir sitio ↗
-  </a>
-
-  <br>
-
-  <button
-    class="back-button"
-    onclick="closeFallback()"
-  >
-    Volver
-  </button>
-
-</div>
-```
-
-  </div>
-
   <script>
+    /* ==========================================
+     * GoNex Web Bridge JavaScript (Completado y Corregido)
+     * ========================================== */
+    const state = { tabs: [], activeTabId: null, nextTabId: 1 };
+    const elements = {
+      tabsBar: document.getElementById("tabsBar"),
+      content: document.getElementById("content"),
+      addressInput: document.getElementById("addressInput"),
+      navigationForm: document.getElementById("navigationForm"),
+      backBtn: document.getElementById("backBtn"),
+      forwardBtn: document.getElementById("forwardBtn"),
+      newTabBtn: document.getElementById("newTabBtn"),
+    };
 
-    /*
-     * DOMINIOS QUE NO INTENTAMOS CARGAR EN IFRAME
-     */
-
-    const protectedDomains = [
-      "youtube.com",
-      "www.youtube.com",
-      "google.com",
-      "www.google.com",
-      "classroom.google.com"
-    ];
-
-    /*
-     * EXTRAER ID DE YOUTUBE
-     */
-
-    function extractYouTubeId(input) {
-
-      try {
-
-        const url = new URL(input);
-
-        const hostname = url.hostname.toLowerCase();
-
-        /*
-         * youtube.com/watch?v=XXXXXXXXXXX
-         */
-
-        if (
-          hostname === "youtube.com" ||
-          hostname === "www.youtube.com" ||
-          hostname === "m.youtube.com"
-        ) {
-
-          if (url.pathname === "/watch") {
-
-            return url.searchParams.get("v");
-
-          }
-
-          /*
-           * /shorts/ID
-           */
-
-          if (url.pathname.startsWith("/shorts/")) {
-
-            return url.pathname.split("/")[2];
-
-          }
-
-          /*
-           * /embed/ID
-           */
-
-          if (url.pathname.startsWith("/embed/")) {
-
-            return url.pathname.split("/")[2];
-
-          }
-
-        }
-
-        /*
-         * youtu.be/ID
-         */
-
-        if (hostname === "youtu.be") {
-
-          return url.pathname.substring(1).split("/")[0];
-
-        }
-
-      } catch (error) {
-
-        return null;
-
-      }
-
-      return null;
-
-    }
-
-    /*
-     * COMPROBAR SI ES UN DOMINIO PROTEGIDO
-     */
-
-    function isProtectedDomain(input) {
-
-      try {
-
-        const url = new URL(input);
-
-        const hostname = url.hostname.toLowerCase();
-
-        return protectedDomains.some(domain =>
-          hostname === domain ||
-          hostname.endsWith("." + domain)
-        );
-
-      } catch {
-
-        return false;
-
-      }
-
-    }
-
-    /*
-     * NORMALIZAR URL
-     */
-
+    // ==========================================
+    // URL ENRUTADOR INTELIGENTE (LA MEJOR LÓGICA)
+    // ==========================================
     function normalizeInput(input) {
+      const value = input.trim();
+      if (/^https?:\/\//i.test(value)) return value;
+      if (/^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(value)) return `https://${value}`;
+      return `https://www.google.com/search?q=${encodeURIComponent(value)}`;
+    }
 
-      let value = input.trim();
+    function extractYouTubeId(url) {
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname.includes("youtube.com") && parsed.pathname === "/watch") return parsed.searchParams.get("v");
+        if (parsed.hostname === "youtu.be") return parsed.pathname.slice(1).split("/")[0];
+        if (parsed.hostname.includes("youtube.com") && parsed.pathname.startsWith("/shorts/")) return parsed.pathname.split("/")[2]?.split("?")[0];
+      } catch (e) { return null; }
+      return null;
+    }
 
-      if (!value) return null;
+    function getNavigationTarget(inputUrl) {
+      const url = normalizeInput(inputUrl);
+      const ytId = extractYouTubeId(url);
 
-      /*
-       * Si parece una URL sin protocolo
-       */
-
-      if (
-        !value.startsWith("http://") &&
-        !value.startsWith("https://")
-      ) {
-
-        /*
-         * Dominio
-         */
-
-        if (
-          value.includes(".") &&
-          !value.includes(" ")
-        ) {
-
-          value = "https://" + value;
-
-        } else {
-
-          /*
-           * Búsqueda Google
-           */
-
-          return "https://www.google.com/search?q=" +
-            encodeURIComponent(value);
-
-        }
-
+      // 1. Transformación NATIVA para videos de YouTube (nocookie embed es lo mejor)
+      if (ytId) {
+        return { type: "iframe", url: `https://www.youtube-nocookie.com/embed/${ytId}`, title: "YouTube Video" };
       }
 
-      return value;
-
-    }
-
-    /*
-     * ABRIR FALLBACK
-     */
-
-    function openFallback(url) {
-
-      document.getElementById("fallback-link").href = url;
-
-      document
-        .getElementById("fallback-modal")
-        .classList.add("active");
-
-    }
-
-    /*
-     * PROCESADOR PRINCIPAL
-     */
-
-    function handleInput(input) {
-
-      const targetUrl = normalizeInput(input);
-
-      if (!targetUrl) return;
-
-      /*
-       * 1. DETECTAR VIDEO YOUTUBE
-       *
-       * Los videos individuales sí pueden utilizar
-       * el endpoint oficial /embed/.
-       */
-
-      const youtubeId = extractYouTubeId(targetUrl);
-
-      if (youtubeId && youtubeId.length === 11) {
-
-        const embedUrl =
-          "https://www.youtube-nocookie.com/embed/" +
-          encodeURIComponent(youtubeId) +
-          "?rel=0";
-
-        document.getElementById("youtube-frame").src = embedUrl;
-
-        document.getElementById("youtube-direct").href =
-          "https://www.youtube.com/watch?v=" +
-          encodeURIComponent(youtubeId);
-
-        document
-          .getElementById("embed-modal")
-          .classList.add("active");
-
-        return;
-
+      // 2. Intercepción inteligente para sitios web restrictivos (YouTube/Google portadas)
+      if (url.includes('youtube.com') || url.toLowerCase() === 'youtube') {
+        return { type: "iframe", url: 'https://piped.video', title: "YouTube Mirror" };
+      }
+      if (url.includes('google.com') || url.toLowerCase() === 'google') {
+        return { type: "iframe", url: 'https://html.duckduckgo.com/html/', title: "DuckDuckGo (Search)" };
       }
 
-      /*
-       * 2. YOUTUBE PORTADA
-       *
-       * NO intentamos iframe.
-       */
-
-      if (isProtectedDomain(targetUrl)) {
-
-        openFallback(targetUrl);
-
-        return;
-
-      }
-
-      /*
-       * 3. OTROS SITIOS
-       *
-       * Por seguridad y compatibilidad, actualmente
-       * también utilizamos fallback para sitios externos.
-       */
-
-      openFallback(targetUrl);
-
+      // 3. LA SOLUCIÓN DEFINITIVA: Interceptar todas las demás URLs usando tu propio backend PROXY
+      return { type: "proxy", url: `${location.origin}/api/proxy?url=${encodeURIComponent(url)}`, title: getDomainName(url) };
     }
 
-    /*
-     * CERRAR YOUTUBE
-     */
-
-    function closeEmbed() {
-
-      document.getElementById("youtube-frame").src = "";
-
-      document
-        .getElementById("embed-modal")
-        .classList.remove("active");
-
+    function getDomainName(url) {
+      try { return new URL(url).hostname.replace(/^www\./, ""); }
+      catch { return "Navegación"; }
     }
 
-    /*
-     * CERRAR FALLBACK
-     */
-
-    function closeFallback() {
-
-      document
-        .getElementById("fallback-modal")
-        .classList.remove("active");
-
+    // ==========================================
+    // SISTEMA DE PESTAÑAS Y NAVEGACIÓN
+    // ==========================================
+    function createTab(initialUrl) {
+      const id = state.nextTabId++;
+      const tab = {
+        id,
+        title: "Cargando...",
+        url: initialUrl || "",
+        history: [],
+        historyIndex: -1,
+        pageElement: null
+      };
+      state.tabs.push(tab);
+      renderTab(tab);
+      createPage(tab);
+      activateTab(id);
+      if (initialUrl) navigateTab(tab, initialUrl);
+      else renderHome(tab);
     }
 
-    /*
-     * FORMULARIO
-     */
-
-    document
-      .getElementById("search-form")
-      .addEventListener("submit", function(event) {
-
-        event.preventDefault();
-
-        const input =
-          document.getElementById("search-input").value;
-
-        handleInput(input);
-
+    function renderTab(tab) {
+      const element = document.createElement("div");
+      element.className = "tab";
+      element.dataset.tabId = tab.id;
+      element.innerHTML = `
+        <span class="tab-title">${escapeHTML(tab.title)}</span>
+        <button class="tab-close" title="Cerrar">×</button>
+      `;
+      element.addEventListener("click", (e) => {
+        if (e.target.classList.contains("tab-close")) closeTab(tab.id);
+        else activateTab(tab.id);
       });
+      elements.tabsBar.insertBefore(element, elements.newTabBtn);
+    }
 
-    /*
-     * ESCAPE PARA CERRAR MODALES
-     */
+    function activateTab(id) {
+      state.activeTabId = id;
+      const tab = state.tabs.find(t => t.id === id);
+      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", Number(t.dataset.tabId) === id));
+      document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", Number(p.dataset.tabId) === id));
+      elements.addressInput.value = tab.url;
+      updateNavButtons();
+    }
 
-    document.addEventListener("keydown", function(event) {
+    function closeTab(id) {
+      const index = state.tabs.findIndex(t => t.id === id);
+      if (index === -1) return;
+      const tab = state.tabs[index];
+      tab.pageElement?.remove();
+      document.querySelector(`.tab[data-tab-id="${id}"]`)?.remove();
+      state.tabs.splice(index, 1);
+      if (state.tabs.length === 0) createTab();
+      else if (state.activeTabId === id) activateTab(state.tabs[Math.min(index, state.tabs.length - 1)].id);
+    }
 
-      if (event.key === "Escape") {
+    function createPage(tab) {
+      const page = document.createElement("section");
+      page.className = "page";
+      page.dataset.tabId = tab.id;
+      elements.content.appendChild(page);
+      tab.pageElement = page;
+    }
 
-        closeEmbed();
-        closeFallback();
+    function navigateTab(tab, inputUrl) {
+      const target = getNavigationTarget(inputUrl);
+      tab.url = normalizeInput(inputUrl);
+      tab.title = target.title;
+      document.querySelector(`.tab[data-tab-id="${tab.id}"] .tab-title`).textContent = tab.title;
 
-      }
+      // Actualizar historial
+      if (tab.historyIndex < tab.history.length - 1) tab.history = tab.history.slice(0, tab.historyIndex + 1);
+      tab.history.push(inputUrl);
+      tab.historyIndex = tab.history.length - 1;
 
-    });
+      renderIframe(tab, target.url, target.title);
+      updateNavButtons();
+    }
 
+    function navigate(url) {
+      const tab = state.tabs.find(t => t.id === state.activeTabId);
+      if (tab) navigateTab(tab, url);
+    }
+
+    function renderIframe(tab, url, title) {
+      tab.pageElement.innerHTML = `<iframe src="${url}" title="${escapeHTML(title)}" allowfullscreen></iframe>`;
+      const iframe = tab.pageElement.querySelector("iframe");
+      let loaded = false;
+      iframe.addEventListener("load", () => { loaded = true; });
+      iframe.addEventListener("error", () => { if (!loaded) renderFallback(tab, url, "Este sitio web no permite mostrarse dentro de marcos por seguridad."); });
+      setTimeout(() => { if (!loaded && tab.pageElement.contains(iframe)) renderFallback(tab, url, "El sitio web ha tardado demasiado en responder o está bloqueando el acceso."); }, 12000);
+    }
+
+    function renderFallback(tab, url, reason) {
+      tab.pageElement.innerHTML = `
+        <div class="fallback">
+          <div class="fallback-card">
+            <div class="fallback-icon">↗</div>
+            <h2 class="fallback-title">Carga Interrumpida</h2>
+            <p class="fallback-text">${escapeHTML(reason)}<br>Puedes intentar abrir el sitio web en una nueva pestaña del navegador.</p>
+            <div class="fallback-url">${escapeHTML(url)}</div>
+            <button class="primary-btn" onclick="window.open('${url}', '_blank')">Abrir sitio web</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHome(tab) {
+      renderFallback(tab, "https://github.com", "Usa la barra de dirección superior para navegar.");
+    }
+
+    function updateNavButtons() {
+      const tab = state.tabs.find(t => t.id === state.activeTabId);
+      elements.backBtn.disabled = !tab || tab.historyIndex <= 0;
+      elements.forwardBtn.disabled = !tab || tab.historyIndex >= tab.history.length - 1;
+    }
+
+    // ==========================================
+    // UTILS Y EVENTOS
+    // ==========================================
+    function escapeHTML(v) { return String(v).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
+
+    elements.navigationForm.addEventListener("submit", (e) => { e.preventDefault(); navigate(elements.addressInput.value); });
+    elements.newTabBtn.addEventListener("click", () => createTab());
+    elements.backBtn.addEventListener("click", () => { const t = state.tabs.find(x => x.id === state.activeTabId); if (t && t.historyIndex > 0) navigateTab(t, t.history[--t.historyIndex]); });
+    elements.forwardBtn.addEventListener("click", () => { const t = state.tabs.find(x => x.id === state.activeTabId); if (t && t.historyIndex < t.history.length - 1) navigateTab(t, t.history[++t.historyIndex]); });
+    document.getElementById("reloadBtn").addEventListener("click", () => { const t = state.tabs.find(x => x.id === state.activeTabId); if (t && t.url) renderIframe(t, t.url, t.title); });
+
+    function init() { createTab(); }
+    init();
   </script>
-
 </body>
 </html>
