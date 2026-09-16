@@ -126,8 +126,6 @@
     // ==========================================================
     // 2. GESTIÓN DEL REPRODUCTOR
     // ==========================================================
-    // Destruye el player anterior y recrea el contenedor.
-    // Esto fuerza a YouTube a cargar SIEMPRE el video correcto.
     function resetPlayerContainer() {
       if (ytPlayer && typeof ytPlayer.destroy === 'function') {
         try { ytPlayer.destroy(); } catch (e) { /* ignorar */ }
@@ -154,7 +152,10 @@
           autoplay: 1,
           rel: 0,
           modestbranding: 1,
-          playsinline: 1
+          playsinline: 1,
+          // ✅ PARÁMETRO OBLIGATORIO: identifica el dominio que controla el reproductor.
+          // Sin esto, YouTube no permite la comunicación y el video no carga en producción.
+          origin: window.location.origin
         },
         events: {
           onReady: function (event) {
@@ -230,7 +231,6 @@
 
     function closeModal() {
       document.getElementById('embed-modal').classList.remove('active');
-      // Destruye el player al cerrar para liberar recursos
       resetPlayerContainer();
     }
 
