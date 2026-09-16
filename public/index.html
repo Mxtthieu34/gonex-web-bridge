@@ -6,7 +6,27 @@
   <title>GoNex Web Bridge</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
-    body { background-color: #0b0f19; color: #f1f5f9; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+    body {
+      background-color: #0b0f19;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+      transition: background-image 0.5s ease-in-out;
+    }
+    /* ✅ Capa oscura sobre el fondo para que el texto se lea bien */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(11, 15, 25, 0.75);
+      z-index: -1;
+    }
     .header { text-align: center; margin-bottom: 30px; }
     .logo { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .subtitle { color: #64748b; font-size: 0.9rem; margin-top: 4px; }
@@ -150,7 +170,20 @@
 
   <script>
     // ==========================================================
-    // 🕒 WIDGET FECHA / HORA / CLIMA
+    // 🖼️ FONDO DE PANTALLA ALEATORIO
+    // ==========================================================
+    function setRandomWallpaper() {
+      // ✅ API gratuita de Unsplash para obtener una imagen aleatoria de 1920x1080
+      const wallpaperUrl = `https://source.unsplash.com/random/1920x1080/?landscape,nature,city`;
+      document.body.style.backgroundImage = `url('${wallpaperUrl}')`;
+      document.body.style.backgroundSize = 'cover';
+      document.body.style.backgroundPosition = 'center';
+      document.body.style.backgroundRepeat = 'no-repeat';
+      document.body.style.backgroundAttachment = 'fixed';
+    }
+
+    // ==========================================================
+    // 🕒 WIDGET FECHA / HORA / CLIMA (CHICLAYO)
     // ==========================================================
     function updateClock() {
       const now = new Date();
@@ -159,8 +192,6 @@
       document.getElementById('info-date').textContent = dateStr;
       document.getElementById('info-time').textContent = timeStr;
     }
-    updateClock();
-    setInterval(updateClock, 1000);
 
     function getWeatherIcon(code) {
       if (code === 0) return '☀️';
@@ -176,30 +207,35 @@
     async function loadWeather() {
       const weatherEl = document.getElementById('info-weather');
       try {
-        // 1. Obtener ubicación por IP (sin API key)
-        const locRes = await fetch('https://ipwho.is/');
-        const loc = await locRes.json();
-        if (!loc || loc.success === false) throw new Error('Sin ubicación');
-        const lat = loc.latitude;
-        const lon = loc.longitude;
-        const city = loc.city || '';
+        // ✅ 1. Obtener coordenadas de Chiclayo usando la API de geocodificación de Open-Meteo
+        const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=Chiclayo&count=1&language=es&format=json`;
+        const geoRes = await fetch(geoUrl);
+        const geoData = await geoRes.json();
 
-        // 2. Obtener clima actual (Open-Meteo, sin API key)
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-        const weather = await weatherRes.json();
-        const temp = Math.round(weather.current_weather.temperature);
-        const code = weather.current_weather.weathercode;
+        if (!geoData.results || geoData.results.length === 0) {
+          throw new Error('No se encontró Chiclayo');
+        }
+
+        const { latitude, longitude, name } = geoData.results[0];
+
+        // ✅ 2. Obtener el clima actual usando las coordenadas
+        const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+        const weatherRes = await fetch(weatherUrl);
+        const weatherData = await weatherRes.json();
+
+        const temp = Math.round(weatherData.current_weather.temperature);
+        const code = weatherData.current_weather.weathercode;
         const icon = getWeatherIcon(code);
 
-        weatherEl.textContent = `${icon} ${temp}°C · ${city}`;
-      } catch (e) {
-        weatherEl.textContent = '';
+        weatherEl.textContent = `${icon} ${temp}°C · ${name}`;
+      } catch (error) {
+        console.error('[GoNex] Error al cargar el clima:', error);
+        weatherEl.textContent = 'Clima no disponible';
       }
     }
-    loadWeather();
 
     // ==========================================================
-    // 🔐 CÓDIGO SECRETO
+    // 🔐 CÓDIGO SECRETO Y BOTONES PERSONALIZADOS
     // ==========================================================
     const SECRET_CODE = 'gonex2026';
 
@@ -396,6 +432,16 @@
     document.getElementById('search-form').addEventListener('submit', function (e) {
       e.preventDefault();
       handleInput(document.getElementById('search-input').value);
+    });
+
+    // ==========================================================
+    // 🚀 INICIALIZACIÓN
+    // ==========================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      setRandomWallpaper(); // Fondo aleatorio al cargar
+      updateClock();        // Hora inicial
+      setInterval(updateClock, 1000); // Actualizar hora cada segundo
+      loadWeather();        // Clima de Chiclayo
     });
   </script>
 </body>

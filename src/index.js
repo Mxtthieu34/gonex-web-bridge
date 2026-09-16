@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge - Backend Express 5 final (sin proxy)
+// GoNex Web Bridge — Backend Express 5 final
 
 const express = require('express');
 const path = require('path');
@@ -16,11 +16,16 @@ const youtube = new YTubeNoAPI();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
+// ==========================================================
+// MIDDLEWARE DE SEGURIDAD
+// ==========================================================
 app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+
+  // ✅ CSP actualizada con los dominios necesarios para el clima y fondos
   res.setHeader(
     'Content-Security-Policy',
     [
@@ -30,13 +35,18 @@ app.use((req, res, next) => {
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com",
-      "connect-src 'self' https://www.youtube.com https://api.tavily.com https://ipwho.is https://api.open-meteo.com",
+      "connect-src 'self' https://www.youtube.com https://api.tavily.com https://geocoding-api.open-meteo.com https://api.open-meteo.com",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'"
     ].join('; ')
   );
+
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+
   next();
 });
 
@@ -89,7 +99,8 @@ app.get('/api/web-search', async (req, res) => {
     return res.status(400).json({ error: 'Falta el parámetro "q".' });
   }
   if (!TAVILY_API_KEY) {
-    return res.status(500).json({ error: 'TAVILY_API_KEY no configurada.' });
+    console.error('[GoNex] TAVILY_API_KEY no configurada.');
+    return res.status(500).json({ error: 'El servicio de búsqueda web no está configurado.' });
   }
   try {
     const apiResponse = await fetch('https://api.tavily.com/search', {
