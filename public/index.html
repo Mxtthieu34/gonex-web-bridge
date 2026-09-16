@@ -20,26 +20,21 @@
     .card .icon { font-size: 1.8rem; margin-bottom: 8px; }
     .card .title { font-size: 0.9rem; font-weight: 600; }
     .badge { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; margin-top: 6px; font-weight: bold; background: rgba(139, 92, 246, 0.2); color: #a855f7; }
-
     .results-container { width: 100%; max-width: 680px; margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
     .video-card { background: #161b26; border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
     .video-card:hover { border-color: #8b5cf6; transform: translateY(-3px); }
     .video-card img { width: 100%; height: 120px; object-fit: cover; }
     .video-card h3 { font-size: 0.85rem; padding: 10px; line-height: 1.3; }
     .video-card p { font-size: 0.75rem; color: #94a3b8; padding: 0 10px 10px; }
-
-    .web-card { background: #161b26; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; text-decoration: none; color: inherit; display: block; }
+    .web-card { background: #161b26; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; color: inherit; display: block; }
     .web-card:hover { border-color: #8b5cf6; transform: translateY(-3px); }
     .web-card h3 { font-size: 0.95rem; margin-bottom: 8px; color: #a855f7; line-height: 1.3; }
     .web-card .web-url { font-size: 0.7rem; color: #64748b; margin-bottom: 8px; word-break: break-all; }
     .web-card p { font-size: 0.8rem; color: #94a3b8; line-height: 1.4; }
-
     .filters { width: 100%; max-width: 680px; display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
     .filter-btn { background: #161b26; border: 1px solid #2d3748; color: #94a3b8; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
     .filter-btn.active { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; border-color: transparent; }
     .filter-btn:hover:not(.active) { border-color: #8b5cf6; color: #fff; }
-
-    /* Panel secreto */
     .secret-panel { display: none; width: 100%; max-width: 680px; margin-top: 25px; padding: 20px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.1)); border: 2px dashed #8b5cf6; border-radius: 14px; position: relative; }
     .secret-panel.active { display: block; animation: fadeIn 0.3s ease-in; }
     .secret-panel h3 { color: #a855f7; font-size: 1rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
@@ -50,8 +45,6 @@
     .secret-btn:hover { background: linear-gradient(135deg, #8b5cf6, #6366f1); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
     .secret-btn .secret-icon { display: block; font-size: 1.6rem; margin-bottom: 6px; }
     .secret-btn .external-badge { position: absolute; top: 4px; right: 4px; font-size: 0.6rem; background: #64748b; color: #fff; padding: 2px 5px; border-radius: 4px; }
-
-    /* Modal Visor Web */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     .modal.active { display: flex; }
     .modal-header { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -59,11 +52,9 @@
     .btn-close:hover { background: #ef4444; }
     .viewer-actions { display: flex; gap: 10px; align-items: center; }
     .viewer-actions a { color: #a855f7; text-decoration: none; font-size: 0.85rem; }
-
     .web-viewer-wrapper { width: 100%; max-width: 1000px; height: 78vh; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
     .web-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
     .web-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; }
-
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
@@ -76,7 +67,7 @@
 
   <div class="search-container">
     <form id="search-form" class="search-box">
-      <input id="search-input" type="text" placeholder="Busca en la web (Tavily), YouTube, o pega una URL..." required />
+      <input id="search-input" type="text" placeholder="Busca en la web, YouTube, o pega una URL..." required />
       <button type="submit">Buscar</button>
     </form>
   </div>
@@ -88,28 +79,19 @@
 
   <div class="grid">
     <div class="card" onclick="setMode('web'); handleInput('noticias de tecnología')">
-      <div class="icon">🌐</div>
-      <div class="title">Web Search</div>
-      <div class="badge">TAVILY</div>
+      <div class="icon">🌐</div><div class="title">Web Search</div><div class="badge">TAVILY</div>
     </div>
     <div class="card" onclick="setMode('youtube'); handleInput('musica')">
-      <div class="icon">📺</div>
-      <div class="title">YouTube</div>
-      <div class="badge">VIDEOS</div>
+      <div class="icon">📺</div><div class="title">YouTube</div><div class="badge">VIDEOS</div>
     </div>
     <div class="card" onclick="handleInput('https://classroom.google.com')">
-      <div class="icon">🏫</div>
-      <div class="title">Classroom</div>
-      <div class="badge">DIRECTO</div>
+      <div class="icon">🏫</div><div class="title">Classroom</div><div class="badge">DIRECTO</div>
     </div>
     <div class="card" onclick="handleInput('https://www.google.com')">
-      <div class="icon">🔍</div>
-      <div class="title">Google</div>
-      <div class="badge">DIRECTO</div>
+      <div class="icon">🔍</div><div class="title">Google</div><div class="badge">DIRECTO</div>
     </div>
   </div>
 
-  <!-- Panel Secreto -->
   <div id="secret-panel" class="secret-panel">
     <button class="secret-close" onclick="hideSecretPanel()">✕</button>
     <h3>⭐ Panel Secreto GoNex</h3>
@@ -118,7 +100,6 @@
 
   <div id="results-container" class="results-container"></div>
 
-  <!-- Modal Visor Web -->
   <div id="web-viewer-modal" class="modal">
     <div class="modal-header">
       <span>Visor GoNex</span>
@@ -132,12 +113,7 @@
         <p>Cargando página...</p>
         <p style="font-size: 0.75rem;">Si tarda mucho, es posible que el sitio bloquee la visualización integrada.</p>
       </div>
-      <iframe
-        id="web-viewer-iframe"
-        src=""
-        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-        referrerpolicy="strict-origin-when-cross-origin">
-      </iframe>
+      <iframe id="web-viewer-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin"></iframe>
     </div>
   </div>
 
@@ -148,12 +124,22 @@
     const SECRET_CODE = 'gonex2026';
 
     const SECRET_BUTTONS = [
-      // 👇 REEMPLAZA estas URLs con las URLs de inserción de Canva (las que terminan en /view?embed)
-      // Ejemplo: { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/DAF.../view?embed' },
-      { icon: '🎸', label: 'Rock Music', url: 'PEGA_AQUI_TU_URL_DE_INSERCION_DE_CANVA_1' },
-      { icon: '🐰', label: 'BaD BUNNY', url: 'PEGA_AQUI_TU_URL_DE_INSERCION_DE_CANVA_2' },
-      // 👇 Classroom 6x se abre en pestaña nueva porque Google Sites bloquea iframes
-      { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', external: true },
+      {
+        icon: '🐰',
+        label: 'BaD BUNNY',
+        url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed'
+      },
+      {
+        icon: '🎸',
+        label: 'Rock Music',
+        url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed'
+      },
+      {
+        icon: '🎮',
+        label: 'Classroom 6x',
+        url: 'https://sites.google.com/view/classroom6x/',
+        external: true
+      },
     ];
 
     function buildSecretButtons() {
@@ -162,17 +148,11 @@
       SECRET_BUTTONS.forEach((btn) => {
         const el = document.createElement('button');
         el.className = 'secret-btn';
-        let badge = '';
-        if (btn.external) {
-          badge = '<span class="external-badge">↗</span>';
-        }
+        const badge = btn.external ? '<span class="external-badge">↗</span>' : '';
         el.innerHTML = `${badge}<span class="secret-icon">${btn.icon}</span>${btn.label}`;
         el.addEventListener('click', () => {
-          if (btn.external) {
-            window.open(btn.url, '_blank');
-          } else {
-            openWebViewer(btn.url);
-          }
+          if (btn.external) window.open(btn.url, '_blank');
+          else openWebViewer(btn.url);
         });
         grid.appendChild(el);
       });
@@ -182,11 +162,9 @@
       buildSecretButtons();
       document.getElementById('secret-panel').classList.add('active');
     }
-
     function hideSecretPanel() {
       document.getElementById('secret-panel').classList.remove('active');
     }
-
     function toggleSecretPanel() {
       const panel = document.getElementById('secret-panel');
       if (panel.classList.contains('active')) hideSecretPanel();
@@ -194,7 +172,7 @@
     }
 
     // ==========================================================
-    // VISOR WEB INTEGRADO (con proxy)
+    // VISOR WEB
     // ==========================================================
     function openWebViewer(url) {
       const iframe = document.getElementById('web-viewer-iframe');
@@ -203,11 +181,11 @@
 
       document.getElementById('web-viewer-modal').classList.add('active');
       loading.style.display = 'flex';
+      loading.innerHTML = '<p>Cargando página...</p><p style="font-size:0.75rem;">Si tarda mucho, es posible que el sitio bloquee la visualización integrada.</p>';
       iframe.style.display = 'none';
       externalLink.href = url;
 
-      const proxyUrl = `/api/proxy?url=${encodeURIComponent(url)}`;
-      iframe.src = proxyUrl;
+      iframe.src = `/api/proxy?url=${encodeURIComponent(url)}`;
 
       iframe.onload = function () {
         loading.style.display = 'none';
@@ -225,10 +203,9 @@
     }
 
     // ==========================================================
-    // MODO ACTIVO
+    // MODO
     // ==========================================================
     var currentMode = 'web';
-
     function setMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -250,7 +227,7 @@
         const data = await response.json();
         displayYouTubeResults(data.results);
       } catch (error) {
-        container.innerHTML = `<p style="color:#ef4444;">Error al buscar en YouTube: ${error.message}</p>`;
+        container.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`;
       }
     }
 
@@ -282,14 +259,12 @@
       try {
         const response = await fetch(`/api/web-search?q=${encodeURIComponent(query)}`);
         const contentType = response.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) {
-          throw new Error('El servidor no respondió con JSON.');
-        }
+        if (!contentType.includes('application/json')) throw new Error('Respuesta no JSON.');
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
         displayWebResults(data.results);
       } catch (error) {
-        container.innerHTML = `<p style="color:#ef4444;">Error al buscar en la web: ${error.message}</p>`;
+        container.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`;
       }
     }
 
@@ -297,7 +272,7 @@
       const container = document.getElementById('results-container');
       container.innerHTML = '';
       if (!results || results.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8;">No se encontraron resultados web.</p>';
+        container.innerHTML = '<p style="color:#94a3b8;">No se encontraron resultados.</p>';
         return;
       }
       results.forEach((item) => {
@@ -315,32 +290,25 @@
 
     function handleInput(input) {
       const clean = input.trim();
-
       if (clean.toLowerCase() === SECRET_CODE.toLowerCase()) {
         toggleSecretPanel();
         return;
       }
-
       const ytId = extractYouTubeId(clean);
-
       if (ytId) {
         window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank');
       } else if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
         openWebViewer(url);
       } else {
-        if (currentMode === 'youtube') {
-          searchYouTube(clean);
-        } else {
-          searchWeb(clean);
-        }
+        if (currentMode === 'youtube') searchYouTube(clean);
+        else searchWeb(clean);
       }
     }
 
     function closeModal(modalId) {
       if (modalId === 'web-viewer-modal') {
-        const iframe = document.getElementById('web-viewer-iframe');
-        iframe.src = 'about:blank';
+        document.getElementById('web-viewer-iframe').src = 'about:blank';
       }
       document.getElementById(modalId).classList.remove('active');
     }
