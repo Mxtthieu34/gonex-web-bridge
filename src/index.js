@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge - Backend Express 5 + YouTube + Tavily + Visor Web Interactivo
+// GoNex Web Bridge - Backend Express 5 + YouTube + Tavily
 
 const express = require('express');
 const path = require('path');
