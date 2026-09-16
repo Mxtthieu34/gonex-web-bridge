@@ -1,6 +1,6 @@
 // src/index.js
-// GoNex Web Bridge — Backend Express 5 hardened para Vercel Serverless
-// Fase 3: DeepSeek — Ingeniero Backend + Hardening
+// GoNex Web Bridge — Backend Express 5 optimizado para Vercel Serverless
+// Fase 3: DeepSeek — Auditoría + Optimización
 
 const express = require('express');
 const path = require('path');
@@ -14,36 +14,29 @@ const publicPath = path.join(__dirname, '..', 'public');
 // ==========================================================
 // 0. CONFIGURACIÓN BASE
 // ==========================================================
-// Oculta la cabecera "X-Powered-By: Express" (information disclosure).
+// Oculta "X-Powered-By: Express" (information disclosure).
 app.disable('x-powered-by');
 
 // Confía en el proxy de Vercel para obtener la IP real del cliente.
 app.set('trust proxy', 1);
 
 // ==========================================================
-// 1. MIDDLEWARE DE SEGURIDAD (CABECERAS)
+// 1. MIDDLEWARE DE SEGURIDAD + POLÍTICA DE CACHÉ
 // ==========================================================
 // Todas las cabeceras se aplican ANTES de cualquier otra lógica.
 // Referrer-Policy es CRÍTICA para que YouTube permita el embed (Error 153).
 app.use((req, res, next) => {
+  // --- Seguridad ---
   // Requerido por YouTube para el reproductor embebido.
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-
   // Evita MIME sniffing (defensa contra XSS por contenido mal tipado).
   res.setHeader('X-Content-Type-Options', 'nosniff');
-
   // Impide que NUESTRA web sea iframada por terceros (clickjacking).
-  // NO afecta a los iframes que NOSOTROS cargamos.
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-
   // Bloquea APIs sensibles del navegador que no usamos.
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
-  // CSP compatible con el frontend actual (inline CSS/JS) y con YouTube.
-  // - script-src: 'self' + 'unsafe-inline' (el index.html lleva <script> embebido).
-  // - style-src:  'self' + 'unsafe-inline' + Google Fonts.
-  // - frame-src:  YouTube (embed normal y nocookie).
-  // - img-src:    permite miniaturas de YouTube (i.ytimg.com) y data URIs.
+  // CSP compatible con el frontend de ChatGPT (inline CSS/JS) y con YouTube.
   res.setHeader(
     'Content-Security-Policy',
     [
@@ -60,13 +53,20 @@ app.use((req, res, next) => {
     ].join('; ')
   );
 
+  // --- Política de caché por defecto ---
+  // Evita que proxies intermedios (CDN de Vercel incluido) cacheen respuestas
+  // dinámicas. Los assets estáticos sobrescriben esta cabecera más abajo.
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+
   next();
 });
 
 // ==========================================================
 // 2. PARSERS DE BODY (PREPARACIÓN PARA APIs FUTURAS)
 // ==========================================================
-// Límites conservadores para prevenir payloads abusivos en serverless.
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
@@ -75,14 +75,20 @@ app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 // ==========================================================
 app.use(
   express.static(publicPath, {
-    // Los assets estáticos se cachean fuerte; el HTML no.
+    // Los assets estáticos se cachean fuerte; el HTML nunca se cachea.
     setHeaders: (res, filePath) => {
       if (filePath.endsWith('.html')) {
+        // El HTML siempre debe venir fresco (contiene la app y sus rutas).
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
       } else {
-        res.setHeader('Cache-Control', 'public, max-age=86400');
+        // CSS, JS, imágenes: caché agresiva de 1 día.
+        res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
       }
-    }
+    },
+    // No servir dotfiles (evita exponer .env, .git, etc. si por error se suben).
+    dotfiles: 'ignore'
   })
 );
 
@@ -108,7 +114,14 @@ app.use((req, res) => {
   if (req.accepts('html')) {
     return res
       .status(404)
-      .send('<!doctype html><meta charset="utf-8"><title>404</title><h1>404 — No encontrado</h1>');
+      .send(
+        '<!doctype html><meta charset="utf-8"><title>404 — GoNex</title>' +
+          '<body style="font-family:system-ui;background:#0b0f19;color:#f1f5f9;padding:40px;">' +
+          '<h1>404 — Ruta no encontrada</h1>' +
+          '<p>La página solicitada no existe en GoNex Web Bridge.</p>' +
+          '<a href="/" style="color:#a855f7;">Volver al inicio</a>' +
+          '</body>'
+      );
   }
   res.status(404).json({ error: 'Not Found', path: req.originalUrl });
 });
@@ -116,8 +129,7 @@ app.use((req, res) => {
 // ==========================================================
 // 6. MANEJADOR GLOBAL DE ERRORES (4 argumentos)
 // ==========================================================
-// Express 5 maneja rechazos de promesas automáticamente y los
-// redirige aquí, así que las rutas async ya están cubiertas.
+// Express 5 redirige aquí también los rechazos de promesas de rutas async.
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   const status = err.status || err.statusCode || 500;
@@ -137,12 +149,20 @@ app.use((err, req, res, next) => {
   // No filtrar detalles internos al cliente en producción.
   const clientMessage = IS_PROD && isServerError ? 'Error interno del servidor' : err.message;
 
+  // Si los headers ya se enviaron, delegar a Express.
+  if (res.headersSent) {
+    return next(err);
+  }
+
   if (req.accepts('html')) {
     return res
       .status(status)
       .send(
-        `<!doctype html><meta charset="utf-8"><title>${status}</title>` +
-          `<h1>${status}</h1><p>${clientMessage}</p>`
+        `<!doctype html><meta charset="utf-8"><title>${status} — GoNex</title>` +
+          '<body style="font-family:system-ui;background:#0b0f19;color:#f1f5f9;padding:40px;">' +
+          `<h1>${status}</h1><p>${clientMessage}</p>` +
+          '<a href="/" style="color:#a855f7;">Volver al inicio</a>' +
+          '</body>'
       );
   }
 
