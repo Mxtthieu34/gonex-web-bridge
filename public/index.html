@@ -14,54 +14,57 @@
       flex-direction: column;
       align-items: center;
       padding: 40px 20px;
-      transition: background-image 0.5s ease-in-out;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      transition: background-image 0.6s ease-in-out;
     }
-    /* ✅ Capa oscura sobre el fondo para que el texto se lea bien */
+    /* Overlay más ligero para que se vea la ciudad */
     body::before {
       content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(11, 15, 25, 0.75);
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(180deg, rgba(11, 15, 25, 0.55) 0%, rgba(11, 15, 25, 0.75) 100%);
       z-index: -1;
+      pointer-events: none;
     }
     .header { text-align: center; margin-bottom: 30px; }
-    .logo { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .subtitle { color: #64748b; font-size: 0.9rem; margin-top: 4px; }
+    .logo { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #a855f7, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+    .subtitle { color: #cbd5e1; font-size: 0.9rem; margin-top: 4px; text-shadow: 0 1px 8px rgba(0,0,0,0.7); }
     .search-container { width: 100%; max-width: 680px; margin-bottom: 20px; }
-    .search-box { display: flex; gap: 10px; background: #161b26; padding: 8px; border-radius: 12px; border: 1px solid #2d3748; }
+    .search-box { display: flex; gap: 10px; background: rgba(22, 27, 38, 0.92); padding: 8px; border-radius: 12px; border: 1px solid #2d3748; backdrop-filter: blur(10px); }
     .search-box input { flex: 1; background: transparent; border: none; outline: none; color: #fff; padding: 10px 14px; font-size: 1rem; }
     .search-box button { background: linear-gradient(135deg, #8b5cf6, #6366f1); border: none; color: #fff; padding: 10px 22px; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; width: 100%; max-width: 680px; }
-    .card { background: #161b26; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+    .card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
     .card:hover { border-color: #8b5cf6; transform: translateY(-2px); }
     .card .icon { font-size: 1.8rem; margin-bottom: 8px; }
     .card .title { font-size: 0.9rem; font-weight: 600; }
     .badge { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; margin-top: 6px; font-weight: bold; background: rgba(139, 92, 246, 0.2); color: #a855f7; }
     .results-container { width: 100%; max-width: 680px; margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-    .video-card { background: #161b26; border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+    .video-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; backdrop-filter: blur(10px); }
     .video-card:hover { border-color: #8b5cf6; transform: translateY(-3px); }
     .video-card img { width: 100%; height: 120px; object-fit: cover; }
     .video-card h3 { font-size: 0.85rem; padding: 10px; line-height: 1.3; }
     .video-card p { font-size: 0.75rem; color: #94a3b8; padding: 0 10px 10px; }
-    .web-card { background: #161b26; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; color: inherit; display: block; }
+    .web-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; padding: 16px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; color: inherit; display: block; backdrop-filter: blur(10px); }
     .web-card:hover { border-color: #8b5cf6; transform: translateY(-3px); }
     .web-card h3 { font-size: 0.95rem; margin-bottom: 8px; color: #a855f7; line-height: 1.3; }
     .web-card .web-url { font-size: 0.7rem; color: #64748b; margin-bottom: 8px; word-break: break-all; }
     .web-card p { font-size: 0.8rem; color: #94a3b8; line-height: 1.4; }
     .filters { width: 100%; max-width: 680px; display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
-    .filter-btn { background: #161b26; border: 1px solid #2d3748; color: #94a3b8; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+    .filter-btn { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; color: #94a3b8; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; backdrop-filter: blur(10px); }
     .filter-btn.active { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; border-color: transparent; }
     .filter-btn:hover:not(.active) { border-color: #8b5cf6; color: #fff; }
-    .secret-panel { display: none; width: 100%; max-width: 680px; margin-top: 25px; padding: 20px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.1)); border: 2px dashed #8b5cf6; border-radius: 14px; position: relative; }
+    .secret-panel { display: none; width: 100%; max-width: 680px; margin-top: 25px; padding: 20px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.15)); border: 2px dashed #8b5cf6; border-radius: 14px; position: relative; backdrop-filter: blur(10px); }
     .secret-panel.active { display: block; animation: fadeIn 0.3s ease-in; }
     .secret-panel h3 { color: #a855f7; font-size: 1rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
     .secret-close { position: absolute; top: 10px; right: 12px; background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
     .secret-close:hover { color: #ef4444; }
     .secret-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
-    .secret-btn { background: #161b26; border: 1px solid #8b5cf6; color: #f1f5f9; padding: 14px 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; text-align: center; position: relative; }
+    .secret-btn { background: rgba(22, 27, 38, 0.95); border: 1px solid #8b5cf6; color: #f1f5f9; padding: 14px 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; text-align: center; position: relative; }
     .secret-btn:hover { background: linear-gradient(135deg, #8b5cf6, #6366f1); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
     .secret-btn .secret-icon { display: block; font-size: 1.6rem; margin-bottom: 6px; }
     .secret-btn .external-badge { position: absolute; top: 4px; right: 4px; font-size: 0.6rem; background: #64748b; color: #fff; padding: 2px 5px; border-radius: 4px; }
@@ -77,14 +80,12 @@
     .web-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* ==========================================================
-       WIDGET: Fecha, hora y clima (esquina superior derecha)
-       ========================================================== */
+    /* Widget fecha / hora / clima */
     .info-widget {
       position: fixed;
       top: 18px;
       right: 18px;
-      background: #0a1e3d;
+      background: rgba(10, 30, 61, 0.9);
       border: 1px solid #1e3a5f;
       border-radius: 10px;
       padding: 8px 12px;
@@ -96,6 +97,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       min-width: 110px;
       font-variant-numeric: tabular-nums;
+      backdrop-filter: blur(10px);
     }
     .info-widget .info-row { white-space: nowrap; }
     .info-widget .info-time { color: #e2e8f0; font-weight: 600; font-size: 0.85rem; }
@@ -104,7 +106,6 @@
 </head>
 <body>
 
-  <!-- Widget fecha / hora / clima -->
   <div class="info-widget" id="info-widget">
     <div class="info-row info-time" id="info-time">--:--:--</div>
     <div class="info-row" id="info-date">-- --- ----</div>
@@ -170,16 +171,33 @@
 
   <script>
     // ==========================================================
-    // 🖼️ FONDO DE PANTALLA ALEATORIO
+    // 🖼️ FONDO DE PANTALLA ALEATORIO — CIUDADES
     // ==========================================================
+    // URLs directas de Unsplash (funcionan sin API key, no expiran)
+    const CITY_WALLPAPERS = [
+      'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1920&q=80', // Nueva York
+      'https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1920&q=80', // NYC edificios
+      'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=1920&q=80', // Ciudad
+      'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1920&q=80', // Ciudad noche
+      'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1920&q=80', // París
+      'https://images.unsplash.com/photo-1444723121867-7a241cacace9?w=1920&q=80', // Tokio
+      'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?w=1920&q=80', // Londres
+      'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1920&q=80', // Dubái
+      'https://images.unsplash.com/photo-1508050919630-b135583b29ab?w=1920&q=80', // Ciudad calles
+      'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1920&q=80',   // Ciudad moderna
+      'https://images.unsplash.com/photo-1493514789931-586cb221d7a7?w=1920&q=80', // Ciudad aérea
+      'https://images.unsplash.com/photo-1470004914212-05527e49370b?w=1920&q=80'  // Skyline
+    ];
+
     function setRandomWallpaper() {
-      // ✅ API gratuita de Unsplash para obtener una imagen aleatoria de 1920x1080
-      const wallpaperUrl = `https://source.unsplash.com/random/1920x1080/?landscape,nature,city`;
-      document.body.style.backgroundImage = `url('${wallpaperUrl}')`;
-      document.body.style.backgroundSize = 'cover';
-      document.body.style.backgroundPosition = 'center';
-      document.body.style.backgroundRepeat = 'no-repeat';
-      document.body.style.backgroundAttachment = 'fixed';
+      const randomIndex = Math.floor(Math.random() * CITY_WALLPAPERS.length);
+      const url = CITY_WALLPAPERS[randomIndex];
+      // Precarga la imagen para evitar parpadeo
+      const img = new Image();
+      img.onload = () => {
+        document.body.style.backgroundImage = `url('${url}')`;
+      };
+      img.src = url;
     }
 
     // ==========================================================
@@ -207,26 +225,17 @@
     async function loadWeather() {
       const weatherEl = document.getElementById('info-weather');
       try {
-        // ✅ 1. Obtener coordenadas de Chiclayo usando la API de geocodificación de Open-Meteo
         const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=Chiclayo&count=1&language=es&format=json`;
         const geoRes = await fetch(geoUrl);
         const geoData = await geoRes.json();
-
-        if (!geoData.results || geoData.results.length === 0) {
-          throw new Error('No se encontró Chiclayo');
-        }
-
+        if (!geoData.results || geoData.results.length === 0) throw new Error('No se encontró Chiclayo');
         const { latitude, longitude, name } = geoData.results[0];
-
-        // ✅ 2. Obtener el clima actual usando las coordenadas
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
         const weatherRes = await fetch(weatherUrl);
         const weatherData = await weatherRes.json();
-
         const temp = Math.round(weatherData.current_weather.temperature);
         const code = weatherData.current_weather.weathercode;
         const icon = getWeatherIcon(code);
-
         weatherEl.textContent = `${icon} ${temp}°C · ${name}`;
       } catch (error) {
         console.error('[GoNex] Error al cargar el clima:', error);
@@ -235,27 +244,14 @@
     }
 
     // ==========================================================
-    // 🔐 CÓDIGO SECRETO Y BOTONES PERSONALIZADOS
+    // 🔐 CÓDIGO SECRETO
     // ==========================================================
     const SECRET_CODE = 'gonex2026';
 
     const SECRET_BUTTONS = [
-      {
-        icon: '🐰',
-        label: 'BaD BUNNY',
-        url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed'
-      },
-      {
-        icon: '🎸',
-        label: 'Rock Music',
-        url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed'
-      },
-      {
-        icon: '🎮',
-        label: 'Classroom 6x',
-        url: 'https://sites.google.com/view/classroom6x/',
-        external: true
-      },
+      { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed' },
+      { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed' },
+      { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', external: true },
     ];
 
     function buildSecretButtons() {
@@ -274,13 +270,8 @@
       });
     }
 
-    function showSecretPanel() {
-      buildSecretButtons();
-      document.getElementById('secret-panel').classList.add('active');
-    }
-    function hideSecretPanel() {
-      document.getElementById('secret-panel').classList.remove('active');
-    }
+    function showSecretPanel() { buildSecretButtons(); document.getElementById('secret-panel').classList.add('active'); }
+    function hideSecretPanel() { document.getElementById('secret-panel').classList.remove('active'); }
     function toggleSecretPanel() {
       const panel = document.getElementById('secret-panel');
       if (panel.classList.contains('active')) hideSecretPanel();
@@ -294,26 +285,16 @@
       const iframe = document.getElementById('web-viewer-iframe');
       const loading = document.getElementById('web-viewer-loading');
       const externalLink = document.getElementById('viewer-open-external');
-
       document.getElementById('web-viewer-modal').classList.add('active');
       loading.style.display = 'flex';
       loading.innerHTML = '<p>Cargando página...</p><p style="font-size:0.75rem;">Si tarda mucho, es posible que el sitio bloquee la visualización integrada.</p>';
       iframe.style.display = 'none';
       externalLink.href = url;
-
       iframe.src = url;
-
-      iframe.onload = function () {
-        loading.style.display = 'none';
-        iframe.style.display = 'block';
-      };
-
+      iframe.onload = function () { loading.style.display = 'none'; iframe.style.display = 'block'; };
       setTimeout(() => {
         if (iframe.style.display === 'none') {
-          loading.innerHTML = `
-            <p style="color: #ef4444;">El sitio está tardando en responder.</p>
-            <p style="font-size: 0.8rem;">Puedes intentar con "Abrir fuera ↗"</p>
-          `;
+          loading.innerHTML = '<p style="color: #ef4444;">El sitio está tardando en responder.</p><p style="font-size: 0.8rem;">Puedes intentar con "Abrir fuera ↗"</p>';
         }
       }, 8000);
     }
@@ -350,21 +331,12 @@
     function displayYouTubeResults(results) {
       const container = document.getElementById('results-container');
       container.innerHTML = '';
-      if (!results || results.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8;">No se encontraron videos.</p>';
-        return;
-      }
+      if (!results || results.length === 0) { container.innerHTML = '<p style="color:#94a3b8;">No se encontraron videos.</p>'; return; }
       results.forEach((video) => {
         const card = document.createElement('div');
         card.className = 'video-card';
-        card.innerHTML = `
-          <img src="${video.thumbnail}" alt="${video.title}" loading="lazy" />
-          <h3>${video.title}</h3>
-          <p>${video.channelTitle}</p>
-        `;
-        card.addEventListener('click', () => {
-          window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank');
-        });
+        card.innerHTML = `<img src="${video.thumbnail}" alt="${video.title}" loading="lazy" /><h3>${video.title}</h3><p>${video.channelTitle}</p>`;
+        card.addEventListener('click', () => { window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank'); });
         container.appendChild(card);
       });
     }
@@ -387,18 +359,11 @@
     function displayWebResults(results) {
       const container = document.getElementById('results-container');
       container.innerHTML = '';
-      if (!results || results.length === 0) {
-        container.innerHTML = '<p style="color:#94a3b8;">No se encontraron resultados.</p>';
-        return;
-      }
+      if (!results || results.length === 0) { container.innerHTML = '<p style="color:#94a3b8;">No se encontraron resultados.</p>'; return; }
       results.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'web-card';
-        card.innerHTML = `
-          <h3>${item.title}</h3>
-          <div class="web-url">${item.url}</div>
-          <p>${item.description}</p>
-        `;
+        card.innerHTML = `<h3>${item.title}</h3><div class="web-url">${item.url}</div><p>${item.description}</p>`;
         card.addEventListener('click', () => openWebViewer(item.url));
         container.appendChild(card);
       });
@@ -406,14 +371,10 @@
 
     function handleInput(input) {
       const clean = input.trim();
-      if (clean.toLowerCase() === SECRET_CODE.toLowerCase()) {
-        toggleSecretPanel();
-        return;
-      }
+      if (clean.toLowerCase() === SECRET_CODE.toLowerCase()) { toggleSecretPanel(); return; }
       const ytId = extractYouTubeId(clean);
-      if (ytId) {
-        window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank');
-      } else if (clean.includes('.') && !clean.includes(' ')) {
+      if (ytId) { window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank'); }
+      else if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
         openWebViewer(url);
       } else {
@@ -423,9 +384,7 @@
     }
 
     function closeModal(modalId) {
-      if (modalId === 'web-viewer-modal') {
-        document.getElementById('web-viewer-iframe').src = 'about:blank';
-      }
+      if (modalId === 'web-viewer-modal') { document.getElementById('web-viewer-iframe').src = 'about:blank'; }
       document.getElementById(modalId).classList.remove('active');
     }
 
@@ -438,10 +397,10 @@
     // 🚀 INICIALIZACIÓN
     // ==========================================================
     document.addEventListener('DOMContentLoaded', () => {
-      setRandomWallpaper(); // Fondo aleatorio al cargar
-      updateClock();        // Hora inicial
-      setInterval(updateClock, 1000); // Actualizar hora cada segundo
-      loadWeather();        // Clima de Chiclayo
+      setRandomWallpaper();
+      updateClock();
+      setInterval(updateClock, 1000);
+      loadWeather();
     });
   </script>
 </body>
