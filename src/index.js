@@ -30,7 +30,7 @@ app.use((req, res, next) => {
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com",
-      "connect-src 'self' https://www.youtube.com https://api.tavily.com",
+      "connect-src 'self' https://www.youtube.com https://api.tavily.com https://ipwho.is https://api.open-meteo.com",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'"
