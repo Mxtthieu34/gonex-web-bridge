@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend con Steel.dev (plan gratuito)
+// GoNex Web Bridge — Backend con Steel.dev (plan gratuito, timeout 15 min)
 
 const express = require('express');
 const path = require('path');
@@ -163,6 +163,7 @@ app.post('/api/browser-sessions/cleanup', async (req, res) => {
 
 // ==========================================================
 // 5. Crear sesión de navegador en la nube
+// ✅ Timeout ajustado a 15 min (máximo del plan gratuito)
 // ==========================================================
 app.post('/api/browser-session', async (req, res) => {
   if (!steel) {
@@ -170,10 +171,9 @@ app.post('/api/browser-session', async (req, res) => {
   }
 
   try {
-    // Sin useProxy, sin solveCaptcha, sin sessionTimeout
     const session = await steel.sessions.create({
-      timeout: 1800000,           // 30 minutos
-      inactivityTimeout: 300000   // 5 min
+      timeout: 900000,            // 15 minutos (máximo del plan gratuito)
+      inactivityTimeout: 300000   // 5 minutos
     });
 
     console.log('[Steel] Sesión creada:', session.id);
@@ -183,7 +183,6 @@ app.post('/api/browser-session', async (req, res) => {
       sessionViewerUrl: session.sessionViewerUrl
     });
   } catch (e) {
-    // 🔍 Log detallado para diagnóstico
     console.error('[Steel] Error detallado:', {
       message: e.message,
       status: e.status,
