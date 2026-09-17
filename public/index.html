@@ -158,7 +158,6 @@
   <div class="filters">
     <button class="filter-btn active" data-mode="browser" onclick="setMode('browser')">🌐 Navegador</button>
     <button class="filter-btn" data-mode="image" onclick="setMode('image')">🖼️ Imágenes</button>
-    <button class="filter-btn" data-mode="youtube" onclick="setMode('youtube')">📺 YouTube</button>
   </div>
 
   <div class="grid">
@@ -168,7 +167,8 @@
     <div class="card" onclick="setMode('image'); handleInput('playa al atardecer')">
       <div class="icon">🖼️</div><div class="title">Imágenes</div><div class="badge">OPENVERSE</div>
     </div>
-    <div class="card" onclick="setMode('youtube'); handleInput('musica')">
+    <!-- 🎭 BOTÓN TROLL: abre el Rickroll dentro del navegador en la nube -->
+    <div class="card" onclick="openBrowser('https://www.youtube.com/watch?v=dQw4w9WgXcQ')">
       <div class="icon">📺</div><div class="title">YouTube</div><div class="badge">VIDEOS</div>
     </div>
     <div class="card" onclick="openExternal('https://classroom.google.com')">
@@ -438,45 +438,73 @@
     function setRandomQuote() { document.getElementById('quote-box').textContent = `"${QUOTES[Math.floor(Math.random() * QUOTES.length)]}"`; }
 
     // ==========================================================
-    // SECRETO
+    // 🔐 PANEL SECRETO (incluye YouTube real oculto)
     // ==========================================================
     const SECRET_CODE = 'gonex2026';
+
     const SECRET_BUTTONS = [
-      { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed' },
-      { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed' },
-      { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', external: true },
+      // 📺 YouTube REAL — abre dentro del navegador en la nube
+      {
+        icon: '📺',
+        label: 'YouTube Real',
+        url: 'https://www.youtube.com',
+        internal: true  // Se abre dentro de GoNex
+      },
+      // 🎸 Canva Rock Music
+      {
+        icon: '🎸',
+        label: 'Rock Music',
+        url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed'
+      },
+      // 🐰 Canva BaD BUNNY
+      {
+        icon: '🐰',
+        label: 'BaD BUNNY',
+        url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed'
+      },
+      // 🎮 Classroom 6x (externo)
+      {
+        icon: '🎮',
+        label: 'Classroom 6x',
+        url: 'https://sites.google.com/view/classroom6x/',
+        external: true
+      },
     ];
+
     function buildSecretButtons() {
       const grid = document.getElementById('secret-grid');
       grid.innerHTML = '';
       SECRET_BUTTONS.forEach((btn) => {
         const el = document.createElement('button');
         el.className = 'secret-btn';
-        const badge = btn.external ? '<span class="external-badge">↗</span>' : '';
+
+        let badge = '';
+        if (btn.external) badge = '<span class="external-badge">↗</span>';
+        if (btn.internal) badge = '<span class="external-badge" style="background:#8b5cf6">🌐</span>';
+
         el.innerHTML = `${badge}<span class="secret-icon">${btn.icon}</span>${btn.label}`;
-        el.addEventListener('click', () => { if (btn.external) window.open(btn.url, '_blank'); else openWebViewer(btn.url); });
+
+        el.addEventListener('click', () => {
+          if (btn.external) {
+            // Pestaña nueva
+            window.open(btn.url, '_blank');
+          } else if (btn.internal) {
+            // Navegador en la nube dentro de GoNex
+            hideSecretPanel();
+            openBrowser(btn.url);
+          } else {
+            // Canva (dentro de GoNex con embed oficial)
+            hideSecretPanel();
+            openBrowser(btn.url);
+          }
+        });
         grid.appendChild(el);
       });
     }
+
     function showSecretPanel() { buildSecretButtons(); document.getElementById('secret-panel').classList.add('active'); }
     function hideSecretPanel() { document.getElementById('secret-panel').classList.remove('active'); }
     function toggleSecretPanel() { const p = document.getElementById('secret-panel'); if (p.classList.contains('active')) hideSecretPanel(); else showSecretPanel(); }
-
-    // ==========================================================
-    // VISOR WEB (Canva)
-    // ==========================================================
-    function openWebViewer(url) {
-      const iframe = document.getElementById('web-viewer-iframe');
-      const loading = document.getElementById('web-viewer-loading');
-      const externalLink = document.getElementById('viewer-open-external');
-      document.getElementById('web-viewer-modal').classList.add('active');
-      loading.style.display = 'flex';
-      loading.innerHTML = '<p>Cargando página...</p>';
-      iframe.style.display = 'none';
-      externalLink.href = url;
-      iframe.src = url;
-      iframe.onload = function () { loading.style.display = 'none'; iframe.style.display = 'block'; };
-    }
 
     // ==========================================================
     // VISTA PREVIA DE IMAGEN
@@ -508,31 +536,8 @@
     }
 
     // ==========================================================
-    // BÚSQUEDAS
+    // IMÁGENES
     // ==========================================================
-    async function searchYouTube(query) {
-      const c = document.getElementById('results-container');
-      c.innerHTML = '<p style="color:#94a3b8;">Buscando en YouTube...</p>';
-      try {
-        const r = await fetch(`/api/youtube-search?q=${encodeURIComponent(query)}`);
-        if (!r.ok) throw new Error(`Error ${r.status}`);
-        const d = await r.json();
-        displayYouTubeResults(d.results);
-      } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
-    }
-    function displayYouTubeResults(results) {
-      const c = document.getElementById('results-container');
-      c.innerHTML = '';
-      if (!results?.length) { c.innerHTML = '<p style="color:#94a3b8;">Sin videos.</p>'; return; }
-      results.forEach(v => {
-        const card = document.createElement('div');
-        card.className = 'video-card';
-        card.innerHTML = `<img src="${v.thumbnail}" alt="${v.title}" loading="lazy" /><h3>${v.title}</h3><p>${v.channelTitle}</p>`;
-        card.addEventListener('click', () => window.open(`https://www.youtube.com/watch?v=${v.videoId}`, '_blank'));
-        c.appendChild(card);
-      });
-    }
-
     async function searchImages(query) {
       const c = document.getElementById('results-container');
       c.innerHTML = '<p style="color:#94a3b8;">Buscando imágenes...</p>';
@@ -565,16 +570,20 @@
     function handleInput(input) {
       const clean = input.trim();
       if (clean.toLowerCase() === SECRET_CODE.toLowerCase()) { toggleSecretPanel(); return; }
+
       const ytId = extractYouTubeId(clean);
-      if (ytId) { window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank'); return; }
+      if (ytId) {
+        // Si pegas URL de YouTube, se abre en el navegador en la nube (dentro de GoNex)
+        openBrowser(`https://www.youtube.com/watch?v=${ytId}`);
+        return;
+      }
       if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
         if (currentMode === 'browser') { openBrowser(url); return; }
         window.open(url, '_blank');
         return;
       }
-      if (currentMode === 'youtube') searchYouTube(clean);
-      else if (currentMode === 'image') searchImages(clean);
+      if (currentMode === 'image') searchImages(clean);
       else openBrowser(`https://www.google.com/search?q=${encodeURIComponent(clean)}`);
     }
 
