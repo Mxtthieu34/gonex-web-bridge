@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend con búsqueda robusta
+// GoNex Web Bridge — Backend con Firecrawl Keyless + Keenable
 
 const express = require('express');
 const path = require('path');
@@ -8,7 +8,6 @@ const { YTubeNoAPI } = require('ytube-noapi');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
-const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 
 const publicPath = path.join(__dirname, '..', 'public');
 const youtube = new YTubeNoAPI();
@@ -16,6 +15,9 @@ const youtube = new YTubeNoAPI();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
+// ==========================================================
+// MIDDLEWARE DE SEGURIDAD
+// ==========================================================
 app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -28,7 +30,7 @@ app.use((req, res, next) => {
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
     "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com",
-    "connect-src 'self' https://www.youtube.com https://api.tavily.com https://es.wikipedia.org https://api.openverse.org https://html.duckduckgo.com https://api.duckduckgo.com https://geocoding-api.open-meteo.com https://api.open-meteo.com",
+    "connect-src 'self' https://www.youtube.com https://api.firecrawl.dev https://api.keenable.ai https://api.openverse.org https://geocoding-api.open-meteo.com https://api.open-meteo.com",
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'"
@@ -51,7 +53,7 @@ app.use(express.static(publicPath, {
 // ==========================================================
 // HELPERS
 // ==========================================================
-async function fetchWithTimeout(url, options = {}, timeout = 8000) {
+async function fetchWithTimeout(url, options = {}, timeout = 10000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
   try {
@@ -64,57 +66,50 @@ async function fetchWithTimeout(url, options = {}, timeout = 8000) {
   }
 }
 
-// Scrapea DuckDuckGo HTML (funciona sin API key, casi nunca bloqueado)
-async function duckduckgoHTMLSearch(query, limit = 10) {
-  const url = 'https://html.duckduckgo.com/html/';
-  const body = new URLSearchParams({ q: query });
-  const res = await fetchWithTimeout(url, {
+// ==========================================================
+// FIRECRAWL KEYLESS SEARCH
+// ==========================================================
+async function firecrawlSearch(query, limit = 10) {
+  const res = await fetchWithTimeout('https://api.firecrawl.dev/v2/search', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
-    },
-    body: body.toString()
-  }, 10000);
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      query: query,
+      limit: limit,
+      sources: ['web']
+    })
+  }, 12000);
 
-  if (!res.ok) throw new Error(`DDG HTML: ${res.status}`);
-  const html = await res.text();
-
-  const results = [];
-  // Parsear resultados con regex simple
-  const resultRegex = /<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
-  let match;
-  while ((match = resultRegex.exec(html)) !== null && results.length < limit) {
-    let url = match[1];
-    // DDG redirige con //duckduckgo.com/l/?uddg=... - extraer URL real
-    if (url.includes('uddg=')) {
-      const m = url.match(/uddg=([^&]+)/);
-      if (m) url = decodeURIComponent(m[1]);
-    }
-    const title = match[2].replace(/<[^>]*>/g, '').trim();
-    const snippet = match[3].replace(/<[^>]*>/g, '').trim();
-    if (title && url) {
-      results.push({ title, url, description: snippet });
-    }
-  }
-
-  return results;
-}
-
-// Wikipedia REST API (más simple y robusta que la MediaWiki API)
-async function wikipediaRestSearch(query, limit = 10) {
-  const url = `https://es.wikipedia.org/w/rest.php/v1/search/page?q=${encodeURIComponent(query)}&limit=${limit}`;
-  const res = await fetchWithTimeout(url, {
-    headers: { 'User-Agent': 'GoNexWebBridge/1.0' }
-  }, 8000);
-
-  if (!res.ok) throw new Error(`Wikipedia: ${res.status}`);
+  if (!res.ok) throw new Error(`Firecrawl: ${res.status}`);
   const data = await res.json();
 
-  return (data.pages || []).map(p => ({
-    title: p.title,
-    url: `https://es.wikipedia.org/wiki/${encodeURIComponent(p.key)}`,
-    description: p.excerpt ? p.excerpt.replace(/<[^>]*>/g, '') : (p.description || 'Sin descripción')
+  return (data.data || []).map(item => ({
+    title: item.title || 'Sin título',
+    url: item.url || '',
+    description: item.description || item.markdown?.substring(0, 200) || ''
+  }));
+}
+
+// ==========================================================
+// KEENABLE KEYLESS SEARCH
+// ==========================================================
+async function keenableSearch(query, limit = 10) {
+  const res = await fetchWithTimeout('https://api.keenable.ai/v1/search/public', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Keenable-Title': 'GoNexWebBridge'
+    },
+    body: JSON.stringify({ query: query, max_results: limit })
+  }, 10000);
+
+  if (!res.ok) throw new Error(`Keenable: ${res.status}`);
+  const data = await res.json();
+
+  return (data.results || []).map(item => ({
+    title: item.title || 'Sin título',
+    url: item.url || '',
+    description: item.snippet || item.description || ''
   }));
 }
 
@@ -142,63 +137,47 @@ app.get('/api/youtube-search', async (req, res) => {
 });
 
 // ==========================================================
-// Búsqueda Web (Tavily → DDG HTML → Wikipedia)
+// Búsqueda Web (Firecrawl → Keenable → OpenVerse)
 // ==========================================================
 app.get('/api/web-search', async (req, res) => {
   const query = req.query.q;
   if (!query) return res.status(400).json({ error: 'Falta "q".' });
 
-  // 1. Tavily (si hay key)
-  if (TAVILY_API_KEY) {
-    try {
-      const r = await fetchWithTimeout('https://api.tavily.com/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ api_key: TAVILY_API_KEY, query: query.trim(), max_results: 10 })
-      }, 8000);
-      if (r.ok) {
-        const d = await r.json();
-        if (d.results?.length) {
-          return res.json({
-            results: d.results.map(i => ({ title: i.title, url: i.url, description: i.content || '' })),
-            source: 'tavily'
-          });
-        }
-      }
-    } catch (e) { console.error('Tavily error:', e.message); }
-  }
-
-  // 2. DuckDuckGo HTML scraping
+  // 1. Firecrawl Keyless
   try {
-    const results = await duckduckgoHTMLSearch(query.trim(), 10);
+    const results = await firecrawlSearch(query.trim(), 10);
     if (results.length > 0) {
-      return res.json({ results, source: 'duckduckgo' });
+      return res.json({ results, source: 'firecrawl' });
     }
-  } catch (e) { console.error('DDG HTML error:', e.message); }
+  } catch (e) { console.error('Firecrawl error:', e.message); }
 
-  // 3. Wikipedia REST
+  // 2. Keenable Keyless
   try {
-    const results = await wikipediaRestSearch(query.trim(), 10);
-    res.json({ results, source: 'wikipedia' });
-  } catch (e) {
-    console.error('Wiki REST error:', e.message);
-    res.status(500).json({ error: 'No se pudo buscar. Intenta otra consulta.' });
-  }
-});
+    const results = await keenableSearch(query.trim(), 10);
+    if (results.length > 0) {
+      return res.json({ results, source: 'keenable' });
+    }
+  } catch (e) { console.error('Keenable error:', e.message); }
 
-// ==========================================================
-// Wikipedia
-// ==========================================================
-app.get('/api/wiki-search', async (req, res) => {
-  const query = req.query.q;
-  if (!query) return res.status(400).json({ error: 'Falta "q".' });
+  // 3. OpenVerse como último recurso (imágenes)
   try {
-    const results = await wikipediaRestSearch(query.trim(), 15);
-    res.json({ results });
-  } catch (e) {
-    console.error('Wiki error:', e.message);
-    res.status(500).json({ error: 'Error Wikipedia.' });
-  }
+    const r = await fetchWithTimeout(
+      `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query.trim())}&page_size=8`,
+      { headers: { 'User-Agent': 'GoNexWebBridge/1.0' } },
+      8000
+    );
+    if (r.ok) {
+      const d = await r.json();
+      const results = (d.results || []).map(i => ({
+        title: i.title || 'Sin título',
+        url: i.url || '',
+        description: `📷 ${i.creator || 'Desconocido'}${i.license ? ' · ' + i.license : ''}`
+      }));
+      if (results.length > 0) return res.json({ results, source: 'openverse' });
+    }
+  } catch (e) { console.error('OpenVerse error:', e.message); }
+
+  res.status(500).json({ error: 'No se pudo buscar. Intenta otra consulta.' });
 });
 
 // ==========================================================
@@ -211,7 +190,7 @@ app.get('/api/image-search', async (req, res) => {
     const r = await fetchWithTimeout(
       `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query.trim())}&page_size=12`,
       { headers: { 'User-Agent': 'GoNexWebBridge/1.0' } },
-      8000
+      10000
     );
     if (!r.ok) throw new Error(`OpenVerse: ${r.status}`);
     const d = await r.json();
@@ -231,44 +210,26 @@ app.get('/api/image-search', async (req, res) => {
 });
 
 // ==========================================================
-// Respuestas (DDG Instant + fallback DDG HTML)
+// Respuestas rápidas (Firecrawl + filtro)
 // ==========================================================
 app.get('/api/instant-search', async (req, res) => {
   const query = req.query.q;
   if (!query) return res.status(400).json({ error: 'Falta "q".' });
 
   try {
-    const r = await fetchWithTimeout(
-      `https://api.duckduckgo.com/?q=${encodeURIComponent(query.trim())}&format=json&no_html=1&skip_disambig=1`,
-      { headers: { 'User-Agent': 'GoNexWebBridge/1.0' } },
-      6000
-    );
-    const d = await r.json();
-    const results = [];
-
-    if (d.AbstractText && d.AbstractURL) {
-      results.push({ title: d.Heading || query, url: d.AbstractURL, description: d.AbstractText });
+    const results = await firecrawlSearch(query.trim(), 6);
+    if (results.length > 0) {
+      return res.json({ results, source: 'firecrawl' });
     }
-    (d.RelatedTopics || []).slice(0, 8).forEach(t => {
-      if (t.Text && t.FirstURL) {
-        results.push({ title: t.Text.substring(0, 80), url: t.FirstURL, description: t.Text });
-      }
-    });
+  } catch (e) { console.error('Firecrawl instant error:', e.message); }
 
-    if (results.length > 0) return res.json({ results, source: 'ddg-instant' });
-
-    // Fallback: DDG HTML
-    const htmlResults = await duckduckgoHTMLSearch(query.trim(), 8);
-    res.json({ results: htmlResults, source: 'duckduckgo' });
+  // Fallback: Keenable
+  try {
+    const results = await keenableSearch(query.trim(), 6);
+    res.json({ results, source: 'keenable' });
   } catch (e) {
-    console.error('Instant error:', e.message);
-    // Último recurso: DDG HTML
-    try {
-      const htmlResults = await duckduckgoHTMLSearch(query.trim(), 8);
-      return res.json({ results: htmlResults });
-    } catch (e2) {
-      res.status(500).json({ error: 'Error al buscar respuestas.' });
-    }
+    console.error('Keenable instant error:', e.message);
+    res.status(500).json({ error: 'Error al buscar respuestas.' });
   }
 });
 

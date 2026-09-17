@@ -48,11 +48,6 @@
     .video-card img { width: 100%; height: 120px; object-fit: cover; }
     .video-card h3 { font-size: 0.85rem; padding: 10px; line-height: 1.3; }
     .video-card p { font-size: 0.75rem; color: #94a3b8; padding: 0 10px 10px; }
-    .web-card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; padding: 16px; cursor: pointer; transition: transform 0.2s; color: inherit; display: block; backdrop-filter: blur(10px); }
-    .web-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
-    .web-card h3 { font-size: 0.95rem; margin-bottom: 8px; color: var(--badge-color); line-height: 1.3; }
-    .web-card .web-url { font-size: 0.7rem; color: #64748b; margin-bottom: 8px; word-break: break-all; }
-    .web-card p { font-size: 0.8rem; color: #94a3b8; line-height: 1.4; }
     .image-card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
     .image-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
     .image-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
@@ -84,7 +79,6 @@
     .web-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
     .web-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; }
 
-    /* Imagen preview modal */
     .image-preview-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(8px); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
     .image-preview-modal.active { display: flex; }
     .image-preview-card { width: 100%; max-width: 900px; max-height: 90vh; background: #161b26; border: 1px solid #2d3748; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
@@ -154,31 +148,23 @@
 
   <div class="search-container">
     <form id="search-form" class="search-box">
-      <input id="search-input" type="text" placeholder="Busca en la web, Wikipedia, imágenes, YouTube..." required />
+      <input id="search-input" type="text" placeholder="Busca en Google, imágenes, YouTube..." required />
       <button type="submit">Buscar</button>
     </form>
   </div>
 
   <div class="filters">
-    <button class="filter-btn active" data-mode="web" onclick="setMode('web')">🌐 Web</button>
-    <button class="filter-btn" data-mode="wiki" onclick="setMode('wiki')">📚 Wikipedia</button>
+    <button class="filter-btn active" data-mode="google" onclick="setMode('google')">🔍 Google</button>
     <button class="filter-btn" data-mode="image" onclick="setMode('image')">🖼️ Imágenes</button>
-    <button class="filter-btn" data-mode="instant" onclick="setMode('instant')">💡 Respuestas</button>
     <button class="filter-btn" data-mode="youtube" onclick="setMode('youtube')">📺 YouTube</button>
   </div>
 
   <div class="grid">
-    <div class="card" onclick="setMode('web'); handleInput('noticias de tecnología')">
-      <div class="icon">🌐</div><div class="title">Web Search</div><div class="badge">MULTI</div>
-    </div>
-    <div class="card" onclick="setMode('wiki'); handleInput('Inteligencia artificial')">
-      <div class="icon">📚</div><div class="title">Wikipedia</div><div class="badge">WIKI</div>
+    <div class="card" onclick="setMode('google'); handleInput('noticias de tecnología')">
+      <div class="icon">🔍</div><div class="title">Google Search</div><div class="badge">DIRECTO ↗</div>
     </div>
     <div class="card" onclick="setMode('image'); handleInput('playa al atardecer')">
       <div class="icon">🖼️</div><div class="title">Imágenes</div><div class="badge">OPENVERSE</div>
-    </div>
-    <div class="card" onclick="setMode('instant'); handleInput('qué es javascript')">
-      <div class="icon">💡</div><div class="title">Respuestas</div><div class="badge">DDG</div>
     </div>
     <div class="card" onclick="setMode('youtube'); handleInput('musica')">
       <div class="icon">📺</div><div class="title">YouTube</div><div class="badge">VIDEOS</div>
@@ -186,11 +172,17 @@
     <div class="card" onclick="openExternal('https://classroom.google.com')">
       <div class="icon">🏫</div><div class="title">Classroom</div><div class="badge">DIRECTO ↗</div>
     </div>
-    <div class="card" onclick="openExternal('https://www.google.com')">
-      <div class="icon">🔍</div><div class="title">Google</div><div class="badge">DIRECTO ↗</div>
-    </div>
     <div class="card" onclick="openExternal('https://github.com')">
       <div class="icon">💻</div><div class="title">GitHub</div><div class="badge">DIRECTO ↗</div>
+    </div>
+    <div class="card" onclick="openExternal('https://www.reddit.com')">
+      <div class="icon">💬</div><div class="title">Reddit</div><div class="badge">DIRECTO ↗</div>
+    </div>
+    <div class="card" onclick="openExternal('https://open.spotify.com')">
+      <div class="icon">🎵</div><div class="title">Spotify</div><div class="badge">DIRECTO ↗</div>
+    </div>
+    <div class="card" onclick="openExternal('https://es.wikipedia.org')">
+      <div class="icon">📚</div><div class="title">Wikipedia</div><div class="badge">DIRECTO ↗</div>
     </div>
   </div>
 
@@ -202,24 +194,6 @@
 
   <div id="results-container" class="results-container"></div>
 
-  <div id="web-viewer-modal" class="modal">
-    <div class="modal-header">
-      <span>Visor GoNex</span>
-      <div class="viewer-actions">
-        <a id="viewer-open-external" href="#" target="_blank">Abrir fuera ↗</a>
-        <button class="btn-close" onclick="closeModal('web-viewer-modal')">Cerrar ✕</button>
-      </div>
-    </div>
-    <div class="web-viewer-wrapper">
-      <div id="web-viewer-loading" class="web-viewer-loading">
-        <p>Cargando página...</p>
-        <p style="font-size: 0.75rem;">Si tarda mucho, es posible que el sitio bloquee la visualización integrada.</p>
-      </div>
-      <iframe id="web-viewer-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-    </div>
-  </div>
-
-  <!-- Modal de vista previa de imagen -->
   <div id="image-preview-modal" class="image-preview-modal" onclick="if(event.target===this)closeImagePreview()">
     <div class="image-preview-card">
       <img id="image-preview-img" src="" alt="Vista previa" />
@@ -269,15 +243,8 @@
   </div>
 
   <script>
-    // ==========================================================
-    // ABRIR EXTERNO (para Google, GitHub, Classroom)
-    // ==========================================================
     function openExternal(url) { window.open(url, '_blank'); }
-    function openClassroom() { window.open('https://classroom.google.com', '_blank'); }
 
-    // ==========================================================
-    // TEMAS
-    // ==========================================================
     const THEMES = ['purple', 'red', 'pink', 'black', 'blue'];
     function applyTheme(theme) {
       THEMES.forEach(t => document.body.classList.remove('theme-' + t));
@@ -287,9 +254,6 @@
     function setTheme(theme) { applyTheme(theme); localStorage.setItem('gonex-theme', theme); }
     function loadSavedTheme() { applyTheme(localStorage.getItem('gonex-theme') || 'purple'); }
 
-    // ==========================================================
-    // FONDOS
-    // ==========================================================
     const PHOTO_IDS = ['photo-1477959858617-67f85cf4f1df','photo-1480714378408-67cf0d13bc1b','photo-1449824913935-59a10b8d2000','photo-1519501025264-65ba15a82390','photo-1502602898657-3e91760cbb34','photo-1444723121867-7a241cacace9','photo-1533929736458-ca588d08c8be','photo-1493246507139-91e8fad9978e','photo-1508050919630-b135583b29ab','photo-1514565131-fce0801e5785','photo-1493514789931-586cb221d7a7','photo-1470004914212-05527e49370b'];
     function buildWallpaperUrl(id) { return `https://wsrv.nl/?url=images.unsplash.com/${id}?w=1920&q=80&auto=format&fit=crop`; }
     function applyWallpaper(url) { document.body.style.backgroundImage = `url('${url}')`; const p = document.getElementById('settings-preview'); if (p) p.style.backgroundImage = `url('${url}')`; }
@@ -308,15 +272,9 @@
     }
     function resetWallpaper() { localStorage.removeItem('gonex-wallpaper'); setRandomWallpaper(); }
 
-    // ==========================================================
-    // AJUSTES
-    // ==========================================================
     function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
     function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
 
-    // ==========================================================
-    // RELOJ + CLIMA
-    // ==========================================================
     function updateClock() {
       const n = new Date();
       document.getElementById('info-date').textContent = n.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -342,9 +300,6 @@
       } catch (e) { el.textContent = 'Clima no disponible'; }
     }
 
-    // ==========================================================
-    // RELOJ MUNDIAL
-    // ==========================================================
     const CITIES = [{ name: 'Lima', tz: 'America/Lima' }, { name: 'Nueva York', tz: 'America/New_York' }, { name: 'Madrid', tz: 'Europe/Madrid' }, { name: 'Tokio', tz: 'Asia/Tokyo' }, { name: 'Sídney', tz: 'Australia/Sydney' }, { name: 'Londres', tz: 'Europe/London' }];
     function renderClockList() {
       const list = document.getElementById('clock-list');
@@ -365,15 +320,9 @@
     }
     function closeWorldClock() { document.getElementById('world-clock-modal').classList.remove('active'); if (window.worldClockInterval) clearInterval(window.worldClockInterval); }
 
-    // ==========================================================
-    // FRASES
-    // ==========================================================
     const QUOTES = ['El éxito es la suma de pequeños esfuerzos repetidos día tras día.','No cuentes los días, haz que los días cuenten.','La mejor manera de predecir el futuro es crearlo.','El único modo de hacer un gran trabajo es amar lo que haces.','La disciplina es el puente entre las metas y los logros.','El conocimiento es poder.','Cree en ti mismo y todo será posible.','Cada día es una nueva oportunidad para cambiar tu vida.','La perseverancia es la clave del éxito.'];
     function setRandomQuote() { document.getElementById('quote-box').textContent = `"${QUOTES[Math.floor(Math.random() * QUOTES.length)]}"`; }
 
-    // ==========================================================
-    // SECRETO
-    // ==========================================================
     const SECRET_CODE = 'gonex2026';
     const SECRET_BUTTONS = [
       { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed' },
@@ -396,9 +345,6 @@
     function hideSecretPanel() { document.getElementById('secret-panel').classList.remove('active'); }
     function toggleSecretPanel() { const p = document.getElementById('secret-panel'); if (p.classList.contains('active')) hideSecretPanel(); else showSecretPanel(); }
 
-    // ==========================================================
-    // VISOR WEB
-    // ==========================================================
     function openWebViewer(url) {
       const iframe = document.getElementById('web-viewer-iframe');
       const loading = document.getElementById('web-viewer-loading');
@@ -413,9 +359,6 @@
       setTimeout(() => { if (iframe.style.display === 'none') loading.innerHTML = '<p style="color:#ef4444;">El sitio está tardando en responder.</p><p style="font-size:0.8rem;">Puedes intentar con "Abrir fuera ↗"</p>'; }, 8000);
     }
 
-    // ==========================================================
-    // VISTA PREVIA DE IMAGEN
-    // ==========================================================
     function openImagePreview(img) {
       document.getElementById('image-preview-img').src = img.url;
       document.getElementById('image-preview-title').textContent = img.title;
@@ -428,10 +371,7 @@
       document.getElementById('image-preview-img').src = '';
     }
 
-    // ==========================================================
-    // MODOS
-    // ==========================================================
-    var currentMode = 'web';
+    var currentMode = 'google';
     function setMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
@@ -442,9 +382,12 @@
       return m ? m[1] : null;
     }
 
-    // ==========================================================
-    // BÚSQUEDAS
-    // ==========================================================
+    // GOOGLE (abre en pestaña nueva)
+    function searchGoogle(query) {
+      window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+    }
+
+    // YOUTUBE
     async function searchYouTube(query) {
       const c = document.getElementById('results-container');
       c.innerHTML = '<p style="color:#94a3b8;">Buscando en YouTube...</p>';
@@ -468,42 +411,7 @@
       });
     }
 
-    async function searchWeb(query) {
-      const c = document.getElementById('results-container');
-      c.innerHTML = '<p style="color:#94a3b8;">Buscando en la web...</p>';
-      try {
-        const r = await fetch(`/api/web-search?q=${encodeURIComponent(query)}`);
-        const ct = r.headers.get('content-type') || '';
-        if (!ct.includes('application/json')) throw new Error('Respuesta no JSON.');
-        const d = await r.json();
-        if (!r.ok) throw new Error(d.error || `Error ${r.status}`);
-        displayWebResults(d.results);
-      } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
-    }
-    function displayWebResults(results) {
-      const c = document.getElementById('results-container');
-      c.innerHTML = '';
-      if (!results?.length) { c.innerHTML = '<p style="color:#94a3b8;">Sin resultados.</p>'; return; }
-      results.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'web-card';
-        card.innerHTML = `<h3>${item.title}</h3><div class="web-url">${item.url}</div><p>${item.description}</p>`;
-        card.addEventListener('click', () => openWebViewer(item.url));
-        c.appendChild(card);
-      });
-    }
-
-    async function searchWiki(query) {
-      const c = document.getElementById('results-container');
-      c.innerHTML = '<p style="color:#94a3b8;">Buscando en Wikipedia...</p>';
-      try {
-        const r = await fetch(`/api/wiki-search?q=${encodeURIComponent(query)}`);
-        if (!r.ok) throw new Error(`Error ${r.status}`);
-        const d = await r.json();
-        displayWebResults(d.results);
-      } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
-    }
-
+    // IMÁGENES
     async function searchImages(query) {
       const c = document.getElementById('results-container');
       c.innerHTML = '<p style="color:#94a3b8;">Buscando imágenes...</p>';
@@ -533,20 +441,6 @@
       });
     }
 
-    async function searchInstant(query) {
-      const c = document.getElementById('results-container');
-      c.innerHTML = '<p style="color:#94a3b8;">Buscando respuestas...</p>';
-      try {
-        const r = await fetch(`/api/instant-search?q=${encodeURIComponent(query)}`);
-        if (!r.ok) throw new Error(`Error ${r.status}`);
-        const d = await r.json();
-        displayWebResults(d.results);
-      } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
-    }
-
-    // ==========================================================
-    // FLUJO PRINCIPAL
-    // ==========================================================
     function handleInput(input) {
       const clean = input.trim();
       if (clean.toLowerCase() === SECRET_CODE.toLowerCase()) { toggleSecretPanel(); return; }
@@ -554,21 +448,12 @@
       if (ytId) { window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank'); return; }
       if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
-        const externos = ['classroom.google.com','sites.google.com','accounts.google.com','mail.google.com','drive.google.com','docs.google.com','calendar.google.com','meet.google.com','google.com','github.com'];
-        if (externos.some(d => url.includes(d))) window.open(url, '_blank');
-        else openWebViewer(url);
+        window.open(url, '_blank');
         return;
       }
       if (currentMode === 'youtube') searchYouTube(clean);
-      else if (currentMode === 'wiki') searchWiki(clean);
       else if (currentMode === 'image') searchImages(clean);
-      else if (currentMode === 'instant') searchInstant(clean);
-      else searchWeb(clean);
-    }
-
-    function closeModal(id) {
-      if (id === 'web-viewer-modal') document.getElementById('web-viewer-iframe').src = 'about:blank';
-      document.getElementById(id).classList.remove('active');
+      else searchGoogle(clean);
     }
 
     document.getElementById('search-form').addEventListener('submit', function (e) { e.preventDefault(); handleInput(document.getElementById('search-input').value); });
