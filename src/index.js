@@ -136,11 +136,9 @@ app.post('/api/browser-session', async (req, res) => {
 
   try {
     const session = await steel.sessions.create({
-      useProxy: true,
-      solveCaptcha: true,
-      timeout: 1800000, // 30 minutos
-      inactivityTimeout: 300000 // 5 min
-    });
+  timeout: 1800000,
+  inactivityTimeout: 300000
+});
 
     console.log('[Steel] Sesión creada:', session.id);
     res.json({
