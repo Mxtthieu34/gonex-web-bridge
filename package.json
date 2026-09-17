@@ -2,7 +2,7 @@
   "name": "gonex-web-bridge",
   "version": "1.0.0",
   "private": true,
-  "description": "Mininavegador web híbrido con búsqueda de YouTube, Tavily y proxy inverso.",
+  "description": "Mininavegador web híbrido con navegador en la nube (Steel.dev).",
   "main": "src/index.js",
   "engines": {
     "node": ">=18.x"
@@ -13,7 +13,7 @@
   "dependencies": {
     "express": "^5.0.0",
     "ytube-noapi": "^1.0.0",
-    "cheerio": "^1.0.0"
+    "steel-sdk": "^0.18.0"
   },
   "keywords": [
     "express",
@@ -21,7 +21,8 @@
     "serverless",
     "youtube-search",
     "web-bridge",
-    "proxy"
+    "cloud-browser",
+    "steel"
   ],
   "license": "MIT"
 }

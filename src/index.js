@@ -1,9 +1,10 @@
 // src/index.js
-// GoNex Web Bridge — Backend con Firecrawl Keyless + Keenable
+// GoNex Web Bridge — Backend con navegador en la nube (Steel.dev)
 
 const express = require('express');
 const path = require('path');
 const { YTubeNoAPI } = require('ytube-noapi');
+const Steel = require('steel-sdk');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,11 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 const publicPath = path.join(__dirname, '..', 'public');
 const youtube = new YTubeNoAPI();
+
+// Cliente de Steel
+const steel = process.env.STEEL_API_KEY
+  ? new Steel({ steelAPIKey: process.env.STEEL_API_KEY })
+  : null;
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
@@ -29,8 +35,8 @@ app.use((req, res, next) => {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
-    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com",
-    "connect-src 'self' https://www.youtube.com https://api.firecrawl.dev https://api.keenable.ai https://api.openverse.org https://geocoding-api.open-meteo.com https://api.open-meteo.com",
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com https://*.steel.dev",
+    "connect-src 'self' https://www.youtube.com https://api.steel.dev https://api.openverse.org https://geocoding-api.open-meteo.com https://api.open-meteo.com",
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'"
@@ -67,54 +73,7 @@ async function fetchWithTimeout(url, options = {}, timeout = 10000) {
 }
 
 // ==========================================================
-// FIRECRAWL KEYLESS SEARCH
-// ==========================================================
-async function firecrawlSearch(query, limit = 10) {
-  const res = await fetchWithTimeout('https://api.firecrawl.dev/v2/search', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: query,
-      limit: limit,
-      sources: ['web']
-    })
-  }, 12000);
-
-  if (!res.ok) throw new Error(`Firecrawl: ${res.status}`);
-  const data = await res.json();
-
-  return (data.data || []).map(item => ({
-    title: item.title || 'Sin título',
-    url: item.url || '',
-    description: item.description || item.markdown?.substring(0, 200) || ''
-  }));
-}
-
-// ==========================================================
-// KEENABLE KEYLESS SEARCH
-// ==========================================================
-async function keenableSearch(query, limit = 10) {
-  const res = await fetchWithTimeout('https://api.keenable.ai/v1/search/public', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Keenable-Title': 'GoNexWebBridge'
-    },
-    body: JSON.stringify({ query: query, max_results: limit })
-  }, 10000);
-
-  if (!res.ok) throw new Error(`Keenable: ${res.status}`);
-  const data = await res.json();
-
-  return (data.results || []).map(item => ({
-    title: item.title || 'Sin título',
-    url: item.url || '',
-    description: item.snippet || item.description || ''
-  }));
-}
-
-// ==========================================================
-// YouTube
+// 1. YouTube Search
 // ==========================================================
 app.get('/api/youtube-search', async (req, res) => {
   const query = req.query.q;
@@ -137,51 +96,7 @@ app.get('/api/youtube-search', async (req, res) => {
 });
 
 // ==========================================================
-// Búsqueda Web (Firecrawl → Keenable → OpenVerse)
-// ==========================================================
-app.get('/api/web-search', async (req, res) => {
-  const query = req.query.q;
-  if (!query) return res.status(400).json({ error: 'Falta "q".' });
-
-  // 1. Firecrawl Keyless
-  try {
-    const results = await firecrawlSearch(query.trim(), 10);
-    if (results.length > 0) {
-      return res.json({ results, source: 'firecrawl' });
-    }
-  } catch (e) { console.error('Firecrawl error:', e.message); }
-
-  // 2. Keenable Keyless
-  try {
-    const results = await keenableSearch(query.trim(), 10);
-    if (results.length > 0) {
-      return res.json({ results, source: 'keenable' });
-    }
-  } catch (e) { console.error('Keenable error:', e.message); }
-
-  // 3. OpenVerse como último recurso (imágenes)
-  try {
-    const r = await fetchWithTimeout(
-      `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query.trim())}&page_size=8`,
-      { headers: { 'User-Agent': 'GoNexWebBridge/1.0' } },
-      8000
-    );
-    if (r.ok) {
-      const d = await r.json();
-      const results = (d.results || []).map(i => ({
-        title: i.title || 'Sin título',
-        url: i.url || '',
-        description: `📷 ${i.creator || 'Desconocido'}${i.license ? ' · ' + i.license : ''}`
-      }));
-      if (results.length > 0) return res.json({ results, source: 'openverse' });
-    }
-  } catch (e) { console.error('OpenVerse error:', e.message); }
-
-  res.status(500).json({ error: 'No se pudo buscar. Intenta otra consulta.' });
-});
-
-// ==========================================================
-// Imágenes (OpenVerse)
+// 2. Imágenes (OpenVerse)
 // ==========================================================
 app.get('/api/image-search', async (req, res) => {
   const query = req.query.q;
@@ -210,26 +125,48 @@ app.get('/api/image-search', async (req, res) => {
 });
 
 // ==========================================================
-// Respuestas rápidas (Firecrawl + filtro)
+// 3. NAVEGADOR EN LA NUBE — Crear sesión Steel
 // ==========================================================
-app.get('/api/instant-search', async (req, res) => {
-  const query = req.query.q;
-  if (!query) return res.status(400).json({ error: 'Falta "q".' });
+app.post('/api/browser-session', async (req, res) => {
+  if (!steel) {
+    return res.status(500).json({ error: 'STEEL_API_KEY no configurada.' });
+  }
+  const { url } = req.body || {};
+  const startUrl = url && url.startsWith('http') ? url : 'https://www.google.com';
 
   try {
-    const results = await firecrawlSearch(query.trim(), 6);
-    if (results.length > 0) {
-      return res.json({ results, source: 'firecrawl' });
-    }
-  } catch (e) { console.error('Firecrawl instant error:', e.message); }
+    const session = await steel.sessions.create({
+      useProxy: true,
+      solveCaptcha: true,
+      timeout: 1800000, // 30 minutos
+      inactivityTimeout: 300000 // 5 min
+    });
 
-  // Fallback: Keenable
-  try {
-    const results = await keenableSearch(query.trim(), 6);
-    res.json({ results, source: 'keenable' });
+    console.log('[Steel] Sesión creada:', session.id);
+    res.json({
+      sessionId: session.id,
+      debugUrl: session.debugUrl,
+      sessionViewerUrl: session.sessionViewerUrl
+    });
   } catch (e) {
-    console.error('Keenable instant error:', e.message);
-    res.status(500).json({ error: 'Error al buscar respuestas.' });
+    console.error('[Steel] Error creando sesión:', e.message);
+    res.status(500).json({ error: 'No se pudo crear el navegador en la nube.' });
+  }
+});
+
+// ==========================================================
+// 4. Cerrar sesión Steel (para no gastar horas)
+// ==========================================================
+app.post('/api/browser-session/close', async (req, res) => {
+  const { sessionId } = req.body || {};
+  if (!sessionId) return res.status(400).json({ error: 'Falta sessionId.' });
+  try {
+    await steel.sessions.release(sessionId);
+    console.log('[Steel] Sesión cerrada:', sessionId);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('[Steel] Error cerrando sesión:', e.message);
+    res.status(500).json({ error: 'Error cerrando sesión.' });
   }
 });
 

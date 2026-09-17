@@ -70,14 +70,14 @@
     .secret-btn .external-badge { position: absolute; top: 4px; right: 4px; font-size: 0.6rem; background: #64748b; color: #fff; padding: 2px 5px; border-radius: 4px; }
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     .modal.active { display: flex; }
-    .modal-header { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .modal-header { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .btn-close { background: #2d3748; border: none; color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     .btn-close:hover { background: #ef4444; }
     .viewer-actions { display: flex; gap: 10px; align-items: center; }
     .viewer-actions a { color: var(--badge-color); text-decoration: none; font-size: 0.85rem; }
-    .web-viewer-wrapper { width: 100%; max-width: 1000px; height: 78vh; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
-    .web-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
-    .web-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; }
+    .browser-viewer-wrapper { width: 100%; max-width: 1200px; height: 82vh; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
+    .browser-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
+    .browser-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; }
 
     .image-preview-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(8px); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
     .image-preview-modal.active { display: flex; }
@@ -148,20 +148,20 @@
 
   <div class="search-container">
     <form id="search-form" class="search-box">
-      <input id="search-input" type="text" placeholder="Busca en Google, imágenes, YouTube..." required />
+      <input id="search-input" type="text" placeholder="Busca en Google (navegador en la nube), imágenes o YouTube..." required />
       <button type="submit">Buscar</button>
     </form>
   </div>
 
   <div class="filters">
-    <button class="filter-btn active" data-mode="google" onclick="setMode('google')">🔍 Google</button>
+    <button class="filter-btn active" data-mode="browser" onclick="setMode('browser')">🌐 Navegador</button>
     <button class="filter-btn" data-mode="image" onclick="setMode('image')">🖼️ Imágenes</button>
     <button class="filter-btn" data-mode="youtube" onclick="setMode('youtube')">📺 YouTube</button>
   </div>
 
   <div class="grid">
-    <div class="card" onclick="setMode('google'); handleInput('noticias de tecnología')">
-      <div class="icon">🔍</div><div class="title">Google Search</div><div class="badge">DIRECTO ↗</div>
+    <div class="card" onclick="openBrowser('https://www.google.com')">
+      <div class="icon">🌐</div><div class="title">Navegador en la Nube</div><div class="badge">STEEL.DEV</div>
     </div>
     <div class="card" onclick="setMode('image'); handleInput('playa al atardecer')">
       <div class="icon">🖼️</div><div class="title">Imágenes</div><div class="badge">OPENVERSE</div>
@@ -193,6 +193,24 @@
   </div>
 
   <div id="results-container" class="results-container"></div>
+
+  <!-- Modal del Navegador en la Nube -->
+  <div id="browser-modal" class="modal">
+    <div class="modal-header">
+      <span>Navegador en la Nube — Steel.dev</span>
+      <div class="viewer-actions">
+        <a id="browser-external" href="#" target="_blank">Abrir fuera ↗</a>
+        <button class="btn-close" onclick="closeBrowser()">Cerrar ✕</button>
+      </div>
+    </div>
+    <div class="browser-viewer-wrapper">
+      <div id="browser-loading" class="browser-viewer-loading">
+        <p>Iniciando navegador en la nube...</p>
+        <p style="font-size: 0.75rem;">Esto puede tardar unos segundos.</p>
+      </div>
+      <iframe id="browser-iframe" src="" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
+    </div>
+  </div>
 
   <div id="image-preview-modal" class="image-preview-modal" onclick="if(event.target===this)closeImagePreview()">
     <div class="image-preview-card">
@@ -245,6 +263,67 @@
   <script>
     function openExternal(url) { window.open(url, '_blank'); }
 
+    // ==========================================================
+    // NAVEGADOR EN LA NUBE (Steel.dev)
+    // ==========================================================
+    var currentSessionId = null;
+
+    async function openBrowser(url) {
+      const modal = document.getElementById('browser-modal');
+      const loading = document.getElementById('browser-loading');
+      const iframe = document.getElementById('browser-iframe');
+      const externalLink = document.getElementById('browser-external');
+
+      modal.classList.add('active');
+      loading.style.display = 'flex';
+      iframe.style.display = 'none';
+      iframe.src = '';
+      externalLink.href = url || 'https://www.google.com';
+
+      try {
+        const r = await fetch('/api/browser-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: url || 'https://www.google.com' })
+        });
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({}));
+          throw new Error(err.error || `Error ${r.status}`);
+        }
+        const data = await r.json();
+        currentSessionId = data.sessionId;
+
+        // El debugUrl de Steel permite interacción mediante ?interactive=true
+        const interactiveUrl = data.debugUrl + (data.debugUrl.includes('?') ? '&' : '?') + 'interactive=true';
+        iframe.src = interactiveUrl;
+        loading.style.display = 'none';
+        iframe.style.display = 'block';
+        externalLink.href = interactiveUrl;
+        console.log('[Steel] Sesión activa:', data.sessionId);
+      } catch (e) {
+        loading.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p><p style="font-size:0.8rem;">Verifica que STEEL_API_KEY esté configurada en Vercel.</p>`;
+      }
+    }
+
+    async function closeBrowser() {
+      document.getElementById('browser-modal').classList.remove('active');
+      document.getElementById('browser-iframe').src = 'about:blank';
+      if (currentSessionId) {
+        try {
+          await fetch('/api/browser-session/close', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: currentSessionId })
+          });
+          console.log('[Steel] Sesión liberada:', currentSessionId);
+        } catch (e) { console.warn('No se pudo liberar la sesión:', e.message); }
+        currentSessionId = null;
+      }
+    }
+
+    // ==========================================================
+    // TEMAS
+    // ==========================================================
     const THEMES = ['purple', 'red', 'pink', 'black', 'blue'];
     function applyTheme(theme) {
       THEMES.forEach(t => document.body.classList.remove('theme-' + t));
@@ -254,6 +333,9 @@
     function setTheme(theme) { applyTheme(theme); localStorage.setItem('gonex-theme', theme); }
     function loadSavedTheme() { applyTheme(localStorage.getItem('gonex-theme') || 'purple'); }
 
+    // ==========================================================
+    // FONDOS
+    // ==========================================================
     const PHOTO_IDS = ['photo-1477959858617-67f85cf4f1df','photo-1480714378408-67cf0d13bc1b','photo-1449824913935-59a10b8d2000','photo-1519501025264-65ba15a82390','photo-1502602898657-3e91760cbb34','photo-1444723121867-7a241cacace9','photo-1533929736458-ca588d08c8be','photo-1493246507139-91e8fad9978e','photo-1508050919630-b135583b29ab','photo-1514565131-fce0801e5785','photo-1493514789931-586cb221d7a7','photo-1470004914212-05527e49370b'];
     function buildWallpaperUrl(id) { return `https://wsrv.nl/?url=images.unsplash.com/${id}?w=1920&q=80&auto=format&fit=crop`; }
     function applyWallpaper(url) { document.body.style.backgroundImage = `url('${url}')`; const p = document.getElementById('settings-preview'); if (p) p.style.backgroundImage = `url('${url}')`; }
@@ -272,9 +354,15 @@
     }
     function resetWallpaper() { localStorage.removeItem('gonex-wallpaper'); setRandomWallpaper(); }
 
+    // ==========================================================
+    // AJUSTES
+    // ==========================================================
     function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
     function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
 
+    // ==========================================================
+    // RELOJ + CLIMA
+    // ==========================================================
     function updateClock() {
       const n = new Date();
       document.getElementById('info-date').textContent = n.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -300,6 +388,9 @@
       } catch (e) { el.textContent = 'Clima no disponible'; }
     }
 
+    // ==========================================================
+    // RELOJ MUNDIAL
+    // ==========================================================
     const CITIES = [{ name: 'Lima', tz: 'America/Lima' }, { name: 'Nueva York', tz: 'America/New_York' }, { name: 'Madrid', tz: 'Europe/Madrid' }, { name: 'Tokio', tz: 'Asia/Tokyo' }, { name: 'Sídney', tz: 'Australia/Sydney' }, { name: 'Londres', tz: 'Europe/London' }];
     function renderClockList() {
       const list = document.getElementById('clock-list');
@@ -320,9 +411,15 @@
     }
     function closeWorldClock() { document.getElementById('world-clock-modal').classList.remove('active'); if (window.worldClockInterval) clearInterval(window.worldClockInterval); }
 
+    // ==========================================================
+    // FRASES
+    // ==========================================================
     const QUOTES = ['El éxito es la suma de pequeños esfuerzos repetidos día tras día.','No cuentes los días, haz que los días cuenten.','La mejor manera de predecir el futuro es crearlo.','El único modo de hacer un gran trabajo es amar lo que haces.','La disciplina es el puente entre las metas y los logros.','El conocimiento es poder.','Cree en ti mismo y todo será posible.','Cada día es una nueva oportunidad para cambiar tu vida.','La perseverancia es la clave del éxito.'];
     function setRandomQuote() { document.getElementById('quote-box').textContent = `"${QUOTES[Math.floor(Math.random() * QUOTES.length)]}"`; }
 
+    // ==========================================================
+    // SECRETO
+    // ==========================================================
     const SECRET_CODE = 'gonex2026';
     const SECRET_BUTTONS = [
       { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed' },
@@ -345,20 +442,25 @@
     function hideSecretPanel() { document.getElementById('secret-panel').classList.remove('active'); }
     function toggleSecretPanel() { const p = document.getElementById('secret-panel'); if (p.classList.contains('active')) hideSecretPanel(); else showSecretPanel(); }
 
+    // ==========================================================
+    // VISOR WEB (para Canva)
+    // ==========================================================
     function openWebViewer(url) {
       const iframe = document.getElementById('web-viewer-iframe');
       const loading = document.getElementById('web-viewer-loading');
       const externalLink = document.getElementById('viewer-open-external');
       document.getElementById('web-viewer-modal').classList.add('active');
       loading.style.display = 'flex';
-      loading.innerHTML = '<p>Cargando página...</p><p style="font-size:0.75rem;">Si tarda mucho, es posible que el sitio bloquee la visualización.</p>';
+      loading.innerHTML = '<p>Cargando página...</p>';
       iframe.style.display = 'none';
       externalLink.href = url;
       iframe.src = url;
       iframe.onload = function () { loading.style.display = 'none'; iframe.style.display = 'block'; };
-      setTimeout(() => { if (iframe.style.display === 'none') loading.innerHTML = '<p style="color:#ef4444;">El sitio está tardando en responder.</p><p style="font-size:0.8rem;">Puedes intentar con "Abrir fuera ↗"</p>'; }, 8000);
     }
 
+    // ==========================================================
+    // VISTA PREVIA DE IMAGEN
+    // ==========================================================
     function openImagePreview(img) {
       document.getElementById('image-preview-img').src = img.url;
       document.getElementById('image-preview-title').textContent = img.title;
@@ -371,7 +473,10 @@
       document.getElementById('image-preview-img').src = '';
     }
 
-    var currentMode = 'google';
+    // ==========================================================
+    // MODOS
+    // ==========================================================
+    var currentMode = 'browser';
     function setMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
@@ -382,12 +487,9 @@
       return m ? m[1] : null;
     }
 
-    // GOOGLE (abre en pestaña nueva)
-    function searchGoogle(query) {
-      window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
-    }
-
-    // YOUTUBE
+    // ==========================================================
+    // BÚSQUEDAS
+    // ==========================================================
     async function searchYouTube(query) {
       const c = document.getElementById('results-container');
       c.innerHTML = '<p style="color:#94a3b8;">Buscando en YouTube...</p>';
@@ -411,7 +513,6 @@
       });
     }
 
-    // IMÁGENES
     async function searchImages(query) {
       const c = document.getElementById('results-container');
       c.innerHTML = '<p style="color:#94a3b8;">Buscando imágenes...</p>';
@@ -448,12 +549,13 @@
       if (ytId) { window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank'); return; }
       if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
+        if (currentMode === 'browser') { openBrowser(url); return; }
         window.open(url, '_blank');
         return;
       }
       if (currentMode === 'youtube') searchYouTube(clean);
       else if (currentMode === 'image') searchImages(clean);
-      else searchGoogle(clean);
+      else openBrowser(`https://www.google.com/search?q=${encodeURIComponent(clean)}`);
     }
 
     document.getElementById('search-form').addEventListener('submit', function (e) { e.preventDefault(); handleInput(document.getElementById('search-input').value); });
