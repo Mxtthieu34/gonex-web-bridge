@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend con múltiples motores de búsqueda
+// GoNex Web Bridge — Backend con búsqueda robusta
 
 const express = require('express');
 const path = require('path');
@@ -13,37 +13,26 @@ const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 const publicPath = path.join(__dirname, '..', 'public');
 const youtube = new YTubeNoAPI();
 
-// User-Agent requerido por Wikipedia y otros servicios
-const USER_AGENT = 'GoNexWebBridge/1.0 (https://gonex-web-bridge.vercel.app)';
-
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
-// ==========================================================
-// MIDDLEWARE DE SEGURIDAD
-// ==========================================================
 app.use((req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-
-  res.setHeader(
-    'Content-Security-Policy',
-    [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: https:",
-      "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com",
-      "connect-src 'self' https://www.youtube.com https://api.tavily.com https://es.wikipedia.org https://api.openverse.org https://api.duckduckgo.com https://geocoding-api.open-meteo.com https://api.open-meteo.com",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "object-src 'none'"
-    ].join('; ')
-  );
-
+  res.setHeader('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https:",
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com",
+    "connect-src 'self' https://www.youtube.com https://api.tavily.com https://es.wikipedia.org https://api.openverse.org https://html.duckduckgo.com https://api.duckduckgo.com https://geocoding-api.open-meteo.com https://api.open-meteo.com",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'"
+  ].join('; '));
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   next();
 });
@@ -51,235 +40,254 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
-app.use(
-  express.static(publicPath, {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith('.html')) {
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      } else {
-        res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
-      }
-    },
-    dotfiles: 'ignore'
-  })
-);
+app.use(express.static(publicPath, {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    else res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
+  },
+  dotfiles: 'ignore'
+}));
 
 // ==========================================================
-// 1. YouTube Search
+// HELPERS
+// ==========================================================
+async function fetchWithTimeout(url, options = {}, timeout = 8000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeoutId);
+    return res;
+  } catch (e) {
+    clearTimeout(timeoutId);
+    throw e;
+  }
+}
+
+// Scrapea DuckDuckGo HTML (funciona sin API key, casi nunca bloqueado)
+async function duckduckgoHTMLSearch(query, limit = 10) {
+  const url = 'https://html.duckduckgo.com/html/';
+  const body = new URLSearchParams({ q: query });
+  const res = await fetchWithTimeout(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
+    },
+    body: body.toString()
+  }, 10000);
+
+  if (!res.ok) throw new Error(`DDG HTML: ${res.status}`);
+  const html = await res.text();
+
+  const results = [];
+  // Parsear resultados con regex simple
+  const resultRegex = /<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
+  let match;
+  while ((match = resultRegex.exec(html)) !== null && results.length < limit) {
+    let url = match[1];
+    // DDG redirige con //duckduckgo.com/l/?uddg=... - extraer URL real
+    if (url.includes('uddg=')) {
+      const m = url.match(/uddg=([^&]+)/);
+      if (m) url = decodeURIComponent(m[1]);
+    }
+    const title = match[2].replace(/<[^>]*>/g, '').trim();
+    const snippet = match[3].replace(/<[^>]*>/g, '').trim();
+    if (title && url) {
+      results.push({ title, url, description: snippet });
+    }
+  }
+
+  return results;
+}
+
+// Wikipedia REST API (más simple y robusta que la MediaWiki API)
+async function wikipediaRestSearch(query, limit = 10) {
+  const url = `https://es.wikipedia.org/w/rest.php/v1/search/page?q=${encodeURIComponent(query)}&limit=${limit}`;
+  const res = await fetchWithTimeout(url, {
+    headers: { 'User-Agent': 'GoNexWebBridge/1.0' }
+  }, 8000);
+
+  if (!res.ok) throw new Error(`Wikipedia: ${res.status}`);
+  const data = await res.json();
+
+  return (data.pages || []).map(p => ({
+    title: p.title,
+    url: `https://es.wikipedia.org/wiki/${encodeURIComponent(p.key)}`,
+    description: p.excerpt ? p.excerpt.replace(/<[^>]*>/g, '') : (p.description || 'Sin descripción')
+  }));
+}
+
+// ==========================================================
+// YouTube
 // ==========================================================
 app.get('/api/youtube-search', async (req, res) => {
   const query = req.query.q;
-  if (!query || typeof query !== 'string' || query.trim() === '') {
-    return res.status(400).json({ error: 'Falta el parámetro "q".' });
-  }
+  if (!query) return res.status(400).json({ error: 'Falta "q".' });
   try {
     const videos = await youtube.searchVideos(query.trim(), 12);
-    if (!videos || videos.length === 0) return res.status(200).json({ results: [] });
-    const results = videos.map((video) => ({
-      videoId: video.videoId,
-      title: video.title,
-      thumbnail: video.thumbnail || `https://i.ytimg.com/vi/${video.videoId}/mqdefault.jpg`,
-      channelTitle: video.channelTitle || video.channel || 'Canal desconocido'
-    }));
-    res.status(200).json({ results });
-  } catch (error) {
-    console.error('[GoNex] YouTube error:', error.message);
-    res.status(500).json({ error: 'Error al buscar en YouTube.' });
+    if (!videos?.length) return res.json({ results: [] });
+    res.json({
+      results: videos.map(v => ({
+        videoId: v.videoId,
+        title: v.title,
+        thumbnail: v.thumbnail || `https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`,
+        channelTitle: v.channelTitle || v.channel || 'Canal'
+      }))
+    });
+  } catch (e) {
+    console.error('YT error:', e.message);
+    res.status(500).json({ error: 'Error YouTube.' });
   }
 });
 
 // ==========================================================
-// 2. Búsqueda Web (Tavily → fallback Wikipedia)
+// Búsqueda Web (Tavily → DDG HTML → Wikipedia)
 // ==========================================================
 app.get('/api/web-search', async (req, res) => {
   const query = req.query.q;
-  if (!query || typeof query !== 'string' || query.trim() === '') {
-    return res.status(400).json({ error: 'Falta el parámetro "q".' });
-  }
+  if (!query) return res.status(400).json({ error: 'Falta "q".' });
 
-  // Intento 1: Tavily
+  // 1. Tavily (si hay key)
   if (TAVILY_API_KEY) {
     try {
-      const apiResponse = await fetch('https://api.tavily.com/search', {
+      const r = await fetchWithTimeout('https://api.tavily.com/search', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          api_key: TAVILY_API_KEY,
-          query: query.trim(),
-          search_depth: 'basic',
-          max_results: 10
-        })
-      });
-      if (apiResponse.ok) {
-        const data = await apiResponse.json();
-        const results = (data.results || []).map((item) => ({
-          title: item.title || 'Sin título',
-          url: item.url || '',
-          description: item.content || ''
-        }));
-        if (results.length > 0) return res.status(200).json({ results, source: 'tavily' });
+        body: JSON.stringify({ api_key: TAVILY_API_KEY, query: query.trim(), max_results: 10 })
+      }, 8000);
+      if (r.ok) {
+        const d = await r.json();
+        if (d.results?.length) {
+          return res.json({
+            results: d.results.map(i => ({ title: i.title, url: i.url, description: i.content || '' })),
+            source: 'tavily'
+          });
+        }
       }
-    } catch (e) {
-      console.error('[GoNex] Tavily error:', e.message);
-    }
+    } catch (e) { console.error('Tavily error:', e.message); }
   }
 
-  // Fallback: Wikipedia con User-Agent
+  // 2. DuckDuckGo HTML scraping
   try {
-    const wikiUrl = `https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*&srlimit=10`;
-    const wikiRes = await fetch(wikiUrl, {
-      headers: { 'User-Agent': USER_AGENT }
-    });
-    const wikiData = await wikiRes.json();
-    const results = (wikiData.query?.search || []).map((item) => ({
-      title: item.title,
-      url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
-      description: item.snippet ? item.snippet.replace(/<[^>]*>/g, '') : ''
-    }));
-    res.status(200).json({ results, source: 'wikipedia' });
-  } catch (error) {
-    console.error('[GoNex] Wikipedia fallback error:', error.message);
-    res.status(500).json({ error: 'Error al buscar. Verifica tu conexión.' });
+    const results = await duckduckgoHTMLSearch(query.trim(), 10);
+    if (results.length > 0) {
+      return res.json({ results, source: 'duckduckgo' });
+    }
+  } catch (e) { console.error('DDG HTML error:', e.message); }
+
+  // 3. Wikipedia REST
+  try {
+    const results = await wikipediaRestSearch(query.trim(), 10);
+    res.json({ results, source: 'wikipedia' });
+  } catch (e) {
+    console.error('Wiki REST error:', e.message);
+    res.status(500).json({ error: 'No se pudo buscar. Intenta otra consulta.' });
   }
 });
 
 // ==========================================================
-// 3. Wikipedia Search
+// Wikipedia
 // ==========================================================
 app.get('/api/wiki-search', async (req, res) => {
   const query = req.query.q;
-  if (!query || typeof query !== 'string' || query.trim() === '') {
-    return res.status(400).json({ error: 'Falta el parámetro "q".' });
-  }
+  if (!query) return res.status(400).json({ error: 'Falta "q".' });
   try {
-    const wikiUrl = `https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*&srlimit=15`;
-    const wikiRes = await fetch(wikiUrl, {
-      headers: { 'User-Agent': USER_AGENT }
-    });
-    const wikiData = await wikiRes.json();
-    const results = (wikiData.query?.search || []).map((item) => ({
-      title: item.title,
-      url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
-      description: item.snippet ? item.snippet.replace(/<[^>]*>/g, '') : '',
-      wordcount: item.wordcount || 0
-    }));
-    res.status(200).json({ results });
-  } catch (error) {
-    console.error('[GoNex] Wikipedia error:', error.message);
-    res.status(500).json({ error: 'Error al buscar en Wikipedia.' });
+    const results = await wikipediaRestSearch(query.trim(), 15);
+    res.json({ results });
+  } catch (e) {
+    console.error('Wiki error:', e.message);
+    res.status(500).json({ error: 'Error Wikipedia.' });
   }
 });
 
 // ==========================================================
-// 4. Búsqueda de Imágenes (OpenVerse)
+// Imágenes (OpenVerse)
 // ==========================================================
 app.get('/api/image-search', async (req, res) => {
   const query = req.query.q;
-  if (!query || typeof query !== 'string' || query.trim() === '') {
-    return res.status(400).json({ error: 'Falta el parámetro "q".' });
-  }
+  if (!query) return res.status(400).json({ error: 'Falta "q".' });
   try {
-    const url = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query.trim())}&page_size=12`;
-    const apiRes = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT }
+    const r = await fetchWithTimeout(
+      `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query.trim())}&page_size=12`,
+      { headers: { 'User-Agent': 'GoNexWebBridge/1.0' } },
+      8000
+    );
+    if (!r.ok) throw new Error(`OpenVerse: ${r.status}`);
+    const d = await r.json();
+    res.json({
+      results: (d.results || []).map(i => ({
+        title: i.title || 'Sin título',
+        thumbnail: i.thumbnail || i.url,
+        url: i.url,
+        creator: i.creator || 'Desconocido',
+        license: i.license || ''
+      }))
     });
-    if (!apiRes.ok) throw new Error(`OpenVerse: ${apiRes.status}`);
-    const data = await apiRes.json();
-    const results = (data.results || []).map((item) => ({
-      title: item.title || 'Sin título',
-      thumbnail: item.thumbnail || item.url,
-      url: item.url,
-      creator: item.creator || 'Desconocido',
-      license: item.license || ''
-    }));
-    res.status(200).json({ results });
-  } catch (error) {
-    console.error('[GoNex] OpenVerse error:', error.message);
-    res.status(500).json({ error: 'Error al buscar imágenes.' });
+  } catch (e) {
+    console.error('OpenVerse error:', e.message);
+    res.status(500).json({ error: 'Error imágenes.' });
   }
 });
 
 // ==========================================================
-// 5. Respuestas rápidas (DuckDuckGo)
+// Respuestas (DDG Instant + fallback DDG HTML)
 // ==========================================================
 app.get('/api/instant-search', async (req, res) => {
   const query = req.query.q;
-  if (!query || typeof query !== 'string' || query.trim() === '') {
-    return res.status(400).json({ error: 'Falta el parámetro "q".' });
-  }
-  try {
-    const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query.trim())}&format=json&no_html=1&skip_disambig=1`;
-    const apiRes = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT }
-    });
-    const data = await apiRes.json();
+  if (!query) return res.status(400).json({ error: 'Falta "q".' });
 
+  try {
+    const r = await fetchWithTimeout(
+      `https://api.duckduckgo.com/?q=${encodeURIComponent(query.trim())}&format=json&no_html=1&skip_disambig=1`,
+      { headers: { 'User-Agent': 'GoNexWebBridge/1.0' } },
+      6000
+    );
+    const d = await r.json();
     const results = [];
-    if (data.AbstractText && data.AbstractURL) {
-      results.push({
-        title: data.Heading || query,
-        url: data.AbstractURL,
-        description: data.AbstractText
-      });
+
+    if (d.AbstractText && d.AbstractURL) {
+      results.push({ title: d.Heading || query, url: d.AbstractURL, description: d.AbstractText });
     }
-    (data.RelatedTopics || []).slice(0, 8).forEach((topic) => {
-      if (topic.Text && topic.FirstURL) {
-        results.push({
-          title: topic.Text.substring(0, 80),
-          url: topic.FirstURL,
-          description: topic.Text
-        });
+    (d.RelatedTopics || []).slice(0, 8).forEach(t => {
+      if (t.Text && t.FirstURL) {
+        results.push({ title: t.Text.substring(0, 80), url: t.FirstURL, description: t.Text });
       }
     });
 
-    // Si DDG no devuelve nada, usar Wikipedia como respaldo
-    if (results.length === 0) {
-      const wikiUrl = `https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*&srlimit=6`;
-      const wikiRes = await fetch(wikiUrl, { headers: { 'User-Agent': USER_AGENT } });
-      const wikiData = await wikiRes.json();
-      (wikiData.query?.search || []).forEach((item) => {
-        results.push({
-          title: item.title,
-          url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
-          description: item.snippet ? item.snippet.replace(/<[^>]*>/g, '') : ''
-        });
-      });
-    }
+    if (results.length > 0) return res.json({ results, source: 'ddg-instant' });
 
-    res.status(200).json({ results });
-  } catch (error) {
-    console.error('[GoNex] DDG error:', error.message);
-    res.status(500).json({ error: 'Error al buscar respuestas.' });
+    // Fallback: DDG HTML
+    const htmlResults = await duckduckgoHTMLSearch(query.trim(), 8);
+    res.json({ results: htmlResults, source: 'duckduckgo' });
+  } catch (e) {
+    console.error('Instant error:', e.message);
+    // Último recurso: DDG HTML
+    try {
+      const htmlResults = await duckduckgoHTMLSearch(query.trim(), 8);
+      return res.json({ results: htmlResults });
+    } catch (e2) {
+      res.status(500).json({ error: 'Error al buscar respuestas.' });
+    }
   }
 });
 
 // ==========================================================
-// RUTA WILDCARD SPA
+// WILDCARD SPA
 // ==========================================================
 app.get('/{*splat}', (req, res, next) => {
   if (!req.accepts('html')) return next();
-  res.sendFile('index.html', { root: publicPath }, (err) => {
-    if (err) next(err);
-  });
+  res.sendFile('index.html', { root: publicPath }, (err) => { if (err) next(err); });
 });
 
-app.use((req, res) => {
-  if (req.accepts('html')) {
-    return res.status(404).send('<!doctype html><meta charset="utf-8"><title>404</title><h1>404</h1>');
-  }
-  res.status(404).json({ error: 'Not Found' });
-});
+app.use((req, res) => res.status(404).json({ error: 'Not Found' }));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   const status = err.status || 500;
   console.error('[GoNex Error]', { status, message: err.message, path: req.originalUrl });
   if (res.headersSent) return next(err);
-  const clientMessage = IS_PROD && status >= 500 ? 'Error interno' : err.message;
-  if (req.accepts('html')) {
-    return res.status(status).send(`<!doctype html><meta charset="utf-8"><h1>${status}</h1><p>${clientMessage}</p>`);
-  }
-  res.status(status).json({ error: err.name || 'Error', message: clientMessage });
+  res.status(status).json({ error: 'Error interno', message: err.message });
 });
 
 if (!IS_PROD) {
