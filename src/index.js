@@ -163,20 +163,24 @@ app.post('/api/browser-sessions/cleanup', async (req, res) => {
 
 // ==========================================================
 // 5. Crear sesión de navegador en la nube
-// ✅ Timeout ajustado a 15 min (máximo del plan gratuito)
+// ✅ Pasa la URL inicial a Steel para que abra directo esa página
 // ==========================================================
 app.post('/api/browser-session', async (req, res) => {
   if (!steel) {
     return res.status(500).json({ error: 'STEEL_API_KEY no configurada.' });
   }
 
+  const { url } = req.body || {};
+  const startUrl = url && url.startsWith('http') ? url : 'https://www.google.com';
+
   try {
     const session = await steel.sessions.create({
+      url: startUrl,              // ✅ Abre esta URL al iniciar la sesión
       timeout: 900000,            // 15 minutos (máximo del plan gratuito)
       inactivityTimeout: 300000   // 5 minutos
     });
 
-    console.log('[Steel] Sesión creada:', session.id);
+    console.log('[Steel] Sesión creada:', session.id, '→', startUrl);
     res.json({
       sessionId: session.id,
       debugUrl: session.debugUrl,
