@@ -45,8 +45,8 @@
       pointer-events: none;
     }
     .header { text-align: center; margin-bottom: 20px; }
-    .logo { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, var(--logo-1), var(--logo-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
-    .subtitle { color: #cbd5e1; font-size: 0.9rem; margin-top: 4px; text-shadow: 0 1px 8px rgba(0,0,0,0.7); }
+    .logo { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, var(--logo-1), var(--logo-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle { color: #cbd5e1; font-size: 0.9rem; margin-top: 4px; }
     .quote-box { max-width: 680px; margin-bottom: 20px; text-align: center; color: #e2e8f0; font-style: italic; font-size: 0.95rem; padding: 12px 20px; background: rgba(22, 27, 38, 0.7); border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); backdrop-filter: blur(8px); }
     .search-container { width: 100%; max-width: 680px; margin-bottom: 20px; }
     .search-box { display: flex; gap: 10px; background: rgba(22, 27, 38, 0.92); padding: 8px; border-radius: 12px; border: 1px solid #2d3748; backdrop-filter: blur(10px); }
@@ -59,22 +59,28 @@
     .card .title { font-size: 0.85rem; font-weight: 600; }
     .badge { display: inline-block; font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; margin-top: 6px; font-weight: bold; background: var(--badge-bg); color: var(--badge-color); }
     .results-container { width: 100%; max-width: 680px; margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-    .video-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; backdrop-filter: blur(10px); }
+    .video-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
     .video-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
     .video-card img { width: 100%; height: 120px; object-fit: cover; }
     .video-card h3 { font-size: 0.85rem; padding: 10px; line-height: 1.3; }
     .video-card p { font-size: 0.75rem; color: #94a3b8; padding: 0 10px 10px; }
-    .web-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; padding: 16px; cursor: pointer; transition: transform 0.2s, border-color 0.2s; color: inherit; display: block; backdrop-filter: blur(10px); }
+    .web-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; padding: 16px; cursor: pointer; transition: transform 0.2s; color: inherit; display: block; backdrop-filter: blur(10px); }
     .web-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
     .web-card h3 { font-size: 0.95rem; margin-bottom: 8px; color: var(--badge-color); line-height: 1.3; }
     .web-card .web-url { font-size: 0.7rem; color: #64748b; margin-bottom: 8px; word-break: break-all; }
     .web-card p { font-size: 0.8rem; color: #94a3b8; line-height: 1.4; }
-    .filters { width: 100%; max-width: 680px; display: flex; gap: 10px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
-    .filter-btn { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; color: #94a3b8; padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; backdrop-filter: blur(10px); }
+    .image-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
+    .image-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
+    .image-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
+    .image-card .image-info { padding: 10px; }
+    .image-card h3 { font-size: 0.8rem; line-height: 1.3; margin-bottom: 4px; }
+    .image-card .image-meta { font-size: 0.65rem; color: #94a3b8; }
+    .filters { width: 100%; max-width: 680px; display: flex; gap: 8px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
+    .filter-btn { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; color: #94a3b8; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s; backdrop-filter: blur(10px); }
     .filter-btn.active { background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); color: #fff; border-color: transparent; }
     .filter-btn:hover:not(.active) { border-color: var(--border-hover); color: #fff; }
     .secret-panel { display: none; width: 100%; max-width: 680px; margin-top: 25px; padding: 20px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.15)); border: 2px dashed var(--accent-1); border-radius: 14px; position: relative; backdrop-filter: blur(10px); }
-    .secret-panel.active { display: block; animation: fadeIn 0.3s ease-in; }
+    .secret-panel.active { display: block; }
     .secret-panel h3 { color: var(--badge-color); font-size: 1rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
     .secret-close { position: absolute; top: 10px; right: 12px; background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
     .secret-close:hover { color: #ef4444; }
@@ -93,7 +99,6 @@
     .web-viewer-wrapper { width: 100%; max-width: 1000px; height: 78vh; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
     .web-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
     .web-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
     .info-widget {
       position: fixed;
@@ -110,60 +115,25 @@
       line-height: 1.5;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       min-width: 110px;
-      font-variant-numeric: tabular-nums;
       backdrop-filter: blur(10px);
       cursor: pointer;
     }
     .info-widget:hover { border-color: var(--accent-1); }
-    .info-widget .info-row { white-space: nowrap; }
     .info-widget .info-time { color: #e2e8f0; font-weight: 600; font-size: 0.85rem; }
     .info-widget .info-weather { color: #7dd3fc; }
 
     .settings-btn {
-      position: fixed;
-      top: 18px;
-      left: 18px;
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      background: rgba(22, 27, 38, 0.92);
-      border: 1px solid #2d3748;
-      color: #f1f5f9;
-      cursor: pointer;
-      font-size: 1.3rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-      backdrop-filter: blur(10px);
-      transition: all 0.2s;
+      position: fixed; top: 18px; left: 18px; width: 42px; height: 42px;
+      border-radius: 10px; background: rgba(22, 27, 38, 0.92);
+      border: 1px solid #2d3748; color: #f1f5f9; cursor: pointer;
+      font-size: 1.3rem; display: flex; align-items: center; justify-content: center;
+      z-index: 50; backdrop-filter: blur(10px); transition: all 0.2s;
     }
     .settings-btn:hover { border-color: var(--accent-1); transform: scale(1.05); }
 
-    .settings-modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: rgba(11, 15, 25, 0.9);
-      backdrop-filter: blur(8px);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
+    .settings-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.9); backdrop-filter: blur(8px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
     .settings-modal.active { display: flex; }
-    .settings-card {
-      width: 100%;
-      max-width: 480px;
-      background: #161b26;
-      border: 1px solid #2d3748;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-      max-height: 90vh;
-      overflow-y: auto;
-    }
+    .settings-card { width: 100%; max-width: 480px; background: #161b26; border: 1px solid #2d3748; border-radius: 16px; padding: 24px; max-height: 90vh; overflow-y: auto; }
     .settings-card h2 { font-size: 1.2rem; margin-bottom: 20px; text-align: center; color: var(--badge-color); }
     .settings-section { margin-bottom: 24px; }
     .settings-section h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; margin-bottom: 12px; }
@@ -177,14 +147,10 @@
     .swatch-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
     .swatch-black { background: linear-gradient(135deg, #4b5563, #1f2937); }
     .swatch-blue { background: linear-gradient(135deg, #0ea5e9, #0284c7); }
-
-    .upload-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; transition: opacity 0.2s; }
-    .upload-btn:hover { opacity: 0.9; }
-    .reset-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #2d3748; color: #f1f5f9; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: background 0.2s; }
-    .reset-btn:hover { background: #4a5568; }
+    .upload-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; margin-bottom: 10px; }
+    .reset-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: #2d3748; color: #f1f5f9; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
     .settings-preview { width: 100%; height: 90px; border-radius: 10px; background-size: cover; background-position: center; border: 1px solid #2d3748; margin-bottom: 12px; background-color: #0b0f19; }
     .settings-close-btn { width: 100%; padding: 12px; background: #2d3748; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 8px; }
-    .settings-close-btn:hover { background: #ef4444; }
     .hidden-input { display: none; }
 
     .world-clock-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 150; align-items: center; justify-content: center; padding: 20px; }
@@ -194,17 +160,17 @@
     .clock-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #2d3748; }
     .clock-row:last-child { border-bottom: none; }
     .clock-city { font-weight: 600; }
-    .clock-time { font-variant-numeric: tabular-nums; color: #7dd3fc; }
+    .clock-time { color: #7dd3fc; }
   </style>
 </head>
 <body>
 
   <button class="settings-btn" onclick="openSettings()" title="Personalizar">⚙️</button>
 
-  <div class="info-widget" id="info-widget" onclick="openWorldClock()">
-    <div class="info-row info-time" id="info-time">--:--:--</div>
-    <div class="info-row" id="info-date">-- --- ----</div>
-    <div class="info-row info-weather" id="info-weather">Cargando...</div>
+  <div class="info-widget" onclick="openWorldClock()">
+    <div class="info-time" id="info-time">--:--:--</div>
+    <div id="info-date">-- --- ----</div>
+    <div class="info-weather" id="info-weather">Cargando...</div>
   </div>
 
   <div class="header">
@@ -216,19 +182,33 @@
 
   <div class="search-container">
     <form id="search-form" class="search-box">
-      <input id="search-input" type="text" placeholder="Busca en la web, YouTube, o pega una URL..." required />
+      <input id="search-input" type="text" placeholder="Busca en la web, Wikipedia, imágenes, YouTube..." required />
       <button type="submit">Buscar</button>
     </form>
   </div>
 
+  <!-- Filtros de modo -->
   <div class="filters">
     <button class="filter-btn active" data-mode="web" onclick="setMode('web')">🌐 Web</button>
+    <button class="filter-btn" data-mode="wiki" onclick="setMode('wiki')">📚 Wikipedia</button>
+    <button class="filter-btn" data-mode="image" onclick="setMode('image')">🖼️ Imágenes</button>
+    <button class="filter-btn" data-mode="instant" onclick="setMode('instant')">💡 Respuestas</button>
     <button class="filter-btn" data-mode="youtube" onclick="setMode('youtube')">📺 YouTube</button>
   </div>
 
+  <!-- Accesos directos -->
   <div class="grid">
     <div class="card" onclick="setMode('web'); handleInput('noticias de tecnología')">
-      <div class="icon">🌐</div><div class="title">Web Search</div><div class="badge">ANYSEARCH</div>
+      <div class="icon">🌐</div><div class="title">Web Search</div><div class="badge">MULTI</div>
+    </div>
+    <div class="card" onclick="setMode('wiki'); handleInput('Inteligencia artificial')">
+      <div class="icon">📚</div><div class="title">Wikipedia</div><div class="badge">WIKI</div>
+    </div>
+    <div class="card" onclick="setMode('image'); handleInput('playa al atardecer')">
+      <div class="icon">🖼️</div><div class="title">Imágenes</div><div class="badge">OPENVERSE</div>
+    </div>
+    <div class="card" onclick="setMode('instant'); handleInput('qué es javascript')">
+      <div class="icon">💡</div><div class="title">Respuestas</div><div class="badge">DDG</div>
     </div>
     <div class="card" onclick="setMode('youtube'); handleInput('musica')">
       <div class="icon">📺</div><div class="title">YouTube</div><div class="badge">VIDEOS</div>
@@ -239,17 +219,8 @@
     <div class="card" onclick="handleInput('https://www.google.com')">
       <div class="icon">🔍</div><div class="title">Google</div><div class="badge">DIRECTO</div>
     </div>
-    <div class="card" onclick="handleInput('https://es.wikipedia.org')">
-      <div class="icon">📚</div><div class="title">Wikipedia</div><div class="badge">DIRECTO</div>
-    </div>
     <div class="card" onclick="handleInput('https://github.com')">
       <div class="icon">💻</div><div class="title">GitHub</div><div class="badge">DIRECTO</div>
-    </div>
-    <div class="card" onclick="handleInput('https://www.reddit.com')">
-      <div class="icon">💬</div><div class="title">Reddit</div><div class="badge">DIRECTO</div>
-    </div>
-    <div class="card" onclick="handleInput('https://open.spotify.com')">
-      <div class="icon">🎵</div><div class="title">Spotify</div><div class="badge">DIRECTO</div>
     </div>
   </div>
 
@@ -284,11 +255,11 @@
       <div class="settings-section">
         <h3>🎨 Color del tema</h3>
         <div class="color-swatches">
-          <div class="color-swatch swatch-purple" data-theme="purple" onclick="setTheme('purple')" title="Morado"></div>
-          <div class="color-swatch swatch-red" data-theme="red" onclick="setTheme('red')" title="Rojo"></div>
-          <div class="color-swatch swatch-pink" data-theme="pink" onclick="setTheme('pink')" title="Rosado"></div>
-          <div class="color-swatch swatch-black" data-theme="black" onclick="setTheme('black')" title="Negro"></div>
-          <div class="color-swatch swatch-blue" data-theme="blue" onclick="setTheme('blue')" title="Azul oscuro"></div>
+          <div class="color-swatch swatch-purple" data-theme="purple" onclick="setTheme('purple')"></div>
+          <div class="color-swatch swatch-red" data-theme="red" onclick="setTheme('red')"></div>
+          <div class="color-swatch swatch-pink" data-theme="pink" onclick="setTheme('pink')"></div>
+          <div class="color-swatch swatch-black" data-theme="black" onclick="setTheme('black')"></div>
+          <div class="color-swatch swatch-blue" data-theme="blue" onclick="setTheme('blue')"></div>
         </div>
       </div>
       <div class="settings-section">
@@ -311,16 +282,8 @@
   </div>
 
   <script>
-    // ==========================================================
-    // 🏫 CLASSROOM
-    // ==========================================================
-    function openClassroom() {
-      window.open('https://classroom.google.com', '_blank');
-    }
+    function openClassroom() { window.open('https://classroom.google.com', '_blank'); }
 
-    // ==========================================================
-    // 🎨 TEMAS
-    // ==========================================================
     const THEMES = ['purple', 'red', 'pink', 'black', 'blue'];
     function applyTheme(theme) {
       THEMES.forEach(t => document.body.classList.remove('theme-' + t));
@@ -330,11 +293,8 @@
       });
     }
     function setTheme(theme) { applyTheme(theme); localStorage.setItem('gonex-theme', theme); }
-    function loadSavedTheme() { const saved = localStorage.getItem('gonex-theme') || 'purple'; applyTheme(saved); }
+    function loadSavedTheme() { applyTheme(localStorage.getItem('gonex-theme') || 'purple'); }
 
-    // ==========================================================
-    // 🖼️ FONDOS
-    // ==========================================================
     const PHOTO_IDS = [
       'photo-1477959858617-67f85cf4f1df','photo-1480714378408-67cf0d13bc1b','photo-1449824913935-59a10b8d2000',
       'photo-1519501025264-65ba15a82390','photo-1502602898657-3e91760cbb34','photo-1444723121867-7a241cacace9',
@@ -351,7 +311,7 @@
       const shuffled = [...PHOTO_IDS].sort(() => Math.random() - 0.5);
       let attempt = 0;
       function tryLoad() {
-        if (attempt >= shuffled.length) { console.warn('[GoNex] Sin fondo'); return; }
+        if (attempt >= shuffled.length) return;
         const url = buildWallpaperUrl(shuffled[attempt]);
         const img = new Image();
         img.onload = () => applyWallpaper(url);
@@ -369,23 +329,16 @@
       if (file.size > 3 * 1024 * 1024) { alert('Máx 3 MB.'); return; }
       const reader = new FileReader();
       reader.onload = (e) => {
-        const dataUrl = e.target.result;
-        try { localStorage.setItem('gonex-wallpaper', dataUrl); applyWallpaper(dataUrl); }
+        try { localStorage.setItem('gonex-wallpaper', e.target.result); applyWallpaper(e.target.result); }
         catch (err) { alert('No se pudo guardar.'); }
       };
       reader.readAsDataURL(file);
     }
     function resetWallpaper() { localStorage.removeItem('gonex-wallpaper'); setRandomWallpaper(); }
 
-    // ==========================================================
-    // ⚙️ AJUSTES
-    // ==========================================================
     function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
     function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
 
-    // ==========================================================
-    // 🕒 RELOJ + CLIMA
-    // ==========================================================
     function updateClock() {
       const now = new Date();
       document.getElementById('info-date').textContent = now.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -401,7 +354,7 @@
       try {
         const geoRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=Chiclayo&count=1&language=es&format=json');
         const geoData = await geoRes.json();
-        if (!geoData.results || geoData.results.length === 0) throw new Error('Sin Chiclayo');
+        if (!geoData.results?.[0]) throw new Error('Sin Chiclayo');
         const { latitude, longitude, name } = geoData.results[0];
         const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
         const weatherData = await weatherRes.json();
@@ -411,16 +364,10 @@
       } catch (error) { weatherEl.textContent = 'Clima no disponible'; }
     }
 
-    // ==========================================================
-    // 🌍 RELOJ MUNDIAL
-    // ==========================================================
     const CITIES = [
-      { name: 'Lima', tz: 'America/Lima' },
-      { name: 'Nueva York', tz: 'America/New_York' },
-      { name: 'Madrid', tz: 'Europe/Madrid' },
-      { name: 'Tokio', tz: 'Asia/Tokyo' },
-      { name: 'Sídney', tz: 'Australia/Sydney' },
-      { name: 'Londres', tz: 'Europe/London' }
+      { name: 'Lima', tz: 'America/Lima' }, { name: 'Nueva York', tz: 'America/New_York' },
+      { name: 'Madrid', tz: 'Europe/Madrid' }, { name: 'Tokio', tz: 'Asia/Tokyo' },
+      { name: 'Sídney', tz: 'Australia/Sydney' }, { name: 'Londres', tz: 'Europe/London' }
     ];
     function renderClockList() {
       const list = document.getElementById('clock-list');
@@ -436,8 +383,7 @@
       if (window.worldClockInterval) clearInterval(window.worldClockInterval);
       window.worldClockInterval = setInterval(() => {
         if (!document.getElementById('world-clock-modal').classList.contains('active')) {
-          clearInterval(window.worldClockInterval);
-          return;
+          clearInterval(window.worldClockInterval); return;
         }
         renderClockList();
       }, 1000);
@@ -447,16 +393,12 @@
       if (window.worldClockInterval) clearInterval(window.worldClockInterval);
     }
 
-    // ==========================================================
-    // 💬 FRASES
-    // ==========================================================
     const QUOTES = [
       "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
       "No cuentes los días, haz que los días cuenten.",
       "La mejor manera de predecir el futuro es crearlo.",
       "El único modo de hacer un gran trabajo es amar lo que haces.",
       "La disciplina es el puente entre las metas y los logros.",
-      "No te preocupes por los fracasos, preocúpate por las oportunidades que pierdes al no intentarlo.",
       "El conocimiento es poder.",
       "Cree en ti mismo y todo será posible.",
       "Cada día es una nueva oportunidad para cambiar tu vida.",
@@ -467,9 +409,6 @@
       document.getElementById('quote-box').textContent = `"${quote}"`;
     }
 
-    // ==========================================================
-    // 🔐 CÓDIGO SECRETO
-    // ==========================================================
     const SECRET_CODE = 'gonex2026';
     const SECRET_BUTTONS = [
       { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed' },
@@ -498,16 +437,13 @@
       if (panel.classList.contains('active')) hideSecretPanel(); else showSecretPanel();
     }
 
-    // ==========================================================
-    // VISOR WEB
-    // ==========================================================
     function openWebViewer(url) {
       const iframe = document.getElementById('web-viewer-iframe');
       const loading = document.getElementById('web-viewer-loading');
       const externalLink = document.getElementById('viewer-open-external');
       document.getElementById('web-viewer-modal').classList.add('active');
       loading.style.display = 'flex';
-      loading.innerHTML = '<p>Cargando página...</p><p style="font-size:0.75rem;">Si tarda mucho, es posible que el sitio bloquee la visualización integrada.</p>';
+      loading.innerHTML = '<p>Cargando página...</p><p style="font-size:0.75rem;">Si tarda mucho, es posible que el sitio bloquee la visualización.</p>';
       iframe.style.display = 'none';
       externalLink.href = url;
       iframe.src = url;
@@ -519,64 +455,134 @@
       }, 8000);
     }
 
-    // ==========================================================
-    // MODO
-    // ==========================================================
     var currentMode = 'web';
     function setMode(mode) {
       currentMode = mode;
       document.querySelectorAll('.filter-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.mode === mode); });
     }
+
     function extractYouTubeId(url) {
       const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
       return match ? match[1] : null;
     }
+
+    // ==========================================
+    // YOUTUBE
+    // ==========================================
     async function searchYouTube(query) {
       const container = document.getElementById('results-container');
       container.innerHTML = '<p style="color:#94a3b8;">Buscando en YouTube...</p>';
       try {
-        const response = await fetch(`/api/youtube-search?q=${encodeURIComponent(query)}`);
-        if (!response.ok) throw new Error(`Error ${response.status}`);
-        const data = await response.json();
-        displayYouTubeResults(data.results);
-      } catch (error) { container.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`; }
+        const r = await fetch(`/api/youtube-search?q=${encodeURIComponent(query)}`);
+        if (!r.ok) throw new Error(`Error ${r.status}`);
+        const d = await r.json();
+        displayYouTubeResults(d.results);
+      } catch (e) { container.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
     }
     function displayYouTubeResults(results) {
-      const container = document.getElementById('results-container');
-      container.innerHTML = '';
-      if (!results || results.length === 0) { container.innerHTML = '<p style="color:#94a3b8;">No se encontraron videos.</p>'; return; }
-      results.forEach((video) => {
+      const c = document.getElementById('results-container');
+      c.innerHTML = '';
+      if (!results?.length) { c.innerHTML = '<p style="color:#94a3b8;">Sin videos.</p>'; return; }
+      results.forEach((v) => {
         const card = document.createElement('div');
         card.className = 'video-card';
-        card.innerHTML = `<img src="${video.thumbnail}" alt="${video.title}" loading="lazy" /><h3>${video.title}</h3><p>${video.channelTitle}</p>`;
-        card.addEventListener('click', () => { window.open(`https://www.youtube.com/watch?v=${video.videoId}`, '_blank'); });
-        container.appendChild(card);
+        card.innerHTML = `<img src="${v.thumbnail}" alt="${v.title}" loading="lazy" /><h3>${v.title}</h3><p>${v.channelTitle}</p>`;
+        card.addEventListener('click', () => window.open(`https://www.youtube.com/watch?v=${v.videoId}`, '_blank'));
+        c.appendChild(card);
       });
     }
+
+    // ==========================================
+    // WEB SEARCH
+    // ==========================================
     async function searchWeb(query) {
-      const container = document.getElementById('results-container');
-      container.innerHTML = '<p style="color:#94a3b8;">Buscando en la web...</p>';
+      const c = document.getElementById('results-container');
+      c.innerHTML = '<p style="color:#94a3b8;">Buscando en la web...</p>';
       try {
-        const response = await fetch(`/api/web-search?q=${encodeURIComponent(query)}`);
-        const contentType = response.headers.get('content-type') || '';
-        if (!contentType.includes('application/json')) throw new Error('Respuesta no JSON.');
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
-        displayWebResults(data.results);
-      } catch (error) { container.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`; }
+        const r = await fetch(`/api/web-search?q=${encodeURIComponent(query)}`);
+        const ct = r.headers.get('content-type') || '';
+        if (!ct.includes('application/json')) throw new Error('Respuesta no JSON.');
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || `Error ${r.status}`);
+        displayWebResults(d.results);
+      } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
     }
     function displayWebResults(results) {
-      const container = document.getElementById('results-container');
-      container.innerHTML = '';
-      if (!results || results.length === 0) { container.innerHTML = '<p style="color:#94a3b8;">No se encontraron resultados.</p>'; return; }
+      const c = document.getElementById('results-container');
+      c.innerHTML = '';
+      if (!results?.length) { c.innerHTML = '<p style="color:#94a3b8;">Sin resultados.</p>'; return; }
       results.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'web-card';
         card.innerHTML = `<h3>${item.title}</h3><div class="web-url">${item.url}</div><p>${item.description}</p>`;
         card.addEventListener('click', () => openWebViewer(item.url));
-        container.appendChild(card);
+        c.appendChild(card);
       });
     }
+
+    // ==========================================
+    // WIKIPEDIA
+    // ==========================================
+    async function searchWiki(query) {
+      const c = document.getElementById('results-container');
+      c.innerHTML = '<p style="color:#94a3b8;">Buscando en Wikipedia...</p>';
+      try {
+        const r = await fetch(`/api/wiki-search?q=${encodeURIComponent(query)}`);
+        if (!r.ok) throw new Error(`Error ${r.status}`);
+        const d = await r.json();
+        displayWebResults(d.results);
+      } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
+    }
+
+    // ==========================================
+    // IMÁGENES (OpenVerse)
+    // ==========================================
+    async function searchImages(query) {
+      const c = document.getElementById('results-container');
+      c.innerHTML = '<p style="color:#94a3b8;">Buscando imágenes...</p>';
+      try {
+        const r = await fetch(`/api/image-search?q=${encodeURIComponent(query)}`);
+        if (!r.ok) throw new Error(`Error ${r.status}`);
+        const d = await r.json();
+        displayImageResults(d.results);
+      } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
+    }
+    function displayImageResults(results) {
+      const c = document.getElementById('results-container');
+      c.innerHTML = '';
+      if (!results?.length) { c.innerHTML = '<p style="color:#94a3b8;">Sin imágenes.</p>'; return; }
+      results.forEach((img) => {
+        const card = document.createElement('div');
+        card.className = 'image-card';
+        card.innerHTML = `
+          <img src="${img.thumbnail}" alt="${img.title}" loading="lazy" onerror="this.style.display='none'" />
+          <div class="image-info">
+            <h3>${img.title.substring(0, 60)}</h3>
+            <div class="image-meta">📷 ${img.creator} ${img.license ? '· ' + img.license : ''}</div>
+          </div>
+        `;
+        card.addEventListener('click', () => window.open(img.url, '_blank'));
+        c.appendChild(card);
+      });
+    }
+
+    // ==========================================
+    // RESPUESTAS (DDG)
+    // ==========================================
+    async function searchInstant(query) {
+      const c = document.getElementById('results-container');
+      c.innerHTML = '<p style="color:#94a3b8;">Buscando respuestas...</p>';
+      try {
+        const r = await fetch(`/api/instant-search?q=${encodeURIComponent(query)}`);
+        if (!r.ok) throw new Error(`Error ${r.status}`);
+        const d = await r.json();
+        displayWebResults(d.results);
+      } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
+    }
+
+    // ==========================================
+    // FLUJO PRINCIPAL
+    // ==========================================
     function handleInput(input) {
       const clean = input.trim();
       if (clean.toLowerCase() === SECRET_CODE.toLowerCase()) { toggleSecretPanel(); return; }
@@ -584,25 +590,29 @@
       if (ytId) { window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank'); return; }
       if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
-        const dominiosExternos = ['classroom.google.com','sites.google.com','accounts.google.com','mail.google.com','drive.google.com','docs.google.com','calendar.google.com','meet.google.com'];
-        if (dominiosExternos.some(d => url.includes(d))) { window.open(url, '_blank'); }
-        else { openWebViewer(url); }
+        const externos = ['classroom.google.com','sites.google.com','accounts.google.com','mail.google.com','drive.google.com','docs.google.com','calendar.google.com','meet.google.com'];
+        if (externos.some(d => url.includes(d))) window.open(url, '_blank');
+        else openWebViewer(url);
         return;
       }
-      if (currentMode === 'youtube') searchYouTube(clean); else searchWeb(clean);
+      // Según el modo activo
+      if (currentMode === 'youtube') searchYouTube(clean);
+      else if (currentMode === 'wiki') searchWiki(clean);
+      else if (currentMode === 'image') searchImages(clean);
+      else if (currentMode === 'instant') searchInstant(clean);
+      else searchWeb(clean);
     }
+
     function closeModal(modalId) {
-      if (modalId === 'web-viewer-modal') { document.getElementById('web-viewer-iframe').src = 'about:blank'; }
+      if (modalId === 'web-viewer-modal') document.getElementById('web-viewer-iframe').src = 'about:blank';
       document.getElementById(modalId).classList.remove('active');
     }
+
     document.getElementById('search-form').addEventListener('submit', function (e) {
       e.preventDefault();
       handleInput(document.getElementById('search-input').value);
     });
 
-    // ==========================================================
-    // 🚀 INICIALIZACIÓN
-    // ==========================================================
     document.addEventListener('DOMContentLoaded', () => {
       loadSavedTheme();
       loadSavedWallpaper();

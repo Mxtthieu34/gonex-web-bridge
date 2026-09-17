@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend Express 5 con AnySearch + YouTube
+// GoNex Web Bridge — Backend con múltiples motores de búsqueda
 
 const express = require('express');
 const path = require('path');
@@ -8,6 +8,7 @@ const { YTubeNoAPI } = require('ytube-noapi');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
+const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 
 const publicPath = path.join(__dirname, '..', 'public');
 const youtube = new YTubeNoAPI();
@@ -33,7 +34,7 @@ app.use((req, res, next) => {
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com",
-      "connect-src 'self' https://www.youtube.com https://api.anysearch.com https://geocoding-api.open-meteo.com https://api.open-meteo.com",
+      "connect-src 'self' https://www.youtube.com https://api.tavily.com https://es.wikipedia.org https://api.openverse.org https://api.duckduckgo.com https://geocoding-api.open-meteo.com https://api.open-meteo.com",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'"
@@ -41,10 +42,6 @@ app.use((req, res, next) => {
   );
 
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
-  res.setHeader('Surrogate-Control', 'no-store');
-
   next();
 });
 
@@ -65,7 +62,7 @@ app.use(
 );
 
 // ==========================================================
-// ENDPOINT: YouTube Search (sin API Key, con ytube-noapi)
+// 1. YouTube Search
 // ==========================================================
 app.get('/api/youtube-search', async (req, res) => {
   const query = req.query.q;
@@ -89,7 +86,7 @@ app.get('/api/youtube-search', async (req, res) => {
 });
 
 // ==========================================================
-// ENDPOINT: Búsqueda Web con AnySearch (gratis, sin clave)
+// 2. Búsqueda Web con Tavily (con fallback a Wikipedia)
 // ==========================================================
 app.get('/api/web-search', async (req, res) => {
   const query = req.query.q;
@@ -97,39 +94,146 @@ app.get('/api/web-search', async (req, res) => {
     return res.status(400).json({ error: 'Falta el parámetro "q".' });
   }
 
-  try {
-    const apiResponse = await fetch('https://api.anysearch.com/v1/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        query: query.trim(),
-        max_results: 10
-      })
-    });
-
-    if (!apiResponse.ok) {
-      const errText = await apiResponse.text();
-      console.error('[GoNex] AnySearch error:', apiResponse.status, errText);
-      throw new Error(`AnySearch: ${apiResponse.status}`);
+  // Intento 1: Tavily (si hay clave)
+  if (TAVILY_API_KEY) {
+    try {
+      const apiResponse = await fetch('https://api.tavily.com/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: TAVILY_API_KEY,
+          query: query.trim(),
+          search_depth: 'basic',
+          max_results: 10
+        })
+      });
+      if (apiResponse.ok) {
+        const data = await apiResponse.json();
+        const results = (data.results || []).map((item) => ({
+          title: item.title || 'Sin título',
+          url: item.url || '',
+          description: item.content || ''
+        }));
+        return res.status(200).json({ results, source: 'tavily' });
+      }
+    } catch (e) {
+      console.error('[GoNex] Tavily falló, usando Wikipedia:', e.message);
     }
+  }
 
-    const data = await apiResponse.json();
-
-    const results = (data.results || data.web?.results || []).map((item) => ({
-      title: item.title || 'Sin título',
-      url: item.url || item.link || '',
-      description: item.description || item.snippet || ''
+  // Fallback: Wikipedia
+  try {
+    const wikiUrl = `https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*&srlimit=10`;
+    const wikiRes = await fetch(wikiUrl);
+    const wikiData = await wikiRes.json();
+    const results = (wikiData.query?.search || []).map((item) => ({
+      title: item.title,
+      url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+      description: item.snippet ? item.snippet.replace(/<[^>]*>/g, '') : ''
     }));
-
-    res.status(200).json({ results });
+    res.status(200).json({ results, source: 'wikipedia' });
   } catch (error) {
-    console.error('[GoNex] AnySearch error:', error.message);
+    console.error('[GoNex] Wikipedia fallback error:', error.message);
     res.status(500).json({ error: 'Error al buscar en la web.' });
   }
 });
 
 // ==========================================================
-// RUTA WILDCARD SPA — Express 5
+// 3. Wikipedia Search
+// ==========================================================
+app.get('/api/wiki-search', async (req, res) => {
+  const query = req.query.q;
+  if (!query || typeof query !== 'string' || query.trim() === '') {
+    return res.status(400).json({ error: 'Falta el parámetro "q".' });
+  }
+  try {
+    const wikiUrl = `https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*&srlimit=15`;
+    const wikiRes = await fetch(wikiUrl);
+    const wikiData = await wikiRes.json();
+    const results = (wikiData.query?.search || []).map((item) => ({
+      title: item.title,
+      url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+      description: item.snippet ? item.snippet.replace(/<[^>]*>/g, '') : '',
+      wordcount: item.wordcount || 0
+    }));
+    res.status(200).json({ results });
+  } catch (error) {
+    console.error('[GoNex] Wikipedia error:', error.message);
+    res.status(500).json({ error: 'Error al buscar en Wikipedia.' });
+  }
+});
+
+// ==========================================================
+// 4. Búsqueda de Imágenes (OpenVerse, sin clave)
+// ==========================================================
+app.get('/api/image-search', async (req, res) => {
+  const query = req.query.q;
+  if (!query || typeof query !== 'string' || query.trim() === '') {
+    return res.status(400).json({ error: 'Falta el parámetro "q".' });
+  }
+  try {
+    const url = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query.trim())}&page_size=12`;
+    const apiRes = await fetch(url, {
+      headers: { 'User-Agent': 'GoNex-Web-Bridge/1.0' }
+    });
+    if (!apiRes.ok) throw new Error(`OpenVerse: ${apiRes.status}`);
+    const data = await apiRes.json();
+    const results = (data.results || []).map((item) => ({
+      title: item.title || 'Sin título',
+      thumbnail: item.thumbnail || item.url,
+      url: item.url,
+      creator: item.creator || 'Desconocido',
+      license: item.license || ''
+    }));
+    res.status(200).json({ results });
+  } catch (error) {
+    console.error('[GoNex] OpenVerse error:', error.message);
+    res.status(500).json({ error: 'Error al buscar imágenes.' });
+  }
+});
+
+// ==========================================================
+// 5. Respuestas rápidas (DuckDuckGo Instant Answer)
+// ==========================================================
+app.get('/api/instant-search', async (req, res) => {
+  const query = req.query.q;
+  if (!query || typeof query !== 'string' || query.trim() === '') {
+    return res.status(400).json({ error: 'Falta el parámetro "q".' });
+  }
+  try {
+    const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query.trim())}&format=json&no_html=1&skip_disambig=1`;
+    const apiRes = await fetch(url);
+    const data = await apiRes.json();
+
+    const results = [];
+    if (data.AbstractText && data.AbstractURL) {
+      results.push({
+        title: data.Heading || query,
+        url: data.AbstractURL,
+        description: data.AbstractText,
+        type: 'abstract'
+      });
+    }
+    (data.RelatedTopics || []).slice(0, 8).forEach((topic) => {
+      if (topic.Text && topic.FirstURL) {
+        results.push({
+          title: topic.Text.substring(0, 80),
+          url: topic.FirstURL,
+          description: topic.Text,
+          type: 'related'
+        });
+      }
+    });
+
+    res.status(200).json({ results });
+  } catch (error) {
+    console.error('[GoNex] DDG error:', error.message);
+    res.status(500).json({ error: 'Error al buscar respuestas.' });
+  }
+});
+
+// ==========================================================
+// RUTA WILDCARD SPA
 // ==========================================================
 app.get('/{*splat}', (req, res, next) => {
   if (!req.accepts('html')) return next();
@@ -150,7 +254,7 @@ app.use((err, req, res, next) => {
   const status = err.status || 500;
   console.error('[GoNex Error]', { status, message: err.message, path: req.originalUrl });
   if (res.headersSent) return next(err);
-  const clientMessage = IS_PROD && status >= 500 ? 'Error interno del servidor' : err.message;
+  const clientMessage = IS_PROD && status >= 500 ? 'Error interno' : err.message;
   if (req.accepts('html')) {
     return res.status(status).send(`<!doctype html><meta charset="utf-8"><h1>${status}</h1><p>${clientMessage}</p>`);
   }
