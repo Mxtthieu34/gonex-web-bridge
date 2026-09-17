@@ -44,19 +44,20 @@
       z-index: -1;
       pointer-events: none;
     }
-    .header { text-align: center; margin-bottom: 30px; }
+    .header { text-align: center; margin-bottom: 20px; }
     .logo { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, var(--logo-1), var(--logo-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
     .subtitle { color: #cbd5e1; font-size: 0.9rem; margin-top: 4px; text-shadow: 0 1px 8px rgba(0,0,0,0.7); }
+    .quote-box { max-width: 680px; margin-bottom: 20px; text-align: center; color: #e2e8f0; font-style: italic; font-size: 0.95rem; padding: 12px 20px; background: rgba(22, 27, 38, 0.7); border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); backdrop-filter: blur(8px); }
     .search-container { width: 100%; max-width: 680px; margin-bottom: 20px; }
     .search-box { display: flex; gap: 10px; background: rgba(22, 27, 38, 0.92); padding: 8px; border-radius: 12px; border: 1px solid #2d3748; backdrop-filter: blur(10px); }
     .search-box input { flex: 1; background: transparent; border: none; outline: none; color: #fff; padding: 10px 14px; font-size: 1rem; }
     .search-box button { background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); border: none; color: #fff; padding: 10px 22px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; width: 100%; max-width: 680px; }
-    .card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; padding: 16px; text-align: center; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; width: 100%; max-width: 680px; }
+    .card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
     .card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
-    .card .icon { font-size: 1.8rem; margin-bottom: 8px; }
-    .card .title { font-size: 0.9rem; font-weight: 600; }
-    .badge { display: inline-block; font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; margin-top: 6px; font-weight: bold; background: var(--badge-bg); color: var(--badge-color); }
+    .card .icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .card .title { font-size: 0.85rem; font-weight: 600; }
+    .badge { display: inline-block; font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; margin-top: 6px; font-weight: bold; background: var(--badge-bg); color: var(--badge-color); }
     .results-container { width: 100%; max-width: 680px; margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
     .video-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s, border-color 0.2s; backdrop-filter: blur(10px); }
     .video-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
@@ -111,7 +112,9 @@
       min-width: 110px;
       font-variant-numeric: tabular-nums;
       backdrop-filter: blur(10px);
+      cursor: pointer;
     }
+    .info-widget:hover { border-color: var(--accent-1); }
     .info-widget .info-row { white-space: nowrap; }
     .info-widget .info-time { color: #e2e8f0; font-weight: 600; font-size: 0.85rem; }
     .info-widget .info-weather { color: #7dd3fc; }
@@ -183,13 +186,22 @@
     .settings-close-btn { width: 100%; padding: 12px; background: #2d3748; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 8px; }
     .settings-close-btn:hover { background: #ef4444; }
     .hidden-input { display: none; }
+
+    .world-clock-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 150; align-items: center; justify-content: center; padding: 20px; }
+    .world-clock-modal.active { display: flex; }
+    .world-clock-card { width: 100%; max-width: 500px; background: #161b26; border: 1px solid #2d3748; border-radius: 16px; padding: 24px; }
+    .world-clock-card h2 { text-align: center; margin-bottom: 20px; color: var(--badge-color); }
+    .clock-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #2d3748; }
+    .clock-row:last-child { border-bottom: none; }
+    .clock-city { font-weight: 600; }
+    .clock-time { font-variant-numeric: tabular-nums; color: #7dd3fc; }
   </style>
 </head>
 <body>
 
   <button class="settings-btn" onclick="openSettings()" title="Personalizar">⚙️</button>
 
-  <div class="info-widget" id="info-widget">
+  <div class="info-widget" id="info-widget" onclick="openWorldClock()">
     <div class="info-row info-time" id="info-time">--:--:--</div>
     <div class="info-row" id="info-date">-- --- ----</div>
     <div class="info-row info-weather" id="info-weather">Cargando...</div>
@@ -199,6 +211,8 @@
     <div class="logo">🟣 GoNex Bridge</div>
     <div class="subtitle">Buscador multi-motor integrado</div>
   </div>
+
+  <div class="quote-box" id="quote-box">Cargando frase...</div>
 
   <div class="search-container">
     <form id="search-form" class="search-box">
@@ -214,7 +228,7 @@
 
   <div class="grid">
     <div class="card" onclick="setMode('web'); handleInput('noticias de tecnología')">
-      <div class="icon">🌐</div><div class="title">Web Search</div><div class="badge">TAVILY</div>
+      <div class="icon">🌐</div><div class="title">Web Search</div><div class="badge">ANYSEARCH</div>
     </div>
     <div class="card" onclick="setMode('youtube'); handleInput('musica')">
       <div class="icon">📺</div><div class="title">YouTube</div><div class="badge">VIDEOS</div>
@@ -224,6 +238,18 @@
     </div>
     <div class="card" onclick="handleInput('https://www.google.com')">
       <div class="icon">🔍</div><div class="title">Google</div><div class="badge">DIRECTO</div>
+    </div>
+    <div class="card" onclick="handleInput('https://es.wikipedia.org')">
+      <div class="icon">📚</div><div class="title">Wikipedia</div><div class="badge">DIRECTO</div>
+    </div>
+    <div class="card" onclick="handleInput('https://github.com')">
+      <div class="icon">💻</div><div class="title">GitHub</div><div class="badge">DIRECTO</div>
+    </div>
+    <div class="card" onclick="handleInput('https://www.reddit.com')">
+      <div class="icon">💬</div><div class="title">Reddit</div><div class="badge">DIRECTO</div>
+    </div>
+    <div class="card" onclick="handleInput('https://open.spotify.com')">
+      <div class="icon">🎵</div><div class="title">Spotify</div><div class="badge">DIRECTO</div>
     </div>
   </div>
 
@@ -255,7 +281,6 @@
   <div id="settings-modal" class="settings-modal">
     <div class="settings-card">
       <h2>⚙️ Personalizar GoNex</h2>
-
       <div class="settings-section">
         <h3>🎨 Color del tema</h3>
         <div class="color-swatches">
@@ -266,37 +291,37 @@
           <div class="color-swatch swatch-blue" data-theme="blue" onclick="setTheme('blue')" title="Azul oscuro"></div>
         </div>
       </div>
-
       <div class="settings-section">
         <h3>🖼️ Imagen de fondo</h3>
         <div class="settings-preview" id="settings-preview"></div>
-        <button class="upload-btn" onclick="document.getElementById('wallpaper-input').click()">
-          📤 Subir mi imagen
-        </button>
+        <button class="upload-btn" onclick="document.getElementById('wallpaper-input').click()">📤 Subir mi imagen</button>
         <input type="file" id="wallpaper-input" class="hidden-input" accept="image/*" onchange="handleWallpaperUpload(event)" />
-        <button class="reset-btn" onclick="resetWallpaper()">
-          🎲 Volver a fondos aleatorios
-        </button>
+        <button class="reset-btn" onclick="resetWallpaper()">🎲 Volver a fondos aleatorios</button>
       </div>
-
       <button class="settings-close-btn" onclick="closeSettings()">Cerrar</button>
+    </div>
+  </div>
+
+  <div id="world-clock-modal" class="world-clock-modal">
+    <div class="world-clock-card">
+      <h2>🌍 Reloj Mundial</h2>
+      <div id="clock-list"></div>
+      <button class="settings-close-btn" onclick="closeWorldClock()" style="margin-top:16px;">Cerrar</button>
     </div>
   </div>
 
   <script>
     // ==========================================================
-    // 🏫 CLASSROOM (abre SIEMPRE en pestaña nueva)
+    // 🏫 CLASSROOM
     // ==========================================================
     function openClassroom() {
-      // Classroom normal → pestaña nueva
       window.open('https://classroom.google.com', '_blank');
     }
 
     // ==========================================================
-    // 🎨 SISTEMA DE TEMAS
+    // 🎨 TEMAS
     // ==========================================================
     const THEMES = ['purple', 'red', 'pink', 'black', 'blue'];
-
     function applyTheme(theme) {
       THEMES.forEach(t => document.body.classList.remove('theme-' + t));
       if (theme !== 'purple') document.body.classList.add('theme-' + theme);
@@ -304,45 +329,24 @@
         sw.classList.toggle('active', sw.dataset.theme === theme);
       });
     }
-
-    function setTheme(theme) {
-      applyTheme(theme);
-      localStorage.setItem('gonex-theme', theme);
-    }
-
-    function loadSavedTheme() {
-      const saved = localStorage.getItem('gonex-theme') || 'purple';
-      applyTheme(saved);
-    }
+    function setTheme(theme) { applyTheme(theme); localStorage.setItem('gonex-theme', theme); }
+    function loadSavedTheme() { const saved = localStorage.getItem('gonex-theme') || 'purple'; applyTheme(saved); }
 
     // ==========================================================
     // 🖼️ FONDOS
     // ==========================================================
     const PHOTO_IDS = [
-      'photo-1477959858617-67f85cf4f1df',
-      'photo-1480714378408-67cf0d13bc1b',
-      'photo-1449824913935-59a10b8d2000',
-      'photo-1519501025264-65ba15a82390',
-      'photo-1502602898657-3e91760cbb34',
-      'photo-1444723121867-7a241cacace9',
-      'photo-1533929736458-ca588d08c8be',
-      'photo-1493246507139-91e8fad9978e',
-      'photo-1508050919630-b135583b29ab',
-      'photo-1514565131-fce0801e5785',
-      'photo-1493514789931-586cb221d7a7',
-      'photo-1470004914212-05527e49370b'
+      'photo-1477959858617-67f85cf4f1df','photo-1480714378408-67cf0d13bc1b','photo-1449824913935-59a10b8d2000',
+      'photo-1519501025264-65ba15a82390','photo-1502602898657-3e91760cbb34','photo-1444723121867-7a241cacace9',
+      'photo-1533929736458-ca588d08c8be','photo-1493246507139-91e8fad9978e','photo-1508050919630-b135583b29ab',
+      'photo-1514565131-fce0801e5785','photo-1493514789931-586cb221d7a7','photo-1470004914212-05527e49370b'
     ];
-
-    function buildWallpaperUrl(photoId) {
-      return `https://wsrv.nl/?url=images.unsplash.com/${photoId}?w=1920&q=80&auto=format&fit=crop`;
-    }
-
+    function buildWallpaperUrl(photoId) { return `https://wsrv.nl/?url=images.unsplash.com/${photoId}?w=1920&q=80&auto=format&fit=crop`; }
     function applyWallpaper(url) {
       document.body.style.backgroundImage = `url('${url}')`;
       const preview = document.getElementById('settings-preview');
       if (preview) preview.style.backgroundImage = `url('${url}')`;
     }
-
     function setRandomWallpaper() {
       const shuffled = [...PHOTO_IDS].sort(() => Math.random() - 0.5);
       let attempt = 0;
@@ -356,34 +360,22 @@
       }
       tryLoad();
     }
-
     function loadSavedWallpaper() {
       const custom = localStorage.getItem('gonex-wallpaper');
-      if (custom) applyWallpaper(custom);
-      else setRandomWallpaper();
+      if (custom) applyWallpaper(custom); else setRandomWallpaper();
     }
-
     function handleWallpaperUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      if (file.size > 3 * 1024 * 1024) { alert('Máx 3 MB. Elige una más pequeña.'); return; }
+      const file = event.target.files[0]; if (!file) return;
+      if (file.size > 3 * 1024 * 1024) { alert('Máx 3 MB.'); return; }
       const reader = new FileReader();
       reader.onload = (e) => {
         const dataUrl = e.target.result;
-        try {
-          localStorage.setItem('gonex-wallpaper', dataUrl);
-          applyWallpaper(dataUrl);
-        } catch (err) {
-          alert('No se pudo guardar. Intenta con una más pequeña.');
-        }
+        try { localStorage.setItem('gonex-wallpaper', dataUrl); applyWallpaper(dataUrl); }
+        catch (err) { alert('No se pudo guardar.'); }
       };
       reader.readAsDataURL(file);
     }
-
-    function resetWallpaper() {
-      localStorage.removeItem('gonex-wallpaper');
-      setRandomWallpaper();
-    }
+    function resetWallpaper() { localStorage.removeItem('gonex-wallpaper'); setRandomWallpaper(); }
 
     // ==========================================================
     // ⚙️ AJUSTES
@@ -399,18 +391,11 @@
       document.getElementById('info-date').textContent = now.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
       document.getElementById('info-time').textContent = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
-
     function getWeatherIcon(code) {
-      if (code === 0) return '☀️';
-      if (code <= 3) return '⛅';
-      if (code <= 48) return '🌫️';
-      if (code <= 67) return '🌧️';
-      if (code <= 77) return '❄️';
-      if (code <= 82) return '🌧️';
-      if (code <= 86) return '❄️';
-      return '⛈️';
+      if (code === 0) return '☀️'; if (code <= 3) return '⛅'; if (code <= 48) return '🌫️';
+      if (code <= 67) return '🌧️'; if (code <= 77) return '❄️'; if (code <= 82) return '🌧️';
+      if (code <= 86) return '❄️'; return '⛈️';
     }
-
     async function loadWeather() {
       const weatherEl = document.getElementById('info-weather');
       try {
@@ -423,9 +408,63 @@
         const temp = Math.round(weatherData.current_weather.temperature);
         const icon = getWeatherIcon(weatherData.current_weather.weathercode);
         weatherEl.textContent = `${icon} ${temp}°C · ${name}`;
-      } catch (error) {
-        weatherEl.textContent = 'Clima no disponible';
-      }
+      } catch (error) { weatherEl.textContent = 'Clima no disponible'; }
+    }
+
+    // ==========================================================
+    // 🌍 RELOJ MUNDIAL
+    // ==========================================================
+    const CITIES = [
+      { name: 'Lima', tz: 'America/Lima' },
+      { name: 'Nueva York', tz: 'America/New_York' },
+      { name: 'Madrid', tz: 'Europe/Madrid' },
+      { name: 'Tokio', tz: 'Asia/Tokyo' },
+      { name: 'Sídney', tz: 'Australia/Sydney' },
+      { name: 'Londres', tz: 'Europe/London' }
+    ];
+    function renderClockList() {
+      const list = document.getElementById('clock-list');
+      list.innerHTML = '';
+      CITIES.forEach(city => {
+        const time = new Date().toLocaleTimeString('es-ES', { timeZone: city.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        list.innerHTML += `<div class="clock-row"><span class="clock-city">${city.name}</span><span class="clock-time">${time}</span></div>`;
+      });
+    }
+    function openWorldClock() {
+      renderClockList();
+      document.getElementById('world-clock-modal').classList.add('active');
+      if (window.worldClockInterval) clearInterval(window.worldClockInterval);
+      window.worldClockInterval = setInterval(() => {
+        if (!document.getElementById('world-clock-modal').classList.contains('active')) {
+          clearInterval(window.worldClockInterval);
+          return;
+        }
+        renderClockList();
+      }, 1000);
+    }
+    function closeWorldClock() {
+      document.getElementById('world-clock-modal').classList.remove('active');
+      if (window.worldClockInterval) clearInterval(window.worldClockInterval);
+    }
+
+    // ==========================================================
+    // 💬 FRASES
+    // ==========================================================
+    const QUOTES = [
+      "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
+      "No cuentes los días, haz que los días cuenten.",
+      "La mejor manera de predecir el futuro es crearlo.",
+      "El único modo de hacer un gran trabajo es amar lo que haces.",
+      "La disciplina es el puente entre las metas y los logros.",
+      "No te preocupes por los fracasos, preocúpate por las oportunidades que pierdes al no intentarlo.",
+      "El conocimiento es poder.",
+      "Cree en ti mismo y todo será posible.",
+      "Cada día es una nueva oportunidad para cambiar tu vida.",
+      "La perseverancia es la clave del éxito."
+    ];
+    function setRandomQuote() {
+      const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+      document.getElementById('quote-box').textContent = `"${quote}"`;
     }
 
     // ==========================================================
@@ -437,7 +476,6 @@
       { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed' },
       { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', external: true },
     ];
-
     function buildSecretButtons() {
       const grid = document.getElementById('secret-grid');
       grid.innerHTML = '';
@@ -453,13 +491,11 @@
         grid.appendChild(el);
       });
     }
-
     function showSecretPanel() { buildSecretButtons(); document.getElementById('secret-panel').classList.add('active'); }
     function hideSecretPanel() { document.getElementById('secret-panel').classList.remove('active'); }
     function toggleSecretPanel() {
       const panel = document.getElementById('secret-panel');
-      if (panel.classList.contains('active')) hideSecretPanel();
-      else showSecretPanel();
+      if (panel.classList.contains('active')) hideSecretPanel(); else showSecretPanel();
     }
 
     // ==========================================================
@@ -489,16 +525,12 @@
     var currentMode = 'web';
     function setMode(mode) {
       currentMode = mode;
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === mode);
-      });
+      document.querySelectorAll('.filter-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.mode === mode); });
     }
-
     function extractYouTubeId(url) {
       const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
       return match ? match[1] : null;
     }
-
     async function searchYouTube(query) {
       const container = document.getElementById('results-container');
       container.innerHTML = '<p style="color:#94a3b8;">Buscando en YouTube...</p>';
@@ -507,11 +539,8 @@
         if (!response.ok) throw new Error(`Error ${response.status}`);
         const data = await response.json();
         displayYouTubeResults(data.results);
-      } catch (error) {
-        container.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`;
-      }
+      } catch (error) { container.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`; }
     }
-
     function displayYouTubeResults(results) {
       const container = document.getElementById('results-container');
       container.innerHTML = '';
@@ -524,7 +553,6 @@
         container.appendChild(card);
       });
     }
-
     async function searchWeb(query) {
       const container = document.getElementById('results-container');
       container.innerHTML = '<p style="color:#94a3b8;">Buscando en la web...</p>';
@@ -535,11 +563,8 @@
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || `Error ${response.status}`);
         displayWebResults(data.results);
-      } catch (error) {
-        container.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`;
-      }
+      } catch (error) { container.innerHTML = `<p style="color:#ef4444;">Error: ${error.message}</p>`; }
     }
-
     function displayWebResults(results) {
       const container = document.getElementById('results-container');
       container.innerHTML = '';
@@ -552,56 +577,24 @@
         container.appendChild(card);
       });
     }
-
-    // ==========================================================
-    // 🚦 FLUJO PRINCIPAL
-    // ==========================================================
     function handleInput(input) {
       const clean = input.trim();
       if (clean.toLowerCase() === SECRET_CODE.toLowerCase()) { toggleSecretPanel(); return; }
-
       const ytId = extractYouTubeId(clean);
-      if (ytId) {
-        window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank');
-        return;
-      }
-
-      // ✅ Detectar URLs de sitios que NO permiten iframe y abrirlos en pestaña nueva
+      if (ytId) { window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank'); return; }
       if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
-
-        // Lista de dominios que siempre se abren fuera
-        const dominiosExternos = [
-          'classroom.google.com',
-          'sites.google.com',
-          'accounts.google.com',
-          'mail.google.com',
-          'drive.google.com',
-          'docs.google.com',
-          'calendar.google.com',
-          'meet.google.com'
-        ];
-
-        const debeAbrirFuera = dominiosExternos.some(d => url.includes(d));
-
-        if (debeAbrirFuera) {
-          window.open(url, '_blank');
-        } else {
-          openWebViewer(url);
-        }
+        const dominiosExternos = ['classroom.google.com','sites.google.com','accounts.google.com','mail.google.com','drive.google.com','docs.google.com','calendar.google.com','meet.google.com'];
+        if (dominiosExternos.some(d => url.includes(d))) { window.open(url, '_blank'); }
+        else { openWebViewer(url); }
         return;
       }
-
-      // Búsqueda normal
-      if (currentMode === 'youtube') searchYouTube(clean);
-      else searchWeb(clean);
+      if (currentMode === 'youtube') searchYouTube(clean); else searchWeb(clean);
     }
-
     function closeModal(modalId) {
       if (modalId === 'web-viewer-modal') { document.getElementById('web-viewer-iframe').src = 'about:blank'; }
       document.getElementById(modalId).classList.remove('active');
     }
-
     document.getElementById('search-form').addEventListener('submit', function (e) {
       e.preventDefault();
       handleInput(document.getElementById('search-input').value);
@@ -616,6 +609,7 @@
       updateClock();
       setInterval(updateClock, 1000);
       loadWeather();
+      setRandomQuote();
     });
   </script>
 </body>

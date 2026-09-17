@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend Express 5 final
+// GoNex Web Bridge — Backend Express 5 con AnySearch + YouTube
 
 const express = require('express');
 const path = require('path');
@@ -8,7 +8,6 @@ const { YTubeNoAPI } = require('ytube-noapi');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
-const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 
 const publicPath = path.join(__dirname, '..', 'public');
 const youtube = new YTubeNoAPI();
@@ -25,7 +24,6 @@ app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
-  // ✅ CSP actualizada con los dominios necesarios para el clima y fondos
   res.setHeader(
     'Content-Security-Policy',
     [
@@ -35,7 +33,7 @@ app.use((req, res, next) => {
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com",
-      "connect-src 'self' https://www.youtube.com https://api.tavily.com https://geocoding-api.open-meteo.com https://api.open-meteo.com",
+      "connect-src 'self' https://www.youtube.com https://api.anysearch.com https://geocoding-api.open-meteo.com https://api.open-meteo.com",
       "base-uri 'self'",
       "form-action 'self'",
       "object-src 'none'"
@@ -67,7 +65,7 @@ app.use(
 );
 
 // ==========================================================
-// ENDPOINT: YouTube Search
+// ENDPOINT: YouTube Search (sin API Key, con ytube-noapi)
 // ==========================================================
 app.get('/api/youtube-search', async (req, res) => {
   const query = req.query.q;
@@ -91,44 +89,47 @@ app.get('/api/youtube-search', async (req, res) => {
 });
 
 // ==========================================================
-// ENDPOINT: Tavily Web Search
+// ENDPOINT: Búsqueda Web con AnySearch (gratis, sin clave)
 // ==========================================================
 app.get('/api/web-search', async (req, res) => {
   const query = req.query.q;
   if (!query || typeof query !== 'string' || query.trim() === '') {
     return res.status(400).json({ error: 'Falta el parámetro "q".' });
   }
-  if (!TAVILY_API_KEY) {
-    console.error('[GoNex] TAVILY_API_KEY no configurada.');
-    return res.status(500).json({ error: 'El servicio de búsqueda web no está configurado.' });
-  }
+
   try {
-    const apiResponse = await fetch('https://api.tavily.com/search', {
+    const apiResponse = await fetch('https://api.anysearch.com/v1/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        api_key: TAVILY_API_KEY,
         query: query.trim(),
-        search_depth: 'basic',
         max_results: 10
       })
     });
-    if (!apiResponse.ok) throw new Error(`Tavily: ${apiResponse.status}`);
+
+    if (!apiResponse.ok) {
+      const errText = await apiResponse.text();
+      console.error('[GoNex] AnySearch error:', apiResponse.status, errText);
+      throw new Error(`AnySearch: ${apiResponse.status}`);
+    }
+
     const data = await apiResponse.json();
-    const results = (data.results || []).map((item) => ({
+
+    const results = (data.results || data.web?.results || []).map((item) => ({
       title: item.title || 'Sin título',
-      url: item.url || '',
-      description: item.content || ''
+      url: item.url || item.link || '',
+      description: item.description || item.snippet || ''
     }));
+
     res.status(200).json({ results });
   } catch (error) {
-    console.error('[GoNex] Tavily error:', error.message);
+    console.error('[GoNex] AnySearch error:', error.message);
     res.status(500).json({ error: 'Error al buscar en la web.' });
   }
 });
 
 // ==========================================================
-// RUTA WILDCARD SPA
+// RUTA WILDCARD SPA — Express 5
 // ==========================================================
 app.get('/{*splat}', (req, res, next) => {
   if (!req.accepts('html')) return next();
