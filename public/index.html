@@ -6,90 +6,74 @@
   <title>GoNex Web Bridge</title>
   <style>
     :root {
-      --accent-1: #8b5cf6;
-      --accent-2: #6366f1;
-      --badge-bg: rgba(139, 92, 246, 0.2);
-      --badge-color: #a855f7;
-      --border-hover: #8b5cf6;
-      --logo-1: #a855f7;
-      --logo-2: #6366f1;
+      --accent-1: #8b5cf6; --accent-2: #6366f1;
+      --badge-bg: rgba(139, 92, 246, 0.2); --badge-color: #a855f7;
+      --border-hover: #8b5cf6; --logo-1: #a855f7; --logo-2: #6366f1;
       --bg-main: #0b0f19;
     }
-    body.theme-red { --accent-1: #ef4444; --accent-2: #dc2626; --badge-bg: rgba(239, 68, 68, 0.2); --badge-color: #f87171; --border-hover: #ef4444; --logo-1: #f87171; --logo-2: #dc2626; }
-    body.theme-pink { --accent-1: #ec4899; --accent-2: #db2777; --badge-bg: rgba(236, 72, 153, 0.2); --badge-color: #f472b6; --border-hover: #ec4899; --logo-1: #f472b6; --logo-2: #db2777; }
-    body.theme-black { --accent-1: #4b5563; --accent-2: #1f2937; --badge-bg: rgba(75, 85, 99, 0.3); --badge-color: #9ca3af; --border-hover: #6b7280; --logo-1: #9ca3af; --logo-2: #4b5563; }
-    body.theme-blue { --accent-1: #0ea5e9; --accent-2: #0284c7; --badge-bg: rgba(14, 165, 233, 0.2); --badge-color: #38bdf8; --border-hover: #0ea5e9; --logo-1: #38bdf8; --logo-2: #0284c7; }
+    body.theme-red { --accent-1: #ef4444; --accent-2: #dc2626; --badge-bg: rgba(239,68,68,.2); --badge-color:#f87171; --border-hover:#ef4444; --logo-1:#f87171; --logo-2:#dc2626; }
+    body.theme-pink { --accent-1: #ec4899; --accent-2: #db2777; --badge-bg: rgba(236,72,153,.2); --badge-color:#f472b6; --border-hover:#ec4899; --logo-1:#f472b6; --logo-2:#db2777; }
+    body.theme-black { --accent-1: #4b5563; --accent-2: #1f2937; --badge-bg: rgba(75,85,99,.3); --badge-color:#9ca3af; --border-hover:#6b7280; --logo-1:#9ca3af; --logo-2:#4b5563; }
+    body.theme-blue { --accent-1: #0ea5e9; --accent-2: #0284c7; --badge-bg: rgba(14,165,233,.2); --badge-color:#38bdf8; --border-hover:#0ea5e9; --logo-1:#38bdf8; --logo-2:#0284c7; }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
     body {
-      background-color: var(--bg-main);
-      color: #f1f5f9;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px 20px;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      transition: background-image 0.8s ease-in-out;
+      background-color: var(--bg-main); color: #f1f5f9; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; padding: 40px 20px;
+      background-size: cover; background-position: center; background-repeat: no-repeat;
+      background-attachment: fixed; transition: background-image 0.8s ease-in-out;
     }
     body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: linear-gradient(180deg, rgba(11, 15, 25, 0.55) 0%, rgba(11, 15, 25, 0.75) 100%);
-      z-index: -1;
-      pointer-events: none;
+      content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(180deg, rgba(11,15,25,.55) 0%, rgba(11,15,25,.75) 100%);
+      z-index: -1; pointer-events: none;
     }
     .header { text-align: center; margin-bottom: 20px; }
     .logo { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, var(--logo-1), var(--logo-2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .subtitle { color: #cbd5e1; font-size: 0.9rem; margin-top: 4px; }
-    .quote-box { max-width: 680px; margin-bottom: 20px; text-align: center; color: #e2e8f0; font-style: italic; font-size: 0.95rem; padding: 12px 20px; background: rgba(22, 27, 38, 0.7); border-radius: 10px; border: 1px solid rgba(139, 92, 246, 0.3); backdrop-filter: blur(8px); }
+    .quote-box { max-width: 680px; margin-bottom: 20px; text-align: center; color: #e2e8f0; font-style: italic; font-size: 0.95rem; padding: 12px 20px; background: rgba(22,27,38,.7); border-radius: 10px; border: 1px solid rgba(139,92,246,.3); backdrop-filter: blur(8px); }
     .search-container { width: 100%; max-width: 680px; margin-bottom: 20px; }
-    .search-box { display: flex; gap: 10px; background: rgba(22, 27, 38, 0.92); padding: 8px; border-radius: 12px; border: 1px solid #2d3748; backdrop-filter: blur(10px); }
+    .search-box { display: flex; gap: 10px; background: rgba(22,27,38,.92); padding: 8px; border-radius: 12px; border: 1px solid #2d3748; backdrop-filter: blur(10px); }
     .search-box input { flex: 1; background: transparent; border: none; outline: none; color: #fff; padding: 10px 14px; font-size: 1rem; }
     .search-box button { background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); border: none; color: #fff; padding: 10px 22px; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; width: 100%; max-width: 680px; }
-    .card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
+    .card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
     .card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
     .card .icon { font-size: 1.6rem; margin-bottom: 6px; }
     .card .title { font-size: 0.85rem; font-weight: 600; }
     .badge { display: inline-block; font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; margin-top: 6px; font-weight: bold; background: var(--badge-bg); color: var(--badge-color); }
     .results-container { width: 100%; max-width: 680px; margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
-    .video-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
+    .video-card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
     .video-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
     .video-card img { width: 100%; height: 120px; object-fit: cover; }
     .video-card h3 { font-size: 0.85rem; padding: 10px; line-height: 1.3; }
     .video-card p { font-size: 0.75rem; color: #94a3b8; padding: 0 10px 10px; }
-    .web-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; padding: 16px; cursor: pointer; transition: transform 0.2s; color: inherit; display: block; backdrop-filter: blur(10px); }
+    .web-card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; padding: 16px; cursor: pointer; transition: transform 0.2s; color: inherit; display: block; backdrop-filter: blur(10px); }
     .web-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
     .web-card h3 { font-size: 0.95rem; margin-bottom: 8px; color: var(--badge-color); line-height: 1.3; }
     .web-card .web-url { font-size: 0.7rem; color: #64748b; margin-bottom: 8px; word-break: break-all; }
     .web-card p { font-size: 0.8rem; color: #94a3b8; line-height: 1.4; }
-    .image-card { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
+    .image-card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
     .image-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
     .image-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
     .image-card .image-info { padding: 10px; }
     .image-card h3 { font-size: 0.8rem; line-height: 1.3; margin-bottom: 4px; }
     .image-card .image-meta { font-size: 0.65rem; color: #94a3b8; }
     .filters { width: 100%; max-width: 680px; display: flex; gap: 8px; margin-bottom: 15px; justify-content: center; flex-wrap: wrap; }
-    .filter-btn { background: rgba(22, 27, 38, 0.92); border: 1px solid #2d3748; color: #94a3b8; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s; backdrop-filter: blur(10px); }
+    .filter-btn { background: rgba(22,27,38,.92); border: 1px solid #2d3748; color: #94a3b8; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s; backdrop-filter: blur(10px); }
     .filter-btn.active { background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); color: #fff; border-color: transparent; }
     .filter-btn:hover:not(.active) { border-color: var(--border-hover); color: #fff; }
-    .secret-panel { display: none; width: 100%; max-width: 680px; margin-top: 25px; padding: 20px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.15)); border: 2px dashed var(--accent-1); border-radius: 14px; position: relative; backdrop-filter: blur(10px); }
+    .secret-panel { display: none; width: 100%; max-width: 680px; margin-top: 25px; padding: 20px; background: linear-gradient(135deg, rgba(139,92,246,.15), rgba(99,102,241,.15)); border: 2px dashed var(--accent-1); border-radius: 14px; position: relative; backdrop-filter: blur(10px); }
     .secret-panel.active { display: block; }
     .secret-panel h3 { color: var(--badge-color); font-size: 1rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; text-align: center; }
     .secret-close { position: absolute; top: 10px; right: 12px; background: transparent; border: none; color: #64748b; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
     .secret-close:hover { color: #ef4444; }
     .secret-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
-    .secret-btn { background: rgba(22, 27, 38, 0.95); border: 1px solid var(--accent-1); color: #f1f5f9; padding: 14px 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; text-align: center; position: relative; }
+    .secret-btn { background: rgba(22,27,38,.95); border: 1px solid var(--accent-1); color: #f1f5f9; padding: 14px 10px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; text-align: center; position: relative; }
     .secret-btn:hover { background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); transform: translateY(-3px); }
     .secret-btn .secret-icon { display: block; font-size: 1.6rem; margin-bottom: 6px; }
     .secret-btn .external-badge { position: absolute; top: 4px; right: 4px; font-size: 0.6rem; background: #64748b; color: #fff; padding: 2px 5px; border-radius: 4px; }
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     .modal.active { display: flex; }
     .modal-header { width: 100%; max-width: 1000px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .btn-close { background: #2d3748; border: none; color: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
@@ -100,38 +84,27 @@
     .web-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
     .web-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; }
 
-    .info-widget {
-      position: fixed;
-      top: 18px;
-      right: 18px;
-      background: rgba(10, 30, 61, 0.9);
-      border: 1px solid #1e3a5f;
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 0.72rem;
-      color: #94a3b8;
-      text-align: right;
-      z-index: 50;
-      line-height: 1.5;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      min-width: 110px;
-      backdrop-filter: blur(10px);
-      cursor: pointer;
-    }
+    /* Imagen preview modal */
+    .image-preview-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(8px); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+    .image-preview-modal.active { display: flex; }
+    .image-preview-card { width: 100%; max-width: 900px; max-height: 90vh; background: #161b26; border: 1px solid #2d3748; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+    .image-preview-card img { max-width: 100%; max-height: 65vh; object-fit: contain; background: #000; }
+    .image-preview-info { padding: 20px; display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .image-preview-info h3 { font-size: 1.1rem; margin-bottom: 6px; }
+    .image-preview-info .image-meta { font-size: 0.8rem; color: #94a3b8; }
+    .image-preview-actions { display: flex; gap: 10px; }
+    .image-preview-actions a { background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; }
+    .image-preview-actions button { background: #2d3748; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+    .image-preview-actions button:hover { background: #ef4444; }
+
+    .info-widget { position: fixed; top: 18px; right: 18px; background: rgba(10,30,61,.9); border: 1px solid #1e3a5f; border-radius: 10px; padding: 8px 12px; font-size: 0.72rem; color: #94a3b8; text-align: right; z-index: 50; line-height: 1.5; box-shadow: 0 4px 12px rgba(0,0,0,.4); min-width: 110px; backdrop-filter: blur(10px); cursor: pointer; }
     .info-widget:hover { border-color: var(--accent-1); }
     .info-widget .info-time { color: #e2e8f0; font-weight: 600; font-size: 0.85rem; }
     .info-widget .info-weather { color: #7dd3fc; }
 
-    .settings-btn {
-      position: fixed; top: 18px; left: 18px; width: 42px; height: 42px;
-      border-radius: 10px; background: rgba(22, 27, 38, 0.92);
-      border: 1px solid #2d3748; color: #f1f5f9; cursor: pointer;
-      font-size: 1.3rem; display: flex; align-items: center; justify-content: center;
-      z-index: 50; backdrop-filter: blur(10px); transition: all 0.2s;
-    }
+    .settings-btn { position: fixed; top: 18px; left: 18px; width: 42px; height: 42px; border-radius: 10px; background: rgba(22,27,38,.92); border: 1px solid #2d3748; color: #f1f5f9; cursor: pointer; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; z-index: 50; backdrop-filter: blur(10px); transition: all 0.2s; }
     .settings-btn:hover { border-color: var(--accent-1); transform: scale(1.05); }
-
-    .settings-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.9); backdrop-filter: blur(8px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .settings-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.9); backdrop-filter: blur(8px); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
     .settings-modal.active { display: flex; }
     .settings-card { width: 100%; max-width: 480px; background: #161b26; border: 1px solid #2d3748; border-radius: 16px; padding: 24px; max-height: 90vh; overflow-y: auto; }
     .settings-card h2 { font-size: 1.2rem; margin-bottom: 20px; text-align: center; color: var(--badge-color); }
@@ -141,7 +114,7 @@
     .color-swatch { width: 44px; height: 44px; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; position: relative; }
     .color-swatch:hover { transform: scale(1.1); }
     .color-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px var(--accent-1); }
-    .color-swatch.active::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-weight: bold; font-size: 1.1rem; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+    .color-swatch.active::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-weight: bold; font-size: 1.1rem; }
     .swatch-purple { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
     .swatch-red { background: linear-gradient(135deg, #ef4444, #dc2626); }
     .swatch-pink { background: linear-gradient(135deg, #ec4899, #db2777); }
@@ -152,8 +125,7 @@
     .settings-preview { width: 100%; height: 90px; border-radius: 10px; background-size: cover; background-position: center; border: 1px solid #2d3748; margin-bottom: 12px; background-color: #0b0f19; }
     .settings-close-btn { width: 100%; padding: 12px; background: #2d3748; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 8px; }
     .hidden-input { display: none; }
-
-    .world-clock-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11, 15, 25, 0.95); backdrop-filter: blur(8px); z-index: 150; align-items: center; justify-content: center; padding: 20px; }
+    .world-clock-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(8px); z-index: 150; align-items: center; justify-content: center; padding: 20px; }
     .world-clock-modal.active { display: flex; }
     .world-clock-card { width: 100%; max-width: 500px; background: #161b26; border: 1px solid #2d3748; border-radius: 16px; padding: 24px; }
     .world-clock-card h2 { text-align: center; margin-bottom: 20px; color: var(--badge-color); }
@@ -187,7 +159,6 @@
     </form>
   </div>
 
-  <!-- Filtros de modo -->
   <div class="filters">
     <button class="filter-btn active" data-mode="web" onclick="setMode('web')">🌐 Web</button>
     <button class="filter-btn" data-mode="wiki" onclick="setMode('wiki')">📚 Wikipedia</button>
@@ -196,7 +167,6 @@
     <button class="filter-btn" data-mode="youtube" onclick="setMode('youtube')">📺 YouTube</button>
   </div>
 
-  <!-- Accesos directos -->
   <div class="grid">
     <div class="card" onclick="setMode('web'); handleInput('noticias de tecnología')">
       <div class="icon">🌐</div><div class="title">Web Search</div><div class="badge">MULTI</div>
@@ -213,14 +183,14 @@
     <div class="card" onclick="setMode('youtube'); handleInput('musica')">
       <div class="icon">📺</div><div class="title">YouTube</div><div class="badge">VIDEOS</div>
     </div>
-    <div class="card" onclick="openClassroom()">
-      <div class="icon">🏫</div><div class="title">Classroom</div><div class="badge">DIRECTO</div>
+    <div class="card" onclick="openExternal('https://classroom.google.com')">
+      <div class="icon">🏫</div><div class="title">Classroom</div><div class="badge">DIRECTO ↗</div>
     </div>
-    <div class="card" onclick="handleInput('https://www.google.com')">
-      <div class="icon">🔍</div><div class="title">Google</div><div class="badge">DIRECTO</div>
+    <div class="card" onclick="openExternal('https://www.google.com')">
+      <div class="icon">🔍</div><div class="title">Google</div><div class="badge">DIRECTO ↗</div>
     </div>
-    <div class="card" onclick="handleInput('https://github.com')">
-      <div class="icon">💻</div><div class="title">GitHub</div><div class="badge">DIRECTO</div>
+    <div class="card" onclick="openExternal('https://github.com')">
+      <div class="icon">💻</div><div class="title">GitHub</div><div class="badge">DIRECTO ↗</div>
     </div>
   </div>
 
@@ -246,6 +216,23 @@
         <p style="font-size: 0.75rem;">Si tarda mucho, es posible que el sitio bloquee la visualización integrada.</p>
       </div>
       <iframe id="web-viewer-iframe" src="" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    </div>
+  </div>
+
+  <!-- Modal de vista previa de imagen -->
+  <div id="image-preview-modal" class="image-preview-modal" onclick="if(event.target===this)closeImagePreview()">
+    <div class="image-preview-card">
+      <img id="image-preview-img" src="" alt="Vista previa" />
+      <div class="image-preview-info">
+        <div>
+          <h3 id="image-preview-title">Título</h3>
+          <div class="image-meta" id="image-preview-meta">Creador · Licencia</div>
+        </div>
+        <div class="image-preview-actions">
+          <a id="image-preview-link" href="#" target="_blank">Abrir original ↗</a>
+          <button onclick="closeImagePreview()">Cerrar</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -282,99 +269,89 @@
   </div>
 
   <script>
+    // ==========================================================
+    // ABRIR EXTERNO (para Google, GitHub, Classroom)
+    // ==========================================================
+    function openExternal(url) { window.open(url, '_blank'); }
     function openClassroom() { window.open('https://classroom.google.com', '_blank'); }
 
+    // ==========================================================
+    // TEMAS
+    // ==========================================================
     const THEMES = ['purple', 'red', 'pink', 'black', 'blue'];
     function applyTheme(theme) {
       THEMES.forEach(t => document.body.classList.remove('theme-' + t));
       if (theme !== 'purple') document.body.classList.add('theme-' + theme);
-      document.querySelectorAll('.color-swatch').forEach(sw => {
-        sw.classList.toggle('active', sw.dataset.theme === theme);
-      });
+      document.querySelectorAll('.color-swatch').forEach(sw => sw.classList.toggle('active', sw.dataset.theme === theme));
     }
     function setTheme(theme) { applyTheme(theme); localStorage.setItem('gonex-theme', theme); }
     function loadSavedTheme() { applyTheme(localStorage.getItem('gonex-theme') || 'purple'); }
 
-    const PHOTO_IDS = [
-      'photo-1477959858617-67f85cf4f1df','photo-1480714378408-67cf0d13bc1b','photo-1449824913935-59a10b8d2000',
-      'photo-1519501025264-65ba15a82390','photo-1502602898657-3e91760cbb34','photo-1444723121867-7a241cacace9',
-      'photo-1533929736458-ca588d08c8be','photo-1493246507139-91e8fad9978e','photo-1508050919630-b135583b29ab',
-      'photo-1514565131-fce0801e5785','photo-1493514789931-586cb221d7a7','photo-1470004914212-05527e49370b'
-    ];
-    function buildWallpaperUrl(photoId) { return `https://wsrv.nl/?url=images.unsplash.com/${photoId}?w=1920&q=80&auto=format&fit=crop`; }
-    function applyWallpaper(url) {
-      document.body.style.backgroundImage = `url('${url}')`;
-      const preview = document.getElementById('settings-preview');
-      if (preview) preview.style.backgroundImage = `url('${url}')`;
-    }
+    // ==========================================================
+    // FONDOS
+    // ==========================================================
+    const PHOTO_IDS = ['photo-1477959858617-67f85cf4f1df','photo-1480714378408-67cf0d13bc1b','photo-1449824913935-59a10b8d2000','photo-1519501025264-65ba15a82390','photo-1502602898657-3e91760cbb34','photo-1444723121867-7a241cacace9','photo-1533929736458-ca588d08c8be','photo-1493246507139-91e8fad9978e','photo-1508050919630-b135583b29ab','photo-1514565131-fce0801e5785','photo-1493514789931-586cb221d7a7','photo-1470004914212-05527e49370b'];
+    function buildWallpaperUrl(id) { return `https://wsrv.nl/?url=images.unsplash.com/${id}?w=1920&q=80&auto=format&fit=crop`; }
+    function applyWallpaper(url) { document.body.style.backgroundImage = `url('${url}')`; const p = document.getElementById('settings-preview'); if (p) p.style.backgroundImage = `url('${url}')`; }
     function setRandomWallpaper() {
-      const shuffled = [...PHOTO_IDS].sort(() => Math.random() - 0.5);
-      let attempt = 0;
-      function tryLoad() {
-        if (attempt >= shuffled.length) return;
-        const url = buildWallpaperUrl(shuffled[attempt]);
-        const img = new Image();
-        img.onload = () => applyWallpaper(url);
-        img.onerror = () => { attempt++; tryLoad(); };
-        img.src = url;
-      }
+      const s = [...PHOTO_IDS].sort(() => Math.random() - 0.5); let a = 0;
+      function tryLoad() { if (a >= s.length) return; const u = buildWallpaperUrl(s[a]); const i = new Image(); i.onload = () => applyWallpaper(u); i.onerror = () => { a++; tryLoad(); }; i.src = u; }
       tryLoad();
     }
-    function loadSavedWallpaper() {
-      const custom = localStorage.getItem('gonex-wallpaper');
-      if (custom) applyWallpaper(custom); else setRandomWallpaper();
-    }
-    function handleWallpaperUpload(event) {
-      const file = event.target.files[0]; if (!file) return;
-      if (file.size > 3 * 1024 * 1024) { alert('Máx 3 MB.'); return; }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try { localStorage.setItem('gonex-wallpaper', e.target.result); applyWallpaper(e.target.result); }
-        catch (err) { alert('No se pudo guardar.'); }
-      };
-      reader.readAsDataURL(file);
+    function loadSavedWallpaper() { const c = localStorage.getItem('gonex-wallpaper'); if (c) applyWallpaper(c); else setRandomWallpaper(); }
+    function handleWallpaperUpload(e) {
+      const f = e.target.files[0]; if (!f) return;
+      if (f.size > 3 * 1024 * 1024) { alert('Máx 3 MB.'); return; }
+      const r = new FileReader();
+      r.onload = (ev) => { try { localStorage.setItem('gonex-wallpaper', ev.target.result); applyWallpaper(ev.target.result); } catch (er) { alert('No se pudo guardar.'); } };
+      r.readAsDataURL(f);
     }
     function resetWallpaper() { localStorage.removeItem('gonex-wallpaper'); setRandomWallpaper(); }
 
+    // ==========================================================
+    // AJUSTES
+    // ==========================================================
     function openSettings() { document.getElementById('settings-modal').classList.add('active'); }
     function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
 
+    // ==========================================================
+    // RELOJ + CLIMA
+    // ==========================================================
     function updateClock() {
-      const now = new Date();
-      document.getElementById('info-date').textContent = now.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
-      document.getElementById('info-time').textContent = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const n = new Date();
+      document.getElementById('info-date').textContent = n.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+      document.getElementById('info-time').textContent = n.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
-    function getWeatherIcon(code) {
-      if (code === 0) return '☀️'; if (code <= 3) return '⛅'; if (code <= 48) return '🌫️';
-      if (code <= 67) return '🌧️'; if (code <= 77) return '❄️'; if (code <= 82) return '🌧️';
-      if (code <= 86) return '❄️'; return '⛈️';
+    function getWeatherIcon(c) {
+      if (c === 0) return '☀️'; if (c <= 3) return '⛅'; if (c <= 48) return '🌫️';
+      if (c <= 67) return '🌧️'; if (c <= 77) return '❄️'; if (c <= 82) return '🌧️';
+      if (c <= 86) return '❄️'; return '⛈️';
     }
     async function loadWeather() {
-      const weatherEl = document.getElementById('info-weather');
+      const el = document.getElementById('info-weather');
       try {
-        const geoRes = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=Chiclayo&count=1&language=es&format=json');
-        const geoData = await geoRes.json();
-        if (!geoData.results?.[0]) throw new Error('Sin Chiclayo');
-        const { latitude, longitude, name } = geoData.results[0];
-        const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
-        const weatherData = await weatherRes.json();
-        const temp = Math.round(weatherData.current_weather.temperature);
-        const icon = getWeatherIcon(weatherData.current_weather.weathercode);
-        weatherEl.textContent = `${icon} ${temp}°C · ${name}`;
-      } catch (error) { weatherEl.textContent = 'Clima no disponible'; }
+        const g = await fetch('https://geocoding-api.open-meteo.com/v1/search?name=Chiclayo&count=1&language=es&format=json');
+        const gd = await g.json();
+        if (!gd.results?.[0]) throw new Error('Sin Chiclayo');
+        const { latitude, longitude, name } = gd.results[0];
+        const w = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+        const wd = await w.json();
+        const t = Math.round(wd.current_weather.temperature);
+        const i = getWeatherIcon(wd.current_weather.weathercode);
+        el.textContent = `${i} ${t}°C · ${name}`;
+      } catch (e) { el.textContent = 'Clima no disponible'; }
     }
 
-    const CITIES = [
-      { name: 'Lima', tz: 'America/Lima' }, { name: 'Nueva York', tz: 'America/New_York' },
-      { name: 'Madrid', tz: 'Europe/Madrid' }, { name: 'Tokio', tz: 'Asia/Tokyo' },
-      { name: 'Sídney', tz: 'Australia/Sydney' }, { name: 'Londres', tz: 'Europe/London' }
-    ];
+    // ==========================================================
+    // RELOJ MUNDIAL
+    // ==========================================================
+    const CITIES = [{ name: 'Lima', tz: 'America/Lima' }, { name: 'Nueva York', tz: 'America/New_York' }, { name: 'Madrid', tz: 'Europe/Madrid' }, { name: 'Tokio', tz: 'Asia/Tokyo' }, { name: 'Sídney', tz: 'Australia/Sydney' }, { name: 'Londres', tz: 'Europe/London' }];
     function renderClockList() {
       const list = document.getElementById('clock-list');
       list.innerHTML = '';
-      CITIES.forEach(city => {
-        const time = new Date().toLocaleTimeString('es-ES', { timeZone: city.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        list.innerHTML += `<div class="clock-row"><span class="clock-city">${city.name}</span><span class="clock-time">${time}</span></div>`;
+      CITIES.forEach(c => {
+        const t = new Date().toLocaleTimeString('es-ES', { timeZone: c.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        list.innerHTML += `<div class="clock-row"><span class="clock-city">${c.name}</span><span class="clock-time">${t}</span></div>`;
       });
     }
     function openWorldClock() {
@@ -382,33 +359,21 @@
       document.getElementById('world-clock-modal').classList.add('active');
       if (window.worldClockInterval) clearInterval(window.worldClockInterval);
       window.worldClockInterval = setInterval(() => {
-        if (!document.getElementById('world-clock-modal').classList.contains('active')) {
-          clearInterval(window.worldClockInterval); return;
-        }
+        if (!document.getElementById('world-clock-modal').classList.contains('active')) { clearInterval(window.worldClockInterval); return; }
         renderClockList();
       }, 1000);
     }
-    function closeWorldClock() {
-      document.getElementById('world-clock-modal').classList.remove('active');
-      if (window.worldClockInterval) clearInterval(window.worldClockInterval);
-    }
+    function closeWorldClock() { document.getElementById('world-clock-modal').classList.remove('active'); if (window.worldClockInterval) clearInterval(window.worldClockInterval); }
 
-    const QUOTES = [
-      "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
-      "No cuentes los días, haz que los días cuenten.",
-      "La mejor manera de predecir el futuro es crearlo.",
-      "El único modo de hacer un gran trabajo es amar lo que haces.",
-      "La disciplina es el puente entre las metas y los logros.",
-      "El conocimiento es poder.",
-      "Cree en ti mismo y todo será posible.",
-      "Cada día es una nueva oportunidad para cambiar tu vida.",
-      "La perseverancia es la clave del éxito."
-    ];
-    function setRandomQuote() {
-      const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
-      document.getElementById('quote-box').textContent = `"${quote}"`;
-    }
+    // ==========================================================
+    // FRASES
+    // ==========================================================
+    const QUOTES = ['El éxito es la suma de pequeños esfuerzos repetidos día tras día.','No cuentes los días, haz que los días cuenten.','La mejor manera de predecir el futuro es crearlo.','El único modo de hacer un gran trabajo es amar lo que haces.','La disciplina es el puente entre las metas y los logros.','El conocimiento es poder.','Cree en ti mismo y todo será posible.','Cada día es una nueva oportunidad para cambiar tu vida.','La perseverancia es la clave del éxito.'];
+    function setRandomQuote() { document.getElementById('quote-box').textContent = `"${QUOTES[Math.floor(Math.random() * QUOTES.length)]}"`; }
 
+    // ==========================================================
+    // SECRETO
+    // ==========================================================
     const SECRET_CODE = 'gonex2026';
     const SECRET_BUTTONS = [
       { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed' },
@@ -423,20 +388,17 @@
         el.className = 'secret-btn';
         const badge = btn.external ? '<span class="external-badge">↗</span>' : '';
         el.innerHTML = `${badge}<span class="secret-icon">${btn.icon}</span>${btn.label}`;
-        el.addEventListener('click', () => {
-          if (btn.external) window.open(btn.url, '_blank');
-          else openWebViewer(btn.url);
-        });
+        el.addEventListener('click', () => { if (btn.external) window.open(btn.url, '_blank'); else openWebViewer(btn.url); });
         grid.appendChild(el);
       });
     }
     function showSecretPanel() { buildSecretButtons(); document.getElementById('secret-panel').classList.add('active'); }
     function hideSecretPanel() { document.getElementById('secret-panel').classList.remove('active'); }
-    function toggleSecretPanel() {
-      const panel = document.getElementById('secret-panel');
-      if (panel.classList.contains('active')) hideSecretPanel(); else showSecretPanel();
-    }
+    function toggleSecretPanel() { const p = document.getElementById('secret-panel'); if (p.classList.contains('active')) hideSecretPanel(); else showSecretPanel(); }
 
+    // ==========================================================
+    // VISOR WEB
+    // ==========================================================
     function openWebViewer(url) {
       const iframe = document.getElementById('web-viewer-iframe');
       const loading = document.getElementById('web-viewer-loading');
@@ -448,42 +410,56 @@
       externalLink.href = url;
       iframe.src = url;
       iframe.onload = function () { loading.style.display = 'none'; iframe.style.display = 'block'; };
-      setTimeout(() => {
-        if (iframe.style.display === 'none') {
-          loading.innerHTML = '<p style="color: #ef4444;">El sitio está tardando en responder.</p><p style="font-size: 0.8rem;">Puedes intentar con "Abrir fuera ↗"</p>';
-        }
-      }, 8000);
+      setTimeout(() => { if (iframe.style.display === 'none') loading.innerHTML = '<p style="color:#ef4444;">El sitio está tardando en responder.</p><p style="font-size:0.8rem;">Puedes intentar con "Abrir fuera ↗"</p>'; }, 8000);
     }
 
+    // ==========================================================
+    // VISTA PREVIA DE IMAGEN
+    // ==========================================================
+    function openImagePreview(img) {
+      document.getElementById('image-preview-img').src = img.url;
+      document.getElementById('image-preview-title').textContent = img.title;
+      document.getElementById('image-preview-meta').textContent = `📷 ${img.creator}${img.license ? ' · ' + img.license : ''}`;
+      document.getElementById('image-preview-link').href = img.url;
+      document.getElementById('image-preview-modal').classList.add('active');
+    }
+    function closeImagePreview() {
+      document.getElementById('image-preview-modal').classList.remove('active');
+      document.getElementById('image-preview-img').src = '';
+    }
+
+    // ==========================================================
+    // MODOS
+    // ==========================================================
     var currentMode = 'web';
     function setMode(mode) {
       currentMode = mode;
-      document.querySelectorAll('.filter-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.mode === mode); });
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
     }
 
     function extractYouTubeId(url) {
-      const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
-      return match ? match[1] : null;
+      const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+      return m ? m[1] : null;
     }
 
-    // ==========================================
-    // YOUTUBE
-    // ==========================================
+    // ==========================================================
+    // BÚSQUEDAS
+    // ==========================================================
     async function searchYouTube(query) {
-      const container = document.getElementById('results-container');
-      container.innerHTML = '<p style="color:#94a3b8;">Buscando en YouTube...</p>';
+      const c = document.getElementById('results-container');
+      c.innerHTML = '<p style="color:#94a3b8;">Buscando en YouTube...</p>';
       try {
         const r = await fetch(`/api/youtube-search?q=${encodeURIComponent(query)}`);
         if (!r.ok) throw new Error(`Error ${r.status}`);
         const d = await r.json();
         displayYouTubeResults(d.results);
-      } catch (e) { container.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
+      } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
     }
     function displayYouTubeResults(results) {
       const c = document.getElementById('results-container');
       c.innerHTML = '';
       if (!results?.length) { c.innerHTML = '<p style="color:#94a3b8;">Sin videos.</p>'; return; }
-      results.forEach((v) => {
+      results.forEach(v => {
         const card = document.createElement('div');
         card.className = 'video-card';
         card.innerHTML = `<img src="${v.thumbnail}" alt="${v.title}" loading="lazy" /><h3>${v.title}</h3><p>${v.channelTitle}</p>`;
@@ -492,9 +468,6 @@
       });
     }
 
-    // ==========================================
-    // WEB SEARCH
-    // ==========================================
     async function searchWeb(query) {
       const c = document.getElementById('results-container');
       c.innerHTML = '<p style="color:#94a3b8;">Buscando en la web...</p>';
@@ -511,7 +484,7 @@
       const c = document.getElementById('results-container');
       c.innerHTML = '';
       if (!results?.length) { c.innerHTML = '<p style="color:#94a3b8;">Sin resultados.</p>'; return; }
-      results.forEach((item) => {
+      results.forEach(item => {
         const card = document.createElement('div');
         card.className = 'web-card';
         card.innerHTML = `<h3>${item.title}</h3><div class="web-url">${item.url}</div><p>${item.description}</p>`;
@@ -520,9 +493,6 @@
       });
     }
 
-    // ==========================================
-    // WIKIPEDIA
-    // ==========================================
     async function searchWiki(query) {
       const c = document.getElementById('results-container');
       c.innerHTML = '<p style="color:#94a3b8;">Buscando en Wikipedia...</p>';
@@ -534,9 +504,6 @@
       } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
     }
 
-    // ==========================================
-    // IMÁGENES (OpenVerse)
-    // ==========================================
     async function searchImages(query) {
       const c = document.getElementById('results-container');
       c.innerHTML = '<p style="color:#94a3b8;">Buscando imágenes...</p>';
@@ -551,24 +518,21 @@
       const c = document.getElementById('results-container');
       c.innerHTML = '';
       if (!results?.length) { c.innerHTML = '<p style="color:#94a3b8;">Sin imágenes.</p>'; return; }
-      results.forEach((img) => {
+      results.forEach(img => {
         const card = document.createElement('div');
         card.className = 'image-card';
         card.innerHTML = `
-          <img src="${img.thumbnail}" alt="${img.title}" loading="lazy" onerror="this.style.display='none'" />
+          <img src="${img.thumbnail}" alt="${img.title}" loading="lazy" onerror="this.src='${img.url}'" />
           <div class="image-info">
             <h3>${img.title.substring(0, 60)}</h3>
             <div class="image-meta">📷 ${img.creator} ${img.license ? '· ' + img.license : ''}</div>
           </div>
         `;
-        card.addEventListener('click', () => window.open(img.url, '_blank'));
+        card.addEventListener('click', () => openImagePreview(img));
         c.appendChild(card);
       });
     }
 
-    // ==========================================
-    // RESPUESTAS (DDG)
-    // ==========================================
     async function searchInstant(query) {
       const c = document.getElementById('results-container');
       c.innerHTML = '<p style="color:#94a3b8;">Buscando respuestas...</p>';
@@ -580,9 +544,9 @@
       } catch (e) { c.innerHTML = `<p style="color:#ef4444;">Error: ${e.message}</p>`; }
     }
 
-    // ==========================================
+    // ==========================================================
     // FLUJO PRINCIPAL
-    // ==========================================
+    // ==========================================================
     function handleInput(input) {
       const clean = input.trim();
       if (clean.toLowerCase() === SECRET_CODE.toLowerCase()) { toggleSecretPanel(); return; }
@@ -590,12 +554,11 @@
       if (ytId) { window.open(`https://www.youtube.com/watch?v=${ytId}`, '_blank'); return; }
       if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
-        const externos = ['classroom.google.com','sites.google.com','accounts.google.com','mail.google.com','drive.google.com','docs.google.com','calendar.google.com','meet.google.com'];
+        const externos = ['classroom.google.com','sites.google.com','accounts.google.com','mail.google.com','drive.google.com','docs.google.com','calendar.google.com','meet.google.com','google.com','github.com'];
         if (externos.some(d => url.includes(d))) window.open(url, '_blank');
         else openWebViewer(url);
         return;
       }
-      // Según el modo activo
       if (currentMode === 'youtube') searchYouTube(clean);
       else if (currentMode === 'wiki') searchWiki(clean);
       else if (currentMode === 'image') searchImages(clean);
@@ -603,23 +566,15 @@
       else searchWeb(clean);
     }
 
-    function closeModal(modalId) {
-      if (modalId === 'web-viewer-modal') document.getElementById('web-viewer-iframe').src = 'about:blank';
-      document.getElementById(modalId).classList.remove('active');
+    function closeModal(id) {
+      if (id === 'web-viewer-modal') document.getElementById('web-viewer-iframe').src = 'about:blank';
+      document.getElementById(id).classList.remove('active');
     }
 
-    document.getElementById('search-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      handleInput(document.getElementById('search-input').value);
-    });
+    document.getElementById('search-form').addEventListener('submit', function (e) { e.preventDefault(); handleInput(document.getElementById('search-input').value); });
 
     document.addEventListener('DOMContentLoaded', () => {
-      loadSavedTheme();
-      loadSavedWallpaper();
-      updateClock();
-      setInterval(updateClock, 1000);
-      loadWeather();
-      setRandomQuote();
+      loadSavedTheme(); loadSavedWallpaper(); updateClock(); setInterval(updateClock, 1000); loadWeather(); setRandomQuote();
     });
   </script>
 </body>

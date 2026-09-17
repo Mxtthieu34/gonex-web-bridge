@@ -13,6 +13,9 @@ const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 const publicPath = path.join(__dirname, '..', 'public');
 const youtube = new YTubeNoAPI();
 
+// User-Agent requerido por Wikipedia y otros servicios
+const USER_AGENT = 'GoNexWebBridge/1.0 (https://gonex-web-bridge.vercel.app)';
+
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
 
@@ -86,7 +89,7 @@ app.get('/api/youtube-search', async (req, res) => {
 });
 
 // ==========================================================
-// 2. Búsqueda Web con Tavily (con fallback a Wikipedia)
+// 2. Búsqueda Web (Tavily → fallback Wikipedia)
 // ==========================================================
 app.get('/api/web-search', async (req, res) => {
   const query = req.query.q;
@@ -94,7 +97,7 @@ app.get('/api/web-search', async (req, res) => {
     return res.status(400).json({ error: 'Falta el parámetro "q".' });
   }
 
-  // Intento 1: Tavily (si hay clave)
+  // Intento 1: Tavily
   if (TAVILY_API_KEY) {
     try {
       const apiResponse = await fetch('https://api.tavily.com/search', {
@@ -114,27 +117,29 @@ app.get('/api/web-search', async (req, res) => {
           url: item.url || '',
           description: item.content || ''
         }));
-        return res.status(200).json({ results, source: 'tavily' });
+        if (results.length > 0) return res.status(200).json({ results, source: 'tavily' });
       }
     } catch (e) {
-      console.error('[GoNex] Tavily falló, usando Wikipedia:', e.message);
+      console.error('[GoNex] Tavily error:', e.message);
     }
   }
 
-  // Fallback: Wikipedia
+  // Fallback: Wikipedia con User-Agent
   try {
     const wikiUrl = `https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*&srlimit=10`;
-    const wikiRes = await fetch(wikiUrl);
+    const wikiRes = await fetch(wikiUrl, {
+      headers: { 'User-Agent': USER_AGENT }
+    });
     const wikiData = await wikiRes.json();
     const results = (wikiData.query?.search || []).map((item) => ({
       title: item.title,
-      url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+      url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
       description: item.snippet ? item.snippet.replace(/<[^>]*>/g, '') : ''
     }));
     res.status(200).json({ results, source: 'wikipedia' });
   } catch (error) {
     console.error('[GoNex] Wikipedia fallback error:', error.message);
-    res.status(500).json({ error: 'Error al buscar en la web.' });
+    res.status(500).json({ error: 'Error al buscar. Verifica tu conexión.' });
   }
 });
 
@@ -148,11 +153,13 @@ app.get('/api/wiki-search', async (req, res) => {
   }
   try {
     const wikiUrl = `https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*&srlimit=15`;
-    const wikiRes = await fetch(wikiUrl);
+    const wikiRes = await fetch(wikiUrl, {
+      headers: { 'User-Agent': USER_AGENT }
+    });
     const wikiData = await wikiRes.json();
     const results = (wikiData.query?.search || []).map((item) => ({
       title: item.title,
-      url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title)}`,
+      url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
       description: item.snippet ? item.snippet.replace(/<[^>]*>/g, '') : '',
       wordcount: item.wordcount || 0
     }));
@@ -164,7 +171,7 @@ app.get('/api/wiki-search', async (req, res) => {
 });
 
 // ==========================================================
-// 4. Búsqueda de Imágenes (OpenVerse, sin clave)
+// 4. Búsqueda de Imágenes (OpenVerse)
 // ==========================================================
 app.get('/api/image-search', async (req, res) => {
   const query = req.query.q;
@@ -174,7 +181,7 @@ app.get('/api/image-search', async (req, res) => {
   try {
     const url = `https://api.openverse.org/v1/images/?q=${encodeURIComponent(query.trim())}&page_size=12`;
     const apiRes = await fetch(url, {
-      headers: { 'User-Agent': 'GoNex-Web-Bridge/1.0' }
+      headers: { 'User-Agent': USER_AGENT }
     });
     if (!apiRes.ok) throw new Error(`OpenVerse: ${apiRes.status}`);
     const data = await apiRes.json();
@@ -193,7 +200,7 @@ app.get('/api/image-search', async (req, res) => {
 });
 
 // ==========================================================
-// 5. Respuestas rápidas (DuckDuckGo Instant Answer)
+// 5. Respuestas rápidas (DuckDuckGo)
 // ==========================================================
 app.get('/api/instant-search', async (req, res) => {
   const query = req.query.q;
@@ -202,7 +209,9 @@ app.get('/api/instant-search', async (req, res) => {
   }
   try {
     const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query.trim())}&format=json&no_html=1&skip_disambig=1`;
-    const apiRes = await fetch(url);
+    const apiRes = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT }
+    });
     const data = await apiRes.json();
 
     const results = [];
@@ -210,8 +219,7 @@ app.get('/api/instant-search', async (req, res) => {
       results.push({
         title: data.Heading || query,
         url: data.AbstractURL,
-        description: data.AbstractText,
-        type: 'abstract'
+        description: data.AbstractText
       });
     }
     (data.RelatedTopics || []).slice(0, 8).forEach((topic) => {
@@ -219,11 +227,24 @@ app.get('/api/instant-search', async (req, res) => {
         results.push({
           title: topic.Text.substring(0, 80),
           url: topic.FirstURL,
-          description: topic.Text,
-          type: 'related'
+          description: topic.Text
         });
       }
     });
+
+    // Si DDG no devuelve nada, usar Wikipedia como respaldo
+    if (results.length === 0) {
+      const wikiUrl = `https://es.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query.trim())}&format=json&origin=*&srlimit=6`;
+      const wikiRes = await fetch(wikiUrl, { headers: { 'User-Agent': USER_AGENT } });
+      const wikiData = await wikiRes.json();
+      (wikiData.query?.search || []).forEach((item) => {
+        results.push({
+          title: item.title,
+          url: `https://es.wikipedia.org/wiki/${encodeURIComponent(item.title.replace(/ /g, '_'))}`,
+          description: item.snippet ? item.snippet.replace(/<[^>]*>/g, '') : ''
+        });
+      });
+    }
 
     res.status(200).json({ results });
   } catch (error) {
