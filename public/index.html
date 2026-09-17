@@ -124,14 +124,93 @@
     .settings-preview { width: 100%; height: 90px; border-radius: 10px; background-size: cover; background-position: center; border: 1px solid #2d3748; margin-bottom: 12px; background-color: #0b0f19; }
     .settings-close-btn { width: 100%; padding: 12px; background: #2d3748; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 8px; }
     .hidden-input { display: none; }
-    .world-clock-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(8px); z-index: 150; align-items: center; justify-content: center; padding: 20px; }
+
+    /* ==========================================================
+       🌍 RELOJES MUNDIALES ANALÓGICOS
+       ========================================================== */
+    .world-clock-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(8px); z-index: 150; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
     .world-clock-modal.active { display: flex; }
-    .world-clock-card { width: 100%; max-width: 500px; background: #161b26; border: 1px solid #2d3748; border-radius: 16px; padding: 24px; }
-    .world-clock-card h2 { text-align: center; margin-bottom: 20px; color: var(--badge-color); }
-    .clock-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #2d3748; }
-    .clock-row:last-child { border-bottom: none; }
-    .clock-city { font-weight: 600; }
-    .clock-time { color: #7dd3fc; }
+    .world-clock-card {
+      width: 100%; max-width: 1100px;
+      background: linear-gradient(180deg, #1a1f2e 0%, #12161f 100%);
+      border: 1px solid #2d3748; border-radius: 20px; padding: 30px 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    }
+    .world-clock-card h2 { text-align: center; margin-bottom: 25px; color: var(--badge-color); font-size: 1.3rem; }
+    .clocks-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px; }
+
+    .clock-item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+    .analog-clock {
+      width: 120px; height: 120px; border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f0ece2 70%, #dcd7c8 100%);
+      border: 5px solid #1f2937;
+      position: relative;
+      box-shadow:
+        0 6px 18px rgba(0,0,0,.5),
+        0 0 0 3px #374151,
+        inset 0 2px 6px rgba(0,0,0,.15);
+    }
+    .clock-face { width: 100%; height: 100%; position: relative; }
+
+    /* Ticks de minutos */
+    .clock-tick {
+      position: absolute; top: 50%; left: 50%;
+      width: 1.5px; height: 4px; background: #555;
+      transform-origin: 50% 0;
+      border-radius: 1px;
+    }
+    .clock-tick.major { width: 2.5px; height: 7px; background: #222; }
+
+    /* Números */
+    .clock-number {
+      position: absolute; top: 50%; left: 50%;
+      font-size: 0.72rem; font-weight: 800; color: #111;
+      font-family: 'Inter', system-ui, sans-serif;
+      transform-origin: center center;
+      user-select: none;
+    }
+
+    /* Manecillas */
+    .hand {
+      position: absolute; left: 50%; bottom: 50%;
+      transform-origin: 50% 100%;
+      border-radius: 4px;
+      z-index: 2;
+    }
+    .hour-hand { width: 4.5px; height: 30px; background: #111; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+    .minute-hand { width: 3px; height: 40px; background: #222; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+    .second-hand { width: 1.5px; height: 46px; background: #dc2626; z-index: 3; }
+    .second-hand::after {
+      content: ''; position: absolute; bottom: -10px; left: 50%;
+      transform: translateX(-50%); width: 5px; height: 12px;
+      background: #dc2626; border-radius: 2px;
+    }
+    .center-dot {
+      position: absolute; top: 50%; left: 50%;
+      width: 9px; height: 9px;
+      background: #111; border: 2px solid #555;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+    }
+
+    .clock-label {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 0.82rem; font-weight: 700; color: #f1f5f9;
+      text-align: center; line-height: 1.2;
+    }
+    .clock-flag { font-size: 1.4rem; line-height: 1; }
+    .clock-city { color: #e2e8f0; }
+
+    @media (max-width: 700px) {
+      .analog-clock { width: 95px; height: 95px; border-width: 4px; }
+      .hour-hand { height: 24px; width: 3.5px; }
+      .minute-hand { height: 32px; width: 2.5px; }
+      .second-hand { height: 38px; }
+      .clock-number { font-size: 0.6rem; }
+      .clocks-row { gap: 16px; }
+    }
   </style>
 </head>
 <body>
@@ -170,7 +249,6 @@
     <div class="card" onclick="setMode('image'); handleInput('playa al atardecer')">
       <div class="icon">🖼️</div><div class="title">Imágenes</div><div class="badge">OPENVERSE</div>
     </div>
-    <!-- 🎭 BOTÓN TROLL: abre el Rickroll en el reproductor de YouTube (dentro de GoNex) -->
     <div class="card" onclick="openYouTubePlayer('dQw4w9WgXcQ')">
       <div class="icon">📺</div><div class="title">YouTube</div><div class="badge">VIDEOS</div>
     </div>
@@ -199,9 +277,7 @@
 
   <div id="results-container" class="results-container"></div>
 
-  <!-- ==========================================================
-       MODAL: Reproductor de YouTube (para el botón troll)
-       ========================================================== -->
+  <!-- Modal Reproductor de YouTube -->
   <div id="yt-modal" class="modal">
     <div class="modal-header">
       <span>Reproductor GoNex</span>
@@ -218,9 +294,7 @@
     </p>
   </div>
 
-  <!-- ==========================================================
-       MODAL: Navegador en la nube (para el panel secreto)
-       ========================================================== -->
+  <!-- Modal Navegador en la nube -->
   <div id="browser-modal" class="modal">
     <div class="modal-header">
       <span>Navegador en la Nube — Steel.dev</span>
@@ -282,15 +356,17 @@
     </div>
   </div>
 
-  <div id="world-clock-modal" class="world-clock-modal">
+  <!-- ==========================================================
+       🌍 MODAL RELOJES MUNDIALES
+       ========================================================== -->
+  <div id="world-clock-modal" class="world-clock-modal" onclick="if(event.target===this)closeWorldClock()">
     <div class="world-clock-card">
-      <h2>🌍 Reloj Mundial</h2>
-      <div id="clock-list"></div>
-      <button class="settings-close-btn" onclick="closeWorldClock()" style="margin-top:16px;">Cerrar</button>
+      <h2>🌍 Relojes del Mundo</h2>
+      <div id="clock-list" class="clocks-row"></div>
+      <button class="settings-close-btn" onclick="closeWorldClock()" style="margin-top:24px;">Cerrar</button>
     </div>
   </div>
 
-  <!-- Carga YouTube IFrame API -->
   <script>
     // ==========================================================
     // YOUTUBE IFRAME PLAYER API
@@ -328,19 +404,9 @@
       if (!ytApiReady) { pendingVideoId = videoId; return; }
       resetYTContainer();
       ytPlayer = new YT.Player('yt-player', {
-        height: '100%',
-        width: '100%',
-        videoId: videoId,
-        playerVars: {
-          autoplay: 1,
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          origin: window.location.origin
-        },
-        events: {
-          onReady: function (event) { event.target.playVideo(); }
-        }
+        height: '100%', width: '100%', videoId: videoId,
+        playerVars: { autoplay: 1, rel: 0, modestbranding: 1, playsinline: 1, origin: window.location.origin },
+        events: { onReady: function (event) { event.target.playVideo(); } }
       });
     }
 
@@ -383,10 +449,7 @@
           body: JSON.stringify({ url: url || 'https://www.google.com' })
         });
         const data = await r.json();
-
-        if (!r.ok) {
-          throw new Error((data.detail || data.error || `Error ${r.status}`) + (data.status ? ` (${data.status})` : ''));
-        }
+        if (!r.ok) throw new Error((data.detail || data.error || `Error ${r.status}`) + (data.status ? ` (${data.status})` : ''));
 
         currentSessionId = data.sessionId;
         const interactiveUrl = data.debugUrl + (data.debugUrl.includes('?') ? '&' : '?') + 'interactive=true';
@@ -408,9 +471,7 @@
         const r = await fetch('/api/browser-sessions/cleanup', { method: 'POST' });
         const d = await r.json();
         alert(`✅ Sesiones liberadas: ${d.released} de ${d.total}`);
-      } catch (e) {
-        alert('Error: ' + e.message);
-      }
+      } catch (e) { alert('Error: ' + e.message); }
     }
 
     async function closeBrowser() {
@@ -468,7 +529,7 @@
     function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
 
     // ==========================================================
-    // RELOJ + CLIMA
+    // RELOJ PRINCIPAL + CLIMA
     // ==========================================================
     function updateClock() {
       const n = new Date();
@@ -496,27 +557,117 @@
     }
 
     // ==========================================================
-    // RELOJ MUNDIAL
+    // 🌍 RELOJES MUNDIALES ANALÓGICOS
     // ==========================================================
-    const CITIES = [{ name: 'Lima', tz: 'America/Lima' }, { name: 'Nueva York', tz: 'America/New_York' }, { name: 'Madrid', tz: 'Europe/Madrid' }, { name: 'Tokio', tz: 'Asia/Tokyo' }, { name: 'Sídney', tz: 'Australia/Sydney' }, { name: 'Londres', tz: 'Europe/London' }];
-    function renderClockList() {
-      const list = document.getElementById('clock-list');
-      list.innerHTML = '';
-      CITIES.forEach(c => {
-        const t = new Date().toLocaleTimeString('es-ES', { timeZone: c.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        list.innerHTML += `<div class="clock-row"><span class="clock-city">${c.name}</span><span class="clock-time">${t}</span></div>`;
+    const CITY_DATA = [
+      { flag: '🇭🇰', name: 'Hong Kong', tz: 'Asia/Hong_Kong' },
+      { flag: '🇦🇺', name: 'Sydney',    tz: 'Australia/Sydney' },
+      { flag: '🇯🇵', name: 'Tokyo',     tz: 'Asia/Tokyo' },
+      { flag: '🇫🇷', name: 'Paris',     tz: 'Europe/Paris' },
+      { flag: '🇺🇸', name: 'New York',  tz: 'America/New_York' },
+      { flag: '🇬🇧', name: 'London',    tz: 'Europe/London' }
+    ];
+
+    function buildClockFace() {
+      // Genera ticks (60 en total) y números (12)
+      let ticks = '';
+      for (let i = 0; i < 60; i++) {
+        const isMajor = i % 5 === 0;
+        const angle = i * 6;
+        const dist = isMajor ? 52 : 54; // distancia desde el centro hacia el borde
+        ticks += `<div class="clock-tick${isMajor ? ' major' : ''}" style="transform: translate(-50%, -100%) rotate(${angle}deg) translateY(-${dist}px);"></div>`;
+      }
+
+      let numbers = '';
+      for (let n = 1; n <= 12; n++) {
+        const angle = n * 30;
+        const radius = 38; // px desde el centro
+        numbers += `<div class="clock-number" style="transform: translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px) rotate(-${angle}deg);">${n}</div>`;
+      }
+
+      return { ticks, numbers };
+    }
+
+    function buildClocks() {
+      const container = document.getElementById('clock-list');
+      container.innerHTML = '';
+      const { ticks, numbers } = buildClockFace();
+
+      CITY_DATA.forEach((city, idx) => {
+        const item = document.createElement('div');
+        item.className = 'clock-item';
+
+        item.innerHTML = `
+          <div class="analog-clock">
+            <div class="clock-face" data-clock-idx="${idx}">
+              ${ticks}
+              ${numbers}
+              <div class="hand hour-hand" data-hand="hour"></div>
+              <div class="hand minute-hand" data-hand="minute"></div>
+              <div class="hand second-hand" data-hand="second"></div>
+              <div class="center-dot"></div>
+            </div>
+          </div>
+          <div class="clock-label">
+            <div class="clock-flag">${city.flag}</div>
+            <div class="clock-city">${city.name}</div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      updateClockHands();
+    }
+
+    function getTimeInZone(tz) {
+      // Usa Intl para obtener horas/minutos/segundos en la zona horaria
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: tz,
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+      }).formatToParts(now);
+
+      let h = 0, m = 0, s = 0;
+      parts.forEach(p => {
+        if (p.type === 'hour')   h = parseInt(p.value, 10);
+        if (p.type === 'minute') m = parseInt(p.value, 10);
+        if (p.type === 'second') s = parseInt(p.value, 10);
+      });
+      return { h: h % 12, m, s };
+    }
+
+    function updateClockHands() {
+      CITY_DATA.forEach((city, idx) => {
+        const face = document.querySelector(`[data-clock-idx="${idx}"]`);
+        if (!face) return;
+
+        const { h, m, s } = getTimeInZone(city.tz);
+        const hourDeg = (h + m / 60 + s / 3600) * 30;
+        const minDeg  = (m + s / 60) * 6;
+        const secDeg  = s * 6;
+
+        const hEl = face.querySelector('[data-hand="hour"]');
+        const mEl = face.querySelector('[data-hand="minute"]');
+        const sEl = face.querySelector('[data-hand="second"]');
+
+        if (hEl) hEl.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+        if (mEl) mEl.style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
+        if (sEl) sEl.style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
       });
     }
+
     function openWorldClock() {
-      renderClockList();
+      buildClocks();
       document.getElementById('world-clock-modal').classList.add('active');
       if (window.worldClockInterval) clearInterval(window.worldClockInterval);
-      window.worldClockInterval = setInterval(() => {
-        if (!document.getElementById('world-clock-modal').classList.contains('active')) { clearInterval(window.worldClockInterval); return; }
-        renderClockList();
-      }, 1000);
+      window.worldClockInterval = setInterval(updateClockHands, 1000);
     }
-    function closeWorldClock() { document.getElementById('world-clock-modal').classList.remove('active'); if (window.worldClockInterval) clearInterval(window.worldClockInterval); }
+
+    function closeWorldClock() {
+      document.getElementById('world-clock-modal').classList.remove('active');
+      if (window.worldClockInterval) clearInterval(window.worldClockInterval);
+    }
 
     // ==========================================================
     // FRASES
@@ -530,32 +681,10 @@
     const SECRET_CODE = 'gonex2026';
 
     const SECRET_BUTTONS = [
-      // 📺 YouTube REAL — usa el NAVEGADOR EN LA NUBE
-      {
-        icon: '📺',
-        label: 'YouTube Real',
-        url: 'https://www.youtube.com',
-        internal: true
-      },
-      // 🎸 Canva Rock Music
-      {
-        icon: '🎸',
-        label: 'Rock Music',
-        url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed'
-      },
-      // 🐰 Canva BaD BUNNY
-      {
-        icon: '🐰',
-        label: 'BaD BUNNY',
-        url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed'
-      },
-      // 🎮 Classroom 6x (externo)
-      {
-        icon: '🎮',
-        label: 'Classroom 6x',
-        url: 'https://sites.google.com/view/classroom6x/',
-        external: true
-      },
+      { icon: '📺', label: 'YouTube Real', url: 'https://www.youtube.com', internal: true },
+      { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed' },
+      { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed' },
+      { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', external: true },
     ];
 
     function buildSecretButtons() {
@@ -575,11 +704,9 @@
           if (btn.external) {
             window.open(btn.url, '_blank');
           } else if (btn.internal) {
-            // YouTube real → navegador en la nube
             hideSecretPanel();
             openBrowser(btn.url);
           } else {
-            // Canva → navegador en la nube
             hideSecretPanel();
             openBrowser(btn.url);
           }
@@ -658,11 +785,7 @@
       if (clean.toLowerCase() === SECRET_CODE.toLowerCase()) { toggleSecretPanel(); return; }
 
       const ytId = extractYouTubeId(clean);
-      if (ytId) {
-        // URL de YouTube → reproductor embebido (dentro de GoNex)
-        openYouTubePlayer(ytId);
-        return;
-      }
+      if (ytId) { openYouTubePlayer(ytId); return; }
       if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
         if (currentMode === 'browser') { openBrowser(url); return; }
