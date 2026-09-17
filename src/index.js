@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend con navegador en la nube (Steel.dev)
+// GoNex Web Bridge — Backend con Steel.dev (plan gratuito)
 
 const express = require('express');
 const path = require('path');
@@ -13,7 +13,6 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const publicPath = path.join(__dirname, '..', 'public');
 const youtube = new YTubeNoAPI();
 
-// Cliente de Steel
 const steel = process.env.STEEL_API_KEY
   ? new Steel({ steelAPIKey: process.env.STEEL_API_KEY })
   : null;
@@ -125,20 +124,57 @@ app.get('/api/image-search', async (req, res) => {
 });
 
 // ==========================================================
-// 3. NAVEGADOR EN LA NUBE — Crear sesión Steel
+// 3. Listar sesiones activas (diagnóstico)
+// ==========================================================
+app.get('/api/browser-sessions', async (req, res) => {
+  if (!steel) return res.status(500).json({ error: 'STEEL_API_KEY no configurada.' });
+  try {
+    const sessions = await steel.sessions.list();
+    res.json({ sessions });
+  } catch (e) {
+    console.error('[Steel] Error listando:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ==========================================================
+// 4. Limpiar TODAS las sesiones huérfanas
+// ==========================================================
+app.post('/api/browser-sessions/cleanup', async (req, res) => {
+  if (!steel) return res.status(500).json({ error: 'STEEL_API_KEY no configurada.' });
+  try {
+    const list = await steel.sessions.list();
+    const sessions = list.sessions || list || [];
+    let released = 0;
+    for (const s of sessions) {
+      try {
+        await steel.sessions.release(s.id);
+        released++;
+      } catch (e) {
+        console.warn('[Steel] No se pudo liberar', s.id, e.message);
+      }
+    }
+    res.json({ released, total: sessions.length });
+  } catch (e) {
+    console.error('[Steel] Error limpiando:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ==========================================================
+// 5. Crear sesión de navegador en la nube
 // ==========================================================
 app.post('/api/browser-session', async (req, res) => {
   if (!steel) {
     return res.status(500).json({ error: 'STEEL_API_KEY no configurada.' });
   }
-  const { url } = req.body || {};
-  const startUrl = url && url.startsWith('http') ? url : 'https://www.google.com';
 
   try {
+    // Sin useProxy, sin solveCaptcha, sin sessionTimeout
     const session = await steel.sessions.create({
-  timeout: 1800000,
-  inactivityTimeout: 300000
-});
+      timeout: 1800000,           // 30 minutos
+      inactivityTimeout: 300000   // 5 min
+    });
 
     console.log('[Steel] Sesión creada:', session.id);
     res.json({
@@ -147,13 +183,24 @@ app.post('/api/browser-session', async (req, res) => {
       sessionViewerUrl: session.sessionViewerUrl
     });
   } catch (e) {
-    console.error('[Steel] Error creando sesión:', e.message);
-    res.status(500).json({ error: 'No se pudo crear el navegador en la nube.' });
+    // 🔍 Log detallado para diagnóstico
+    console.error('[Steel] Error detallado:', {
+      message: e.message,
+      status: e.status,
+      name: e.name,
+      error: e.error,
+      response: e.response?.data || e.response?.body || null
+    });
+    res.status(500).json({
+      error: 'No se pudo crear el navegador en la nube.',
+      detail: e.message,
+      status: e.status || null
+    });
   }
 });
 
 // ==========================================================
-// 4. Cerrar sesión Steel (para no gastar horas)
+// 6. Cerrar sesión de navegador
 // ==========================================================
 app.post('/api/browser-session/close', async (req, res) => {
   const { sessionId } = req.body || {};
