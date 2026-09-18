@@ -63,6 +63,7 @@
     .secret-btn:hover { background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); transform: translateY(-3px); }
     .secret-btn .secret-icon { display: block; font-size: 1.6rem; margin-bottom: 6px; }
     .secret-btn .external-badge { position: absolute; top: 4px; right: 4px; font-size: 0.6rem; background: #64748b; color: #fff; padding: 2px 5px; border-radius: 4px; }
+    .secret-btn .canva-badge { position: absolute; top: 4px; right: 4px; font-size: 0.6rem; background: #00c4cc; color: #fff; padding: 2px 5px; border-radius: 4px; }
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(6px); z-index: 100; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     .modal.active { display: flex; }
     .modal-header { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
@@ -83,6 +84,11 @@
     .browser-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
     .browser-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; padding: 20px; text-align: center; }
     .browser-viewer-loading button { background: #2d3748; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 8px; }
+
+    /* Visor Canva (iframe directo) */
+    .canva-viewer-wrapper { width: 100%; max-width: 1200px; height: 82vh; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
+    .canva-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
+    .canva-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; padding: 20px; text-align: center; }
 
     .image-preview-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(8px); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
     .image-preview-modal.active { display: flex; }
@@ -125,84 +131,27 @@
     .settings-close-btn { width: 100%; padding: 12px; background: #2d3748; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 8px; }
     .hidden-input { display: none; }
 
-    /* ==========================================================
-       🌍 RELOJES MUNDIALES ANALÓGICOS
-       ========================================================== */
+    /* Relojes */
     .world-clock-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(8px); z-index: 150; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
     .world-clock-modal.active { display: flex; }
-    .world-clock-card {
-      width: 100%; max-width: 1100px;
-      background: linear-gradient(180deg, #1a1f2e 0%, #12161f 100%);
-      border: 1px solid #2d3748; border-radius: 20px; padding: 30px 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.6);
-    }
+    .world-clock-card { width: 100%; max-width: 1100px; background: linear-gradient(180deg, #1a1f2e 0%, #12161f 100%); border: 1px solid #2d3748; border-radius: 20px; padding: 30px 24px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
     .world-clock-card h2 { text-align: center; margin-bottom: 25px; color: var(--badge-color); font-size: 1.3rem; }
     .clocks-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 22px; }
-
     .clock-item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-
-    .analog-clock {
-      width: 120px; height: 120px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f0ece2 70%, #dcd7c8 100%);
-      border: 5px solid #1f2937;
-      position: relative;
-      box-shadow:
-        0 6px 18px rgba(0,0,0,.5),
-        0 0 0 3px #374151,
-        inset 0 2px 6px rgba(0,0,0,.15);
-    }
+    .analog-clock { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f0ece2 70%, #dcd7c8 100%); border: 5px solid #1f2937; position: relative; box-shadow: 0 6px 18px rgba(0,0,0,.5), 0 0 0 3px #374151, inset 0 2px 6px rgba(0,0,0,.15); }
     .clock-face { width: 100%; height: 100%; position: relative; }
-
-    /* Ticks de minutos */
-    .clock-tick {
-      position: absolute; top: 50%; left: 50%;
-      width: 1.5px; height: 4px; background: #555;
-      transform-origin: 50% 0;
-      border-radius: 1px;
-    }
+    .clock-tick { position: absolute; top: 50%; left: 50%; width: 1.5px; height: 4px; background: #555; transform-origin: 50% 0; border-radius: 1px; }
     .clock-tick.major { width: 2.5px; height: 7px; background: #222; }
-
-    /* Números */
-    .clock-number {
-      position: absolute; top: 50%; left: 50%;
-      font-size: 0.72rem; font-weight: 800; color: #111;
-      font-family: 'Inter', system-ui, sans-serif;
-      transform-origin: center center;
-      user-select: none;
-    }
-
-    /* Manecillas */
-    .hand {
-      position: absolute; left: 50%; bottom: 50%;
-      transform-origin: 50% 100%;
-      border-radius: 4px;
-      z-index: 2;
-    }
+    .clock-number { position: absolute; top: 50%; left: 50%; font-size: 0.72rem; font-weight: 800; color: #111; font-family: 'Inter', system-ui, sans-serif; transform-origin: center center; user-select: none; }
+    .hand { position: absolute; left: 50%; bottom: 50%; transform-origin: 50% 100%; border-radius: 4px; z-index: 2; }
     .hour-hand { width: 4.5px; height: 30px; background: #111; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
     .minute-hand { width: 3px; height: 40px; background: #222; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
     .second-hand { width: 1.5px; height: 46px; background: #dc2626; z-index: 3; }
-    .second-hand::after {
-      content: ''; position: absolute; bottom: -10px; left: 50%;
-      transform: translateX(-50%); width: 5px; height: 12px;
-      background: #dc2626; border-radius: 2px;
-    }
-    .center-dot {
-      position: absolute; top: 50%; left: 50%;
-      width: 9px; height: 9px;
-      background: #111; border: 2px solid #555;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 4;
-    }
-
-    .clock-label {
-      display: flex; flex-direction: column; align-items: center; gap: 2px;
-      font-size: 0.82rem; font-weight: 700; color: #f1f5f9;
-      text-align: center; line-height: 1.2;
-    }
+    .second-hand::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 5px; height: 12px; background: #dc2626; border-radius: 2px; }
+    .center-dot { position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; background: #111; border: 2px solid #555; border-radius: 50%; transform: translate(-50%, -50%); z-index: 4; }
+    .clock-label { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 0.82rem; font-weight: 700; color: #f1f5f9; text-align: center; line-height: 1.2; }
     .clock-flag { font-size: 1.4rem; line-height: 1; }
     .clock-city { color: #e2e8f0; }
-
     @media (max-width: 700px) {
       .analog-clock { width: 95px; height: 95px; border-width: 4px; }
       .hour-hand { height: 24px; width: 3.5px; }
@@ -312,6 +261,23 @@
     </div>
   </div>
 
+  <!-- 🎨 Modal Canva (iframe directo) -->
+  <div id="canva-modal" class="modal">
+    <div class="modal-header">
+      <span>Canva — GoNex</span>
+      <div class="viewer-actions">
+        <a id="canva-external" href="#" target="_blank">Abrir fuera ↗</a>
+        <button class="btn-close" onclick="closeCanva()">Cerrar ✕</button>
+      </div>
+    </div>
+    <div class="canva-viewer-wrapper">
+      <div id="canva-loading" class="canva-viewer-loading">
+        <p>Cargando Canva...</p>
+      </div>
+      <iframe id="canva-iframe" src="" allowfullscreen="allowfullscreen" allow="fullscreen"></iframe>
+    </div>
+  </div>
+
   <div id="image-preview-modal" class="image-preview-modal" onclick="if(event.target===this)closeImagePreview()">
     <div class="image-preview-card">
       <img id="image-preview-img" src="" alt="Vista previa" />
@@ -356,9 +322,6 @@
     </div>
   </div>
 
-  <!-- ==========================================================
-       🌍 MODAL RELOJES MUNDIALES
-       ========================================================== -->
   <div id="world-clock-modal" class="world-clock-modal" onclick="if(event.target===this)closeWorldClock()">
     <div class="world-clock-card">
       <h2>🌍 Relojes del Mundo</h2>
@@ -420,6 +383,33 @@
     function closeYouTubePlayer() {
       document.getElementById('yt-modal').classList.remove('active');
       resetYTContainer();
+    }
+
+    // ==========================================================
+    // 🎨 VISOR CANVA (iframe directo, sin navegador remoto)
+    // ==========================================================
+    function openCanvaViewer(url) {
+      const modal = document.getElementById('canva-modal');
+      const iframe = document.getElementById('canva-iframe');
+      const loading = document.getElementById('canva-loading');
+      const externalLink = document.getElementById('canva-external');
+
+      modal.classList.add('active');
+      loading.style.display = 'flex';
+      iframe.style.display = 'none';
+      iframe.src = '';
+      externalLink.href = url;
+
+      iframe.src = url;
+      iframe.onload = function () {
+        loading.style.display = 'none';
+        iframe.style.display = 'block';
+      };
+    }
+
+    function closeCanva() {
+      document.getElementById('canva-modal').classList.remove('active');
+      document.getElementById('canva-iframe').src = 'about:blank';
     }
 
     // ==========================================================
@@ -557,7 +547,7 @@
     }
 
     // ==========================================================
-    // 🌍 RELOJES MUNDIALES ANALÓGICOS
+    // RELOJES MUNDIALES
     // ==========================================================
     const CITY_DATA = [
       { flag: '🇭🇰', name: 'Hong Kong', tz: 'Asia/Hong_Kong' },
@@ -569,22 +559,19 @@
     ];
 
     function buildClockFace() {
-      // Genera ticks (60 en total) y números (12)
       let ticks = '';
       for (let i = 0; i < 60; i++) {
         const isMajor = i % 5 === 0;
         const angle = i * 6;
-        const dist = isMajor ? 52 : 54; // distancia desde el centro hacia el borde
+        const dist = isMajor ? 52 : 54;
         ticks += `<div class="clock-tick${isMajor ? ' major' : ''}" style="transform: translate(-50%, -100%) rotate(${angle}deg) translateY(-${dist}px);"></div>`;
       }
-
       let numbers = '';
       for (let n = 1; n <= 12; n++) {
         const angle = n * 30;
-        const radius = 38; // px desde el centro
+        const radius = 38;
         numbers += `<div class="clock-number" style="transform: translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius}px) rotate(-${angle}deg);">${n}</div>`;
       }
-
       return { ticks, numbers };
     }
 
@@ -592,16 +579,13 @@
       const container = document.getElementById('clock-list');
       container.innerHTML = '';
       const { ticks, numbers } = buildClockFace();
-
       CITY_DATA.forEach((city, idx) => {
         const item = document.createElement('div');
         item.className = 'clock-item';
-
         item.innerHTML = `
           <div class="analog-clock">
             <div class="clock-face" data-clock-idx="${idx}">
-              ${ticks}
-              ${numbers}
+              ${ticks}${numbers}
               <div class="hand hour-hand" data-hand="hour"></div>
               <div class="hand minute-hand" data-hand="minute"></div>
               <div class="hand second-hand" data-hand="second"></div>
@@ -615,22 +599,17 @@
         `;
         container.appendChild(item);
       });
-
       updateClockHands();
     }
 
     function getTimeInZone(tz) {
-      // Usa Intl para obtener horas/minutos/segundos en la zona horaria
       const now = new Date();
       const parts = new Intl.DateTimeFormat('en-GB', {
-        timeZone: tz,
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        hour12: false
+        timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
       }).formatToParts(now);
-
       let h = 0, m = 0, s = 0;
       parts.forEach(p => {
-        if (p.type === 'hour')   h = parseInt(p.value, 10);
+        if (p.type === 'hour') h = parseInt(p.value, 10);
         if (p.type === 'minute') m = parseInt(p.value, 10);
         if (p.type === 'second') s = parseInt(p.value, 10);
       });
@@ -641,16 +620,13 @@
       CITY_DATA.forEach((city, idx) => {
         const face = document.querySelector(`[data-clock-idx="${idx}"]`);
         if (!face) return;
-
         const { h, m, s } = getTimeInZone(city.tz);
         const hourDeg = (h + m / 60 + s / 3600) * 30;
-        const minDeg  = (m + s / 60) * 6;
-        const secDeg  = s * 6;
-
+        const minDeg = (m + s / 60) * 6;
+        const secDeg = s * 6;
         const hEl = face.querySelector('[data-hand="hour"]');
         const mEl = face.querySelector('[data-hand="minute"]');
         const sEl = face.querySelector('[data-hand="second"]');
-
         if (hEl) hEl.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
         if (mEl) mEl.style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
         if (sEl) sEl.style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
@@ -681,10 +657,34 @@
     const SECRET_CODE = 'gonex2026';
 
     const SECRET_BUTTONS = [
-      { icon: '📺', label: 'YouTube Real', url: 'https://www.youtube.com', internal: true },
-      { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed' },
-      { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed' },
-      { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', external: true },
+      // 📺 YouTube REAL — usa el NAVEGADOR EN LA NUBE
+      {
+        icon: '📺',
+        label: 'YouTube Real',
+        url: 'https://www.youtube.com',
+        type: 'browser'
+      },
+      // 🎸 Canva Rock Music — usa IFRAME DIRECTO
+      {
+        icon: '🎸',
+        label: 'Rock Music',
+        url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed',
+        type: 'canva'
+      },
+      // 🐰 Canva BaD BUNNY — usa IFRAME DIRECTO
+      {
+        icon: '🐰',
+        label: 'BaD BUNNY',
+        url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed',
+        type: 'canva'
+      },
+      // 🎮 Classroom 6x — pestaña nueva
+      {
+        icon: '🎮',
+        label: 'Classroom 6x',
+        url: 'https://sites.google.com/view/classroom6x/',
+        type: 'external'
+      },
     ];
 
     function buildSecretButtons() {
@@ -695,20 +695,20 @@
         el.className = 'secret-btn';
 
         let badge = '';
-        if (btn.external) badge = '<span class="external-badge">↗</span>';
-        if (btn.internal) badge = '<span class="external-badge" style="background:#8b5cf6">🌐</span>';
+        if (btn.type === 'external') badge = '<span class="external-badge">↗</span>';
+        if (btn.type === 'browser')  badge = '<span class="external-badge" style="background:#8b5cf6">🌐</span>';
+        if (btn.type === 'canva')    badge = '<span class="canva-badge">🎨</span>';
 
         el.innerHTML = `${badge}<span class="secret-icon">${btn.icon}</span>${btn.label}`;
 
         el.addEventListener('click', () => {
-          if (btn.external) {
+          hideSecretPanel();
+          if (btn.type === 'external') {
             window.open(btn.url, '_blank');
-          } else if (btn.internal) {
-            hideSecretPanel();
+          } else if (btn.type === 'browser') {
             openBrowser(btn.url);
-          } else {
-            hideSecretPanel();
-            openBrowser(btn.url);
+          } else if (btn.type === 'canva') {
+            openCanvaViewer(btn.url);
           }
         });
         grid.appendChild(el);
