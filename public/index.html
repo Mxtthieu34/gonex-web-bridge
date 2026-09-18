@@ -44,6 +44,7 @@
     .card .title { font-size: 0.85rem; font-weight: 600; }
     .badge { display: inline-block; font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; margin-top: 6px; font-weight: bold; background: var(--badge-bg); color: var(--badge-color); }
     .badge-ddg { background: rgba(222, 88, 51, 0.2); color: #de5833; }
+    .badge-empty { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
     .results-container { width: 100%; max-width: 680px; margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
     .image-card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
     .image-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
@@ -191,9 +192,12 @@
   </div>
 
   <div class="grid">
-   <div class="card" onclick="return false;">
-      <div class="icon">🌐</div><div class="title">Google</div><div class="badge">STEEL.DEV</div>
+    <!-- 🔸 Google: por ahora vacío (no hace nada) -->
+    <div class="card" onclick="return false;">
+      <div class="icon">🌐</div><div class="title">Google</div><div class="badge badge-empty">PRÓXIMAMENTE</div>
     </div>
+
+    <!-- 🦆 DuckDuckGo: abre en navegador remoto con búsqueda -->
     <div class="card" onclick="openBrowser('https://duckduckgo.com')">
       <div class="icon">
         <svg viewBox="0 0 100 100" width="32" height="32">
@@ -213,6 +217,7 @@
       </div>
       <div class="title">DuckDuckGo</div><div class="badge badge-ddg">PRIVADO</div>
     </div>
+
     <div class="card" onclick="setMode('image'); handleInput('playa al atardecer')">
       <div class="icon">🖼️</div><div class="title">Imágenes</div><div class="badge">OPENVERSE</div>
     </div>
@@ -433,7 +438,8 @@
     }
 
     // ==========================================================
-    // NAVEGADOR EN LA NUBE
+    // NAVEGADOR EN LA NUBE (Steel.dev)
+    // ✅ Usa debugUrl + interactive=true (no pide login)
     // ==========================================================
     function openExternal(url) { window.open(url, '_blank'); }
 
@@ -450,24 +456,26 @@
       loading.innerHTML = '<p>Iniciando navegador en la nube...</p><p style="font-size: 0.75rem;">Esto puede tardar unos segundos.</p>';
       iframe.style.display = 'none';
       iframe.src = '';
-      externalLink.href = url || 'https://www.google.com';
+      externalLink.href = url || 'https://duckduckgo.com';
 
       try {
         const r = await fetch('/api/browser-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: url || 'https://www.google.com' })
+          body: JSON.stringify({ url: url || 'https://duckduckgo.com' })
         });
         const data = await r.json();
         if (!r.ok) throw new Error((data.detail || data.error || `Error ${r.status}`) + (data.status ? ` (${data.status})` : ''));
 
         currentSessionId = data.sessionId;
-        // ✅ Preferir sessionViewerUrl (mejor soporte de teclado)
-        const viewerUrl = data.sessionViewerUrl || data.debugUrl;
-        iframe.src = viewerUrl;
+
+        // ✅ debugUrl + interactive=true (la URL que funciona sin login)
+        const interactiveUrl = data.debugUrl + (data.debugUrl.includes('?') ? '&' : '?') + 'interactive=true';
+
+        iframe.src = interactiveUrl;
         loading.style.display = 'none';
         iframe.style.display = 'block';
-        externalLink.href = viewerUrl;
+        externalLink.href = interactiveUrl;
       } catch (e) {
         loading.innerHTML = `
           <p style="color:#ef4444;">Error: ${e.message}</p>
