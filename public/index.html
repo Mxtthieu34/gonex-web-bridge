@@ -37,11 +37,13 @@
     .search-box input { flex: 1; background: transparent; border: none; outline: none; color: #fff; padding: 10px 14px; font-size: 1rem; }
     .search-box button { background: linear-gradient(135deg, var(--accent-1), var(--accent-2)); border: none; color: #fff; padding: 10px 22px; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; width: 100%; max-width: 680px; }
-    .card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
+    .card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); position: relative; overflow: hidden; }
     .card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
-    .card .icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .card .icon { font-size: 1.6rem; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; height: 36px; }
+    .card .icon img { width: 32px; height: 32px; object-fit: contain; }
     .card .title { font-size: 0.85rem; font-weight: 600; }
     .badge { display: inline-block; font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; margin-top: 6px; font-weight: bold; background: var(--badge-bg); color: var(--badge-color); }
+    .badge-ddg { background: rgba(222, 88, 51, 0.2); color: #de5833; }
     .results-container { width: 100%; max-width: 680px; margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
     .image-card { background: rgba(22,27,38,.92); border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.2s; backdrop-filter: blur(10px); }
     .image-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
@@ -72,20 +74,17 @@
     .viewer-actions { display: flex; gap: 10px; align-items: center; }
     .viewer-actions a { color: var(--badge-color); text-decoration: none; font-size: 0.85rem; }
 
-    /* Reproductor de YouTube */
     .player-wrapper { width: 100%; max-width: 900px; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
     .player-wrapper iframe { width: 100%; height: 100%; border: none; }
     #yt-player { width: 100%; height: 100%; }
     .player-fallback { margin-top: 12px; text-align: center; color: #64748b; font-size: 0.8rem; }
     .player-fallback a { color: #a855f7; text-decoration: none; }
 
-    /* Navegador en la nube */
     .browser-viewer-wrapper { width: 100%; max-width: 1200px; height: 82vh; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
     .browser-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
     .browser-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; padding: 20px; text-align: center; }
     .browser-viewer-loading button { background: #2d3748; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 8px; }
 
-    /* Visor Canva (iframe directo) */
     .canva-viewer-wrapper { width: 100%; max-width: 1200px; height: 82vh; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #2d3748; position: relative; }
     .canva-viewer-wrapper iframe { width: 100%; height: 100%; border: none; }
     .canva-viewer-loading { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #0b0f19; color: #94a3b8; gap: 15px; padding: 20px; text-align: center; }
@@ -131,7 +130,6 @@
     .settings-close-btn { width: 100%; padding: 12px; background: #2d3748; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; margin-top: 8px; }
     .hidden-input { display: none; }
 
-    /* Relojes */
     .world-clock-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(11,15,25,.95); backdrop-filter: blur(8px); z-index: 150; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
     .world-clock-modal.active { display: flex; }
     .world-clock-card { width: 100%; max-width: 1100px; background: linear-gradient(180deg, #1a1f2e 0%, #12161f 100%); border: 1px solid #2d3748; border-radius: 20px; padding: 30px 24px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
@@ -181,19 +179,39 @@
 
   <div class="search-container">
     <form id="search-form" class="search-box">
-      <input id="search-input" type="text" placeholder="Busca en Google (navegador en la nube), imágenes..." required />
+      <input id="search-input" type="text" placeholder="Busca en Google, DuckDuckGo, imágenes..." required />
       <button type="submit">Buscar</button>
     </form>
   </div>
 
   <div class="filters">
-    <button class="filter-btn active" data-mode="browser" onclick="setMode('browser')">🌐 Navegador</button>
+    <button class="filter-btn active" data-mode="browser" onclick="setMode('browser')">🌐 Google</button>
+    <button class="filter-btn" data-mode="ddg" onclick="setMode('ddg')">🦆 DuckDuckGo</button>
     <button class="filter-btn" data-mode="image" onclick="setMode('image')">🖼️ Imágenes</button>
   </div>
 
   <div class="grid">
     <div class="card" onclick="openBrowser('https://www.google.com')">
-      <div class="icon">🌐</div><div class="title">Navegador en la Nube</div><div class="badge">STEEL.DEV</div>
+      <div class="icon">🌐</div><div class="title">Google</div><div class="badge">STEEL.DEV</div>
+    </div>
+    <div class="card" onclick="openBrowser('https://duckduckgo.com')">
+      <div class="icon">
+        <svg viewBox="0 0 100 100" width="32" height="32">
+          <circle cx="50" cy="50" r="50" fill="#DE5833"/>
+          <circle cx="50" cy="50" r="42" fill="#FFFFFF"/>
+          <circle cx="50" cy="50" r="38" fill="#DE5833"/>
+          <ellipse cx="38" cy="42" rx="7" ry="8" fill="#FFFFFF"/>
+          <ellipse cx="62" cy="42" rx="7" ry="8" fill="#FFFFFF"/>
+          <circle cx="38" cy="43" r="3.5" fill="#1A1A1A"/>
+          <circle cx="62" cy="43" r="3.5" fill="#1A1A1A"/>
+          <ellipse cx="50" cy="62" rx="18" ry="12" fill="#FFFFFF"/>
+          <circle cx="34" cy="62" r="3" fill="#1A1A1A"/>
+          <circle cx="42" cy="68" r="3" fill="#1A1A1A"/>
+          <circle cx="58" cy="68" r="3" fill="#1A1A1A"/>
+          <circle cx="66" cy="62" r="3" fill="#1A1A1A"/>
+        </svg>
+      </div>
+      <div class="title">DuckDuckGo</div><div class="badge badge-ddg">PRIVADO</div>
     </div>
     <div class="card" onclick="setMode('image'); handleInput('playa al atardecer')">
       <div class="icon">🖼️</div><div class="title">Imágenes</div><div class="badge">OPENVERSE</div>
@@ -226,7 +244,6 @@
 
   <div id="results-container" class="results-container"></div>
 
-  <!-- Modal Reproductor de YouTube -->
   <div id="yt-modal" class="modal">
     <div class="modal-header">
       <span>Reproductor GoNex</span>
@@ -243,7 +260,6 @@
     </p>
   </div>
 
-  <!-- Modal Navegador en la nube -->
   <div id="browser-modal" class="modal">
     <div class="modal-header">
       <span>Navegador en la Nube — Steel.dev</span>
@@ -257,11 +273,15 @@
         <p>Iniciando navegador en la nube...</p>
         <p style="font-size: 0.75rem;">Esto puede tardar unos segundos.</p>
       </div>
-      <iframe id="browser-iframe" src="" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox" allow="clipboard-read; clipboard-write; fullscreen"></iframe>
+      <iframe 
+        id="browser-iframe" 
+        src="" 
+        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-orientation-lock allow-pointer-lock allow-presentation" 
+        allow="clipboard-read; clipboard-write; fullscreen; gamepad; keyboard-map; autoplay">
+      </iframe>
     </div>
   </div>
 
-  <!-- 🎨 Modal Canva (iframe directo) -->
   <div id="canva-modal" class="modal">
     <div class="modal-header">
       <span>Canva — GoNex</span>
@@ -386,7 +406,7 @@
     }
 
     // ==========================================================
-    // 🎨 VISOR CANVA (iframe directo, sin navegador remoto)
+    // VISOR CANVA
     // ==========================================================
     function openCanvaViewer(url) {
       const modal = document.getElementById('canva-modal');
@@ -442,11 +462,12 @@
         if (!r.ok) throw new Error((data.detail || data.error || `Error ${r.status}`) + (data.status ? ` (${data.status})` : ''));
 
         currentSessionId = data.sessionId;
-        const interactiveUrl = data.debugUrl + (data.debugUrl.includes('?') ? '&' : '?') + 'interactive=true';
-        iframe.src = interactiveUrl;
+        // ✅ Preferir sessionViewerUrl (mejor soporte de teclado)
+        const viewerUrl = data.sessionViewerUrl || data.debugUrl;
+        iframe.src = viewerUrl;
         loading.style.display = 'none';
         iframe.style.display = 'block';
-        externalLink.href = interactiveUrl;
+        externalLink.href = viewerUrl;
       } catch (e) {
         loading.innerHTML = `
           <p style="color:#ef4444;">Error: ${e.message}</p>
@@ -519,7 +540,7 @@
     function closeSettings() { document.getElementById('settings-modal').classList.remove('active'); }
 
     // ==========================================================
-    // RELOJ PRINCIPAL + CLIMA
+    // RELOJ + CLIMA
     // ==========================================================
     function updateClock() {
       const n = new Date();
@@ -657,34 +678,10 @@
     const SECRET_CODE = 'gonex2026';
 
     const SECRET_BUTTONS = [
-      // 📺 YouTube REAL — usa el NAVEGADOR EN LA NUBE
-      {
-        icon: '📺',
-        label: 'YouTube Real',
-        url: 'https://www.youtube.com',
-        type: 'browser'
-      },
-      // 🎸 Canva Rock Music — usa IFRAME DIRECTO
-      {
-        icon: '🎸',
-        label: 'Rock Music',
-        url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed',
-        type: 'canva'
-      },
-      // 🐰 Canva BaD BUNNY — usa IFRAME DIRECTO
-      {
-        icon: '🐰',
-        label: 'BaD BUNNY',
-        url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed',
-        type: 'canva'
-      },
-      // 🎮 Classroom 6x — pestaña nueva
-      {
-        icon: '🎮',
-        label: 'Classroom 6x',
-        url: 'https://sites.google.com/view/classroom6x/',
-        type: 'external'
-      },
+      { icon: '📺', label: 'YouTube Real', url: 'https://www.youtube.com', type: 'browser' },
+      { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed', type: 'canva' },
+      { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed', type: 'canva' },
+      { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', type: 'external' },
     ];
 
     function buildSecretButtons() {
@@ -693,23 +690,16 @@
       SECRET_BUTTONS.forEach((btn) => {
         const el = document.createElement('button');
         el.className = 'secret-btn';
-
         let badge = '';
         if (btn.type === 'external') badge = '<span class="external-badge">↗</span>';
         if (btn.type === 'browser')  badge = '<span class="external-badge" style="background:#8b5cf6">🌐</span>';
         if (btn.type === 'canva')    badge = '<span class="canva-badge">🎨</span>';
-
         el.innerHTML = `${badge}<span class="secret-icon">${btn.icon}</span>${btn.label}`;
-
         el.addEventListener('click', () => {
           hideSecretPanel();
-          if (btn.type === 'external') {
-            window.open(btn.url, '_blank');
-          } else if (btn.type === 'browser') {
-            openBrowser(btn.url);
-          } else if (btn.type === 'canva') {
-            openCanvaViewer(btn.url);
-          }
+          if (btn.type === 'external') window.open(btn.url, '_blank');
+          else if (btn.type === 'browser') openBrowser(btn.url);
+          else if (btn.type === 'canva') openCanvaViewer(btn.url);
         });
         grid.appendChild(el);
       });
@@ -788,11 +778,12 @@
       if (ytId) { openYouTubePlayer(ytId); return; }
       if (clean.includes('.') && !clean.includes(' ')) {
         const url = clean.startsWith('http') ? clean : 'https://' + clean;
-        if (currentMode === 'browser') { openBrowser(url); return; }
+        if (currentMode === 'browser' || currentMode === 'ddg') { openBrowser(url); return; }
         window.open(url, '_blank');
         return;
       }
       if (currentMode === 'image') searchImages(clean);
+      else if (currentMode === 'ddg') openBrowser(`https://duckduckgo.com/?q=${encodeURIComponent(clean)}`);
       else openBrowser(`https://www.google.com/search?q=${encodeURIComponent(clean)}`);
     }
 
