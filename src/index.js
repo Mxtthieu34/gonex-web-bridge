@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend con Steel.dev (plan gratuito, timeout 15 min)
+// GoNex Web Bridge — Backend con Steel.dev (audio habilitado, timeout 15 min)
 
 const express = require('express');
 const path = require('path');
@@ -163,7 +163,8 @@ app.post('/api/browser-sessions/cleanup', async (req, res) => {
 
 // ==========================================================
 // 5. Crear sesión de navegador en la nube
-// ✅ Pasa la URL inicial a Steel para que abra directo esa página
+// ✅ CON AUDIO HABILITADO
+// ✅ Timeout 15 min (plan gratuito)
 // ==========================================================
 app.post('/api/browser-session', async (req, res) => {
   if (!steel) {
@@ -175,9 +176,16 @@ app.post('/api/browser-session', async (req, res) => {
 
   try {
     const session = await steel.sessions.create({
-      url: startUrl,              // ✅ Abre esta URL al iniciar la sesión
+      url: startUrl,
       timeout: 900000,            // 15 minutos (máximo del plan gratuito)
-      inactivityTimeout: 300000   // 5 minutos
+      inactivityTimeout: 300000,  // 5 minutos
+      // ✅ Habilita el audio del navegador remoto
+      'steel.browser.args': [
+        '--autoplay-policy=no-user-gesture-required',
+        '--disable-features=AudioServiceOutOfProcess',
+        '--enable-features=WebRtcAllowInputVolumeAdjustment',
+        '--alsa-output-device=default'
+      ]
     });
 
     console.log('[Steel] Sesión creada:', session.id, '→', startUrl);
@@ -187,18 +195,35 @@ app.post('/api/browser-session', async (req, res) => {
       sessionViewerUrl: session.sessionViewerUrl
     });
   } catch (e) {
-    console.error('[Steel] Error detallado:', {
-      message: e.message,
-      status: e.status,
-      name: e.name,
-      error: e.error,
-      response: e.response?.data || e.response?.body || null
-    });
-    res.status(500).json({
-      error: 'No se pudo crear el navegador en la nube.',
-      detail: e.message,
-      status: e.status || null
-    });
+    // Si falla con args, intentar sin ellos (fallback)
+    console.warn('[Steel] Error con args de audio, reintentando sin ellos:', e.message);
+
+    try {
+      const session = await steel.sessions.create({
+        url: startUrl,
+        timeout: 900000,
+        inactivityTimeout: 300000
+      });
+      console.log('[Steel] Sesión creada (sin audio args):', session.id, '→', startUrl);
+      res.json({
+        sessionId: session.id,
+        debugUrl: session.debugUrl,
+        sessionViewerUrl: session.sessionViewerUrl
+      });
+    } catch (e2) {
+      console.error('[Steel] Error detallado:', {
+        message: e2.message,
+        status: e2.status,
+        name: e2.name,
+        error: e2.error,
+        response: e2.response?.data || e2.response?.body || null
+      });
+      res.status(500).json({
+        error: 'No se pudo crear el navegador en la nube.',
+        detail: e2.message,
+        status: e2.status || null
+      });
+    }
   }
 });
 
