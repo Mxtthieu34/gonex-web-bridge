@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend con Steel.dev (audio habilitado, timeout 15 min)
+// GoNex Web Bridge — Backend con Steel.dev + CSP para Netlify
 
 const express = require('express');
 const path = require('path');
@@ -34,7 +34,7 @@ app.use((req, res, next) => {
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
-    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com https://*.steel.dev",
+    "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com https://*.steel.dev https://*.netlify.app",
     "connect-src 'self' https://www.youtube.com https://api.steel.dev https://api.openverse.org https://geocoding-api.open-meteo.com https://api.open-meteo.com",
     "base-uri 'self'",
     "form-action 'self'",
@@ -163,8 +163,6 @@ app.post('/api/browser-sessions/cleanup', async (req, res) => {
 
 // ==========================================================
 // 5. Crear sesión de navegador en la nube
-// ✅ CON AUDIO HABILITADO
-// ✅ Timeout 15 min (plan gratuito)
 // ==========================================================
 app.post('/api/browser-session', async (req, res) => {
   if (!steel) {
@@ -178,14 +176,7 @@ app.post('/api/browser-session', async (req, res) => {
     const session = await steel.sessions.create({
       url: startUrl,
       timeout: 900000,            // 15 minutos (máximo del plan gratuito)
-      inactivityTimeout: 300000,  // 5 minutos
-      // ✅ Habilita el audio del navegador remoto
-      'steel.browser.args': [
-        '--autoplay-policy=no-user-gesture-required',
-        '--disable-features=AudioServiceOutOfProcess',
-        '--enable-features=WebRtcAllowInputVolumeAdjustment',
-        '--alsa-output-device=default'
-      ]
+      inactivityTimeout: 300000   // 5 minutos
     });
 
     console.log('[Steel] Sesión creada:', session.id, '→', startUrl);
@@ -195,35 +186,18 @@ app.post('/api/browser-session', async (req, res) => {
       sessionViewerUrl: session.sessionViewerUrl
     });
   } catch (e) {
-    // Si falla con args, intentar sin ellos (fallback)
-    console.warn('[Steel] Error con args de audio, reintentando sin ellos:', e.message);
-
-    try {
-      const session = await steel.sessions.create({
-        url: startUrl,
-        timeout: 900000,
-        inactivityTimeout: 300000
-      });
-      console.log('[Steel] Sesión creada (sin audio args):', session.id, '→', startUrl);
-      res.json({
-        sessionId: session.id,
-        debugUrl: session.debugUrl,
-        sessionViewerUrl: session.sessionViewerUrl
-      });
-    } catch (e2) {
-      console.error('[Steel] Error detallado:', {
-        message: e2.message,
-        status: e2.status,
-        name: e2.name,
-        error: e2.error,
-        response: e2.response?.data || e2.response?.body || null
-      });
-      res.status(500).json({
-        error: 'No se pudo crear el navegador en la nube.',
-        detail: e2.message,
-        status: e2.status || null
-      });
-    }
+    console.error('[Steel] Error detallado:', {
+      message: e.message,
+      status: e.status,
+      name: e.name,
+      error: e.error,
+      response: e.response?.data || e.response?.body || null
+    });
+    res.status(500).json({
+      error: 'No se pudo crear el navegador en la nube.',
+      detail: e.message,
+      status: e.status || null
+    });
   }
 });
 
