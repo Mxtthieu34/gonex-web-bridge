@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend con Steel.dev + CSP para Netlify
+// GoNex Web Bridge — Backend con Steel.dev + CSP para Netlify y PeerJS
 
 const express = require('express');
 const path = require('path');
@@ -30,12 +30,12 @@ app.use((req, res, next) => {
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com",
+    "script-src 'self' 'unsafe-inline' https://www.youtube.com https://s.ytimg.com https://unpkg.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https:",
     "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.canva.com https://*.steel.dev https://*.netlify.app",
-    "connect-src 'self' https://www.youtube.com https://api.steel.dev https://api.openverse.org https://geocoding-api.open-meteo.com https://api.open-meteo.com",
+    "connect-src 'self' https://www.youtube.com https://api.steel.dev https://api.openverse.org https://geocoding-api.open-meteo.com https://api.open-meteo.com https://unpkg.com wss://*.peerjs.com https://*.peerjs.com",
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'"
@@ -175,8 +175,8 @@ app.post('/api/browser-session', async (req, res) => {
   try {
     const session = await steel.sessions.create({
       url: startUrl,
-      timeout: 900000,            // 15 minutos (máximo del plan gratuito)
-      inactivityTimeout: 300000   // 5 minutos
+      timeout: 900000,
+      inactivityTimeout: 300000
     });
 
     console.log('[Steel] Sesión creada:', session.id, '→', startUrl);

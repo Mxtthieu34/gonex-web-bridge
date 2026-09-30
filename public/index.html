@@ -319,6 +319,23 @@
     </div>
   </div>
 
+  <!-- ♞ MODAL AJEDREZ -->
+  <div id="ajedrez-modal" class="modal">
+    <div class="modal-header">
+      <span>♞ Ajedrez — GoNex</span>
+      <div class="viewer-actions">
+        <a href="/ajedrez.html" target="_blank">Abrir fuera ↗</a>
+        <button class="btn-close" onclick="closeAjedrez()">Cerrar ✕</button>
+      </div>
+    </div>
+    <div class="canva-viewer-wrapper" style="max-width: 1400px; height: 90vh;">
+      <div id="ajedrez-loading" class="canva-viewer-loading">
+        <p>Cargando Ajedrez...</p>
+      </div>
+      <iframe id="ajedrez-iframe" src="" allowfullscreen="allowfullscreen" allow="autoplay; fullscreen; clipboard-read; clipboard-write"></iframe>
+    </div>
+  </div>
+
   <div id="image-preview-modal" class="image-preview-modal" onclick="if(event.target===this)closeImagePreview()">
     <div class="image-preview-card">
       <img id="image-preview-img" src="" alt="Vista previa" />
@@ -486,6 +503,32 @@
     function closeWhatssacudida() {
       document.getElementById('whatssacudida-modal').classList.remove('active');
       document.getElementById('whatssacudida-iframe').src = 'about:blank';
+    }
+
+    // ==========================================================
+    // ♞ VISOR AJEDREZ
+    // ==========================================================
+    function openAjedrez() {
+      const modal = document.getElementById('ajedrez-modal');
+      const iframe = document.getElementById('ajedrez-iframe');
+      const loading = document.getElementById('ajedrez-loading');
+
+      modal.classList.add('active');
+      loading.style.display = 'flex';
+      loading.innerHTML = '<p>Cargando Ajedrez...</p>';
+      iframe.style.display = 'none';
+      iframe.src = '';
+      iframe.src = '/ajedrez.html';
+
+      iframe.onload = function () {
+        loading.style.display = 'none';
+        iframe.style.display = 'block';
+      };
+    }
+
+    function closeAjedrez() {
+      document.getElementById('ajedrez-modal').classList.remove('active');
+      document.getElementById('ajedrez-iframe').src = 'about:blank';
     }
 
     // ==========================================================
@@ -736,6 +779,7 @@
     const SECRET_BUTTONS = [
       { icon: '📺', label: 'YouTube Real', url: 'https://www.youtube.com', type: 'browser' },
       { icon: '🟢', label: 'Whatssacudida', url: 'https://whatssacudida.netlify.app/', type: 'whatssacudida' },
+      { icon: '♞', label: 'Ajedrez', url: '/ajedrez.html', type: 'ajedrez' },
       { icon: '🎸', label: 'Rock Music', url: 'https://www.canva.com/design/DAHKHpNFubU/4bZCz-YrnpQpkPcnVN3IHw/view?embed', type: 'canva' },
       { icon: '🐰', label: 'BaD BUNNY', url: 'https://www.canva.com/design/DAHMRaEH3qU/unar59-cooD-8Dufwnxk0w/view?embed', type: 'canva' },
       { icon: '🎮', label: 'Classroom 6x', url: 'https://sites.google.com/view/classroom6x/', type: 'external' },
@@ -752,6 +796,7 @@
         if (btn.type === 'browser')  badge = '<span class="external-badge" style="background:#8b5cf6">🌐</span>';
         if (btn.type === 'canva')    badge = '<span class="canva-badge">🎨</span>';
         if (btn.type === 'whatssacudida') badge = '<span class="whats-badge">🟢</span>';
+        if (btn.type === 'ajedrez')  badge = '<span class="canva-badge" style="background:#7fb069">♞</span>';
         el.innerHTML = `${badge}<span class="secret-icon">${btn.icon}</span>${btn.label}`;
         el.addEventListener('click', () => {
           hideSecretPanel();
@@ -759,6 +804,7 @@
           else if (btn.type === 'browser') openBrowser(btn.url);
           else if (btn.type === 'canva') openCanvaViewer(btn.url);
           else if (btn.type === 'whatssacudida') openWhatssacudida();
+          else if (btn.type === 'ajedrez') openAjedrez();
         });
         grid.appendChild(el);
       });
