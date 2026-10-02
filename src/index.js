@@ -1,5 +1,5 @@
 // src/index.js
-// GoNex Web Bridge — Backend con Steel.dev + CSP para Netlify y PeerJS
+// GoNex Web Bridge — Backend con Steel.dev + CSP + Página de bloqueo con Konami
 
 const express = require('express');
 const path = require('path');
@@ -48,10 +48,12 @@ app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
 // ==========================================================
-// ARCHIVOS ESTÁTICOS (con index: false para evitar conflicto)
+// ARCHIVOS ESTÁTICOS
+// index: false → evita que se sirva index.html automáticamente al entrar a "/"
+// Los archivos se sirven solo si se piden explícitamente (ej: /index.html, /lock.html)
 // ==========================================================
 app.use(express.static(publicPath, {
-  index: false,   // 👈 Deshabilita el index.html automático
+  index: false,
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     else res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
@@ -222,11 +224,11 @@ app.post('/api/browser-session/close', async (req, res) => {
 });
 
 // ==========================================================
-// RUTA COMODÍN (SPA) - Sirve lock.html por defecto
+// RUTA COMODÍN (SPA) — Sirve lock.html por defecto
+// Solo se ejecuta si el archivo NO existe en /public
 // ==========================================================
 app.get('/{*splat}', (req, res, next) => {
   if (!req.accepts('html')) return next();
-  // 👇 Sirve la página de bloqueo por defecto
   res.sendFile('lock.html', { root: publicPath }, (err) => { if (err) next(err); });
 });
 

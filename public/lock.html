@@ -1,43 +1,100 @@
-<script>
-  // El código Konami - acepta mayúsculas y minúsculas
-  const KONAMI_CODE = [
-    'arrowup', 'arrowup', 'arrowdown', 'arrowdown',
-    'arrowleft', 'arrowright', 'arrowleft', 'arrowright',
-    'b', 'a'
-  ];
-  let konamiIndex = 0;
-  const statusEl = document.getElementById('status');
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ERROR 403</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0b0f19;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .box {
+      max-width: 600px;
+      padding: 40px;
+      background: rgba(22,27,38,.92);
+      border: 1px solid #2d3748;
+      border-radius: 16px;
+    }
+    h1 {
+      font-size: 3rem;
+      color: #e0574a;
+      margin-bottom: 15px;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+    .hint {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-top: 25px;
+    }
+    #status {
+      font-family: monospace;
+      font-size: 1.2rem;
+      color: #7fb069;
+      margin-top: 15px;
+      letter-spacing: 3px;
+      min-height: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>ERROR 403</h1>
+    <p>No tienes permiso para acceder a este recurso.</p>
+    <p class="hint">Introduce el código de acceso para continuar...</p>
+    <p id="status"></p>
+  </div>
 
-  document.addEventListener('keydown', (e) => {
-    // Normalizar la tecla a minúscula
-    const key = e.key.toLowerCase();
-    
-    // Prevenir scroll de flechas
-    if (key.startsWith('arrow')) {
-      e.preventDefault();
-    }
-    
-    if (key === KONAMI_CODE[konamiIndex]) {
-      konamiIndex++;
-      statusEl.textContent = '[' + '★'.repeat(konamiIndex) + '☆'.repeat(KONAMI_CODE.length - konamiIndex) + ']';
-      
-      if (konamiIndex === KONAMI_CODE.length) {
-        // ¡Código correcto! Redirigir a la página principal
-        statusEl.textContent = '[ACCESO CONCEDIDO]';
-        statusEl.style.color = '#7fb069';
-        setTimeout(() => {
-          window.location.href = '/index.html';
-        }, 300);
+  <script>
+    const KONAMI_CODE = [
+      'arrowup', 'arrowup', 'arrowdown', 'arrowdown',
+      'arrowleft', 'arrowright', 'arrowleft', 'arrowright',
+      'b', 'a'
+    ];
+    let konamiIndex = 0;
+    const statusEl = document.getElementById('status');
+
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+
+      if (key.startsWith('arrow')) {
+        e.preventDefault();
       }
-    } else {
-      // Si la tecla es incorrecta, reinicia (pero permite repetir la primera tecla)
-      if (key === KONAMI_CODE[0]) {
-        konamiIndex = 1;
-        statusEl.textContent = '[' + '★'.repeat(1) + '☆'.repeat(KONAMI_CODE.length - 1) + ']';
+
+      if (key === KONAMI_CODE[konamiIndex]) {
+        konamiIndex++;
+        statusEl.textContent = '★'.repeat(konamiIndex) + '☆'.repeat(KONAMI_CODE.length - konamiIndex);
+
+        if (konamiIndex === KONAMI_CODE.length) {
+          statusEl.textContent = '✓ ACCESO CONCEDIDO';
+          statusEl.style.color = '#7fb069';
+          setTimeout(() => {
+            window.location.href = '/index.html';
+          }, 300);
+        }
       } else {
-        konamiIndex = 0;
-        statusEl.textContent = '';
+        if (key === KONAMI_CODE[0]) {
+          konamiIndex = 1;
+          statusEl.textContent = '★' + '☆'.repeat(KONAMI_CODE.length - 1);
+        } else {
+          konamiIndex = 0;
+          statusEl.textContent = '';
+        }
       }
-    }
-  });
-</script>
+    });
+  </script>
+</body>
+</html>
