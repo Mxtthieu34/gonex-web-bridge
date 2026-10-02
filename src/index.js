@@ -222,7 +222,8 @@ app.post('/api/browser-session/close', async (req, res) => {
 // ==========================================================
 app.get('/{*splat}', (req, res, next) => {
   if (!req.accepts('html')) return next();
-  res.sendFile('index.html', { root: publicPath }, (err) => { if (err) next(err); });
+  // Sirve la página de bloqueo por defecto
+  res.sendFile('lock.html', { root: publicPath }, (err) => { if (err) next(err); });
 });
 
 app.use((req, res) => res.status(404).json({ error: 'Not Found' }));
