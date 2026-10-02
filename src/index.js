@@ -47,7 +47,11 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: false, limit: '100kb' }));
 
+// ==========================================================
+// ARCHIVOS ESTÁTICOS (con index: false para evitar conflicto)
+// ==========================================================
 app.use(express.static(publicPath, {
+  index: false,   // 👈 Deshabilita el index.html automático
   setHeaders: (res, filePath) => {
     if (filePath.endsWith('.html')) res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     else res.setHeader('Cache-Control', 'public, max-age=86400, immutable');
@@ -218,11 +222,11 @@ app.post('/api/browser-session/close', async (req, res) => {
 });
 
 // ==========================================================
-// WILDCARD SPA
+// RUTA COMODÍN (SPA) - Sirve lock.html por defecto
 // ==========================================================
 app.get('/{*splat}', (req, res, next) => {
   if (!req.accepts('html')) return next();
-  // Sirve la página de bloqueo por defecto
+  // 👇 Sirve la página de bloqueo por defecto
   res.sendFile('lock.html', { root: publicPath }, (err) => { if (err) next(err); });
 });
 
